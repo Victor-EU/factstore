@@ -1,0 +1,10 @@
+# Development Postgres for the factstore kernel and its tests.
+# track_commit_timestamp lets the tests check that transaction IDs follow commit order.
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_PASSWORD: postgres
+    command: ["postgres", "-c", "track_commit_timestamp=on"]
+    ports:
+      - "54329:5432"
