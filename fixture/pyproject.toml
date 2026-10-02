@@ -1,0 +1,19 @@
+[project]
+name = "factstore-fixture"
+version = "0.1.0.dev0"
+description = "A synthetic cross-border brand for testing and benchmarking factstore: a direct loader and source-shaped exports."
+requires-python = ">=3.12"
+dependencies = ["factstore"]
+
+[project.scripts]
+factstore-fixture = "factstore_fixture.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/factstore_fixture"]
