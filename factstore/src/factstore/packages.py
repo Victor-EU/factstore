@@ -20,13 +20,15 @@ match in the package or in a package it depends on, the manifest names it, as an
 `skills` are paths of skill files in the package's directory.
 
 admin.install registers the attributes a store lacks in one transaction, written by an actor named
-after the package, so the log says which package registered what. Nothing else is written and the
-kernel learns no names. Installing again registers nothing.
+after the package, so the log says which package registered what. A new version may also make the
+changes the kernel allows to an attribute it already has (cardinality one to many, uniqueness none
+to identity), in a transaction of their own before the registration. Nothing else is written and the
+kernel learns no names. Installing again writes nothing.
 """
 
 import json
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from importlib import resources
 from pathlib import Path
 
@@ -65,6 +67,8 @@ class InstallResult:
     tx: int | None  # the registration transaction; None when the store already had every attribute
     registered: list[str]
     existing: list[str]
+    evolved: list[str] = field(default_factory=list)  # attributes made many or identity by this version
+    evolve_tx: int | None = None
 
 
 def load(path) -> Package:

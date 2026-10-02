@@ -57,27 +57,43 @@ class Person:
     tax_rate: Decimal
 
 
-def person(rng: random.Random, n: int) -> Person:
+def person(rng: random.Random, n: int, taken: set[str] | None = None) -> Person:
+    """A shopper. Pass `taken`, the addresses already given out, for one whose email is their own:
+    a mailbox belongs to one person, and Shopify allows one customer account per email."""
     first, last = rng.choice(FIRST), rng.choice(LAST)
     city, state, zip_, tz, tax, _ = rng.choices(CITIES, weights=CITY_WEIGHTS)[0]
-    return Person(first, last, email(rng, first, last, n), phone(rng) if rng.random() < 0.35 else None,
+    return Person(first, last, email(rng, first, last, n, taken), phone(rng) if rng.random() < 0.35 else None,
                   f"{rng.randint(2, 2999)} {rng.choice(STREETS)}", city, state, zip_, tz, Decimal(tax))
 
 
-def email(rng: random.Random, first: str, last: str, n: int) -> str:
+def email(rng: random.Random, first: str, last: str, n: int, taken: set[str] | None = None) -> str:
     domain = rng.choices([d for d, _ in EMAIL_DOMAINS], weights=[w for _, w in EMAIL_DOMAINS])[0]
     local = rng.choice([f"{first}.{last}", f"{first}{last}", f"{first[0]}{last}", f"{first}{last}{n % 97}",
                         f"{first}_{last[0]}{n % 1000}", f"{last}.{first}"]).lower()
-    return f"{local}@{domain}"
+    return _unique(f"{local}@{domain}", taken)
 
 
-def alias_email(rng: random.Random, original: str) -> str:
+def alias_email(rng: random.Random, original: str, taken: set[str] | None = None) -> str:
     """The same person signing up again: a plus alias or a different provider."""
     local, domain = original.split("@")
     if rng.random() < 0.5:
-        return f"{local}+{rng.choice(['shop', 'orders', 'home', '2'])}@{domain}"
+        return _unique(f"{local}+{rng.choice(['shop', 'orders', 'home', '2'])}@{domain}", taken)
     other = [d for d, _ in EMAIL_DOMAINS if d != domain]
-    return f"{local}@{rng.choice(other)}"
+    return _unique(f"{local}@{rng.choice(other)}", taken)
+
+
+def _unique(address: str, taken: set[str] | None) -> str:
+    """`address`, or with a number after the local part if someone already has it, as people do
+    (brian.wright2@...). Draws nothing from the random stream, so the rest of the world is unchanged."""
+    if taken is None:
+        return address
+    local, domain = address.split("@")
+    candidate, k = address, 1
+    while candidate in taken:
+        k += 1
+        candidate = f"{local}{k}@{domain}"
+    taken.add(candidate)
+    return candidate
 
 
 def phone(rng: random.Random) -> str:

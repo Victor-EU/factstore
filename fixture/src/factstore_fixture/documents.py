@@ -75,7 +75,7 @@ def proforma_invoice(po: Po, path: str) -> None:
     y -= 26
     terms = [f"1. Price term: {supplier.incoterm}",
              f"2. Payment: {supplier.payment_terms}",
-             f"3. Delivery: about {po.etd:%b %d, %Y} (ETD), subject to deposit received",
+             f"3. Delivery: about {po.quoted_etd:%b %d, %Y} (ETD), subject to deposit received",
              "4. Packing: export carton, shipping marks per buyer's instruction",
              f"5. Total volume approx. {po.cbm:.2f} CBM"]
     if po.currency == "CNY":

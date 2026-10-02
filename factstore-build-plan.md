@@ -129,6 +129,25 @@ Runs alongside M2 once M1's registration works.
 - **Ontology SKILL.md:** reads `stats`, proposes shapes, records a confirmed name on a shape entity. Its vocabulary (`shape/name`, and `shape/signature` referencing each defining attribute) ships with `factstore-skills`, installed like a package.
 - **Stretch:** the landed-cost skill (§14).
 
+**Status, 2026-10-02: exit met on the fixture, with Sonnet** ([evals/m4](evals/m4/README.md)).
+- **The skills.** [factstore-skills](factstore-skills/README.md) holds the catalogue and ontology skills, and its shape vocabulary installs like a package. The ingestion skill is in factstore-ecom-ops 0.2.0. Each skill is a `SKILL.md` an agent loads.
+- **Crosswalk:** precision and recall 1.0 for every SKU's nine IDs.
+- **Second catalogue run:** no new entities.
+  - In one of four pairs of runs, the second run indexed sources the first had left to ingestion. The skill now keeps a re-run to the scope the store shows.
+- **Ontology:** all 18 shapes, recorded only after the person confirmed.
+- **Ingestion:** all 504 statements in the 135 PDFs, each in a transaction whose evidence is its PDF.
+- **Beyond the exit:**
+  - Chats and email put 217 of 221 statements on the right entities.
+  - The six of the ten questions whose data comes from documents give the same answers on the ingested store as on the world the direct loader wrote.
+- **What the runs changed:**
+  - **Skills.** The catalogue's scope: lines, a join key's values, the general ledger, and the scope of re-runs. The PO lifecycle in ingestion.
+  - **ecom-ops 0.2.0.** `shipment/hbl` is an identity, and shipment lines are keyed by house bill and PO line.
+  - **Installer.** A new package version can make an attribute many or identity.
+  - **Fixture.** It printed the final ETD on proforma invoices, and gave one email address to several shoppers. Both are fixed.
+- **Still open:**
+  - Attribute names vary from run to run, so M5's count of attributes registered beyond the package will too.
+  - Not built: the landed-cost skill (stretch).
+
 **Exit**, on the fixture's exports: crosswalk precision and recall measured against the fixture's known crosswalk; a second catalogue run creates no new entities; the ontology skill recovers the fixture's known shapes; the ingestion skill extracts the fixture's PDFs with evidence on every transaction.
 
 ### M5 — Slice run and report

@@ -1,0 +1,160 @@
+{
+ "model": "sonnet",
+ "propose": {
+  "turns": 5,
+  "tool_calls": 3,
+  "cost_usd": 0.11742480000000001,
+  "wall_seconds": 27,
+  "skill_used": [
+   "factstore-ontology"
+  ],
+  "subtype": "success",
+  "final": "hopify/line_item_id`, `core/part_of`, `line/sku` | none | Part of Shopify order. Points to SKU. |\n| **Shopify customer** | 21,240 | `shopify/customer_id` | `core/same_as` (278, 1.3%) | Pointed to by orders. Duplicates point to the surviving customer via `core/same_as`. |\n| **Amazon order** | 38,264 | `amazon/order_id` | none | Index entry that carries only its ID. Pointed to by Amazon order lines. |\n| **Amazon order line** | 43,513 | `amazon/order_line`, `core/part_of`, `line/sku` | none | Part of Amazon order. Points to SKU. |\n| **FBA inbound shipment** | 49 | `amazon/fba_shipment_id` | none | Index entry that carries only its ID. Pointed to by FBA lines. |\n| **FBA shipment line** | 221 | `amazon/fba_line`, `core/part_of`, `line/sku` | none | Part of FBA inbound shipment. Points to SKU. |\n| **SKU** | 49 | `sku/code`, `sku/title`, `sku/family`, `sku/hs_code`, `sku/upc`, `sku/retail_price`, `sku/supplier`, `shopify/variant_id`, `factory/item_code`, `tpl/item_code`, `core/currency` | `amazon/asin`, `amazon/fnsku`, `amazon/seller_sku` (25, 51%); `sku/launched_on` (3, 6%) | Points to Supplier. Pointed to by order lines, PO lines, FBA lines and inventory. |\n| **Supplier** | 8 | `supplier/code`, `supplier/name`, `supplier/name_cn`, `supplier/address`, `supplier/contact_name`, `supplier/currency`, `supplier/incoterm`, `supplier/payment_terms`, `supplier/port` | none | Pointed to by SKU and PO. |\n| **Purchase order** | 48 | `po/number`, `po/pi_number`, `po/placed_on`, `po/etd`, `po/status`, `po/supplier`, `core/currency` | none | Points to Supplier. Pointed to by PO lines and QC inspections. |\n| **Purchase order line** | 196 | `po_line/key`, `po_line/quantity`, `po_line/unit_price`, `po_line/sku`, `core/part_of` | none | Part of Purchase order. Points to SKU. Pointed to by shipment lines. |\n| **Shipment** | 32 | `shipment/booking_no`, `hbl`, `mode`, `origin`, `destination`, `etd`, `eta`, `status`, `vessel`, `freight_cost`, `core/currency` | `shipment/delivered_at` (29, 91%); `shipment/container_no` (15, 47%) | Pointed to by shipment lines, customs entries and receipts. |\n| **Shipment line** | 170 | `shipment_line/key`, `cartons`, `quantity`, `po_line`, `core/part_of` | none | Part of Shipment. Points to Purchase order line. |\n| **Customs entry** | 30 | `customs/entry_no`, `filed_on`, `entered_value`, `duty`, `fees`, `customs/shipment`, `core/currency` | none | Points to Shipment. |\n| **Warehouse receipt** | 29 | `tpl/receipt_no`, `receipt/shipment` | none | Points to Shipment. |\n| **QC inspection** | 46 | `qc/report_no`, `inspected_on`, `inspector`, `result`, `sample_size`, `qc/po` | none | Points to Purchase order. |\n| **Location** | 11 | `location/code`, `location/name`, `location/kind` | none | Pointed to by inventory. |\n| **Inventory position** | 121 | `inventory/sku`, `inventory/location`, `inventory/position` | `inventory/quantity` and `inventory/counted_at` (47, 39%) | Points to SKU and Location. |\n\nWhere I had to make a judgement call:\n- **Merged shapes:** I merged four SKU signatures, four Shipment signatures and two Shopify customer signatures. Each group differs only by optional attributes.\n- **Index entries:** Amazon order and FBA inbound shipment carry only an ID. I kept them as shapes because many lines point at them in a regular way.\n- **Inventory position:** The 74 positions without a count and the 47 with one share `inventory/position`. I merged them, but they could be two shapes, such as \"Inventory position\" and \"Inventory count\".\n- **Shopify customer duplicates:** `core/same_as` marks 278 duplicate customers. 275 point to a surviving customer and 3 point to another duplicate, so those 3 form chains. Order references to duplicates (347) are left as they are.\n\nPlease confirm, rename or drop each name. In particular:\n1. Do you want \"Warehouse receipt\" or \"3PL receipt\"?\n2. Do you want \"FBA inbound shipment\" and \"Amazon order\" kept as shapes?\n3. Should inventory be one shape or two?\n\nI'll record nothing until you answer."
+ },
+ "record": {
+  "turns": 3,
+  "tool_calls": 2,
+  "cost_usd": 0.24850219999999998,
+  "wall_seconds": 34,
+  "skill_used": [],
+  "subtype": "success",
+  "final": "I recorded all 18 shapes in one transaction (tx 170155), each with its name, a one-line doc and its full signature, exactly as proposed.\n\nI left out `core/on_behalf_of`. The store has no actor for you. The only actors are admin, factstore-core, factstore-ecom-ops, fixture loader, factstore-skills and ontology agent. So the write is stamped only as the ontology agent. If you want your confirmation on record, tell me which actor entity stands for you and I'll add it.\n\nI recorded optional attributes only as the shares I gave you, not as signature entries. Examples are the SKU's Amazon IDs and Shipment's `container_no`."
+ },
+ "recorded_before_confirming": 0,
+ "shapes": {
+  "truth": 18,
+  "recorded": 18,
+  "exact": 18,
+  "close": 18,
+  "exact_to_shapes_json": 16,
+  "unmatched_recorded": [],
+  "shapes": {
+   "Supplier": {
+    "recorded_as": "Supplier",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "SKU": {
+    "recorded_as": "SKU",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "Location": {
+    "recorded_as": "Location",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "Purchase order": {
+    "recorded_as": "Purchase order",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 0.71
+   },
+   "Purchase order line": {
+    "recorded_as": "Purchase order line",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 0.8
+   },
+   "QC inspection": {
+    "recorded_as": "QC inspection",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "Shipment": {
+    "recorded_as": "Shipment",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "Shipment line": {
+    "recorded_as": "Shipment line",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "Customs entry": {
+    "recorded_as": "Customs entry",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "Stock position": {
+    "recorded_as": "Inventory position",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "Warehouse receipt": {
+    "recorded_as": "Warehouse receipt",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "Shopify customer": {
+    "recorded_as": "Shopify customer",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "Shopify order": {
+    "recorded_as": "Shopify order",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "Shopify order line": {
+    "recorded_as": "Shopify order line",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "Amazon order": {
+    "recorded_as": "Amazon order",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "Amazon order line": {
+    "recorded_as": "Amazon order line",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "FBA inbound shipment": {
+    "recorded_as": "FBA inbound shipment",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   },
+   "FBA inbound line": {
+    "recorded_as": "FBA shipment line",
+    "jaccard": 1.0,
+    "missing": [],
+    "extra": [],
+    "jaccard_to_shapes_json": 1.0
+   }
+  }
+ }
+}

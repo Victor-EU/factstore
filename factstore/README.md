@@ -16,11 +16,11 @@ The tests create and drop a store per test. To use a store yourself:
 ```bash
 export FACTSTORE_ADMIN_DSN=postgresql://postgres:postgres@localhost:54329/postgres
 .venv/bin/factstore init demo                        # with factstore-core installed
-.venv/bin/factstore install demo ../packages/ecom-ops
+.venv/bin/factstore install demo ../packages/ecom-ops ../factstore-skills
 .venv/bin/factstore actor demo "catalogue agent"     # prints the actor ID and its credential
 ```
 
-[`packages/`](../packages/README.md) describes the package format and the two packages.
+[`packages/`](../packages/README.md) describes the package format and the packages. A new version of a package registers what it adds. It may also make an attribute many or identity, the two changes the kernel allows. [`factstore-skills/`](../factstore-skills/README.md) holds the catalogue and ontology skills (M4).
 
 ```python
 import factstore

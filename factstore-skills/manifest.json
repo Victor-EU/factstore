@@ -1,0 +1,12 @@
+{
+  "name": "factstore-skills",
+  "version": "0.1.0",
+  "doc": "The catalogue and ontology skills, and the vocabulary the ontology skill records shapes with.",
+  "depends_on": ["factstore-core"],
+  "skills": ["catalogue/SKILL.md", "ontology/SKILL.md"],
+  "attributes": [
+    {"ident": "shape/name", "type": "string", "cardinality": "one", "unique": "identity", "doc": "Name a person confirmed for a kind of thing the store holds, e.g. Purchase order."},
+    {"ident": "shape/signature", "type": "ref", "cardinality": "many", "doc": "An attribute every entity of a shape carries, as the attribute's entity; members carry all of them."},
+    {"ident": "shape/doc", "type": "string", "cardinality": "one", "doc": "One line on what a shape's entities are, for the next reader."}
+  ]
+}

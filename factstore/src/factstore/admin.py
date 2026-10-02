@@ -68,23 +68,38 @@ def install(admin_dsn: str, store: str, pkgs: list[Package]) -> list[InstallResu
     return [_install(admin_dsn, store, p) for p in order]
 
 
+# The changes the kernel allows to a registered attribute (design §1), as (store, package) values.
+EVOLUTIONS = {"cardinality": ("one", "many"), "unique": ("none", "identity")}
+
+
 def _install(admin_dsn: str, store: str, package: Package) -> InstallResult:
     with _connect(admin_dsn, store) as conn:
-        have = {row[0]: row[1:] for row in conn.execute("select ident, type, cardinality, uniq from attr")}
-    problems = []
+        have = {row[0]: dict(zip(("type", "cardinality", "unique"), row[1:]))
+                for row in conn.execute("select ident, type, cardinality, uniq from attr")}
+    problems, evolve = [], []
     for spec in package.attributes:
         old = have.get(spec["ident"])
-        new = (spec.get("type"), spec.get("cardinality"), spec.get("unique", "none"))
-        if old is not None and old != new:
-            problems.append(f"{package.name}: {spec['ident']} is {'/'.join(map(str, new))} in the package"
-                            f" but {'/'.join(old)} in the store")
+        if old is None:
+            continue
+        new = {"type": spec.get("type"), "cardinality": spec.get("cardinality"), "unique": spec.get("unique", "none")}
+        changed = [k for k in new if new[k] != old[k]]
+        if any(EVOLUTIONS.get(k) != (old[k], new[k]) for k in changed):
+            problems.append(f"{package.name}: {spec['ident']} is {'/'.join(map(str, new.values()))} in the package"
+                            f" but {'/'.join(old.values())} in the store")
+        evolve += [{"e": ["fs/ident", spec["ident"]], "a": f"fs/{k}", "v": new[k]} for k in changed]
     if problems:
         raise PackageError(problems)
-    if all(spec["ident"] in have for spec in package.attributes):
+    missing = [s["ident"] for s in package.attributes if s["ident"] not in have]
+    if not missing and not evolve:
         return InstallResult(package.name, package.version, None, [], [s["ident"] for s in package.attributes])
     with _login_as(admin_dsn, store, package.name) as cred, connect(cred.dsn) as s:
-        result = s.register_attribute(list(package.attributes))
-    return InstallResult(package.name, package.version, result.tx, result.registered, result.existing)
+        # Evolutions first: if values collide under a new identity, nothing is written.
+        evolved = s.transact(evolve).tx if evolve else None
+        result = s.register_attribute(list(package.attributes)) if missing else None
+    return InstallResult(package.name, package.version, result.tx if result else None,
+                         result.registered if result else [],
+                         result.existing if result else [s["ident"] for s in package.attributes],
+                         sorted({f["e"][1] for f in evolve}), evolved)
 
 
 @contextmanager

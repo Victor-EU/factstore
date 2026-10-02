@@ -5,9 +5,10 @@ Build plan M3. A package is a namespaced attribute set, the packages it builds o
 | Package | Attributes | What |
 |---|---|---|
 | [`factstore-core`](core/manifest.json) | 13 | The Part II conventions: `core/part_of`, `core/supersedes`, `core/same_as`, `core/currency`, `core/evidence`, domain time, provenance, and `document/hash` and `document/url`. `factstore init` installs it. |
-| [`factstore-ecom-ops`](ecom-ops/manifest.json) | 69 | The supply side of a brand that makes in China and sells online: suppliers, SKUs and their IDs in each system, purchase orders, inspections, shipments, customs entries, and stock by location. Depends on core. |
+| [`factstore-ecom-ops`](ecom-ops/manifest.json) | 69 | The supply side of a brand that makes in China and sells online: suppliers, SKUs and their IDs in each system, purchase orders, inspections, shipments, customs entries, and stock by location. Depends on core. Its skill, [`ecom-ops-ingest-documents`](ecom-ops/ingest-documents/SKILL.md), reads supplier PDFs, chats and shipping emails into it. |
+| [`factstore-skills`](../factstore-skills/manifest.json) | 3 | The catalogue and ontology skills, and `shape/` for the shapes the ontology skill records ([factstore-skills](../factstore-skills/README.md)). Depends on core. |
 
-Both came from the fixture's draft vocabulary. The fixture now installs them and registers only the sales-side identifiers itself (below).
+Core and ecom-ops came from the fixture's draft vocabulary. The fixture now installs them and registers only the sales-side identifiers itself (below).
 
 ## Format
 
@@ -29,7 +30,7 @@ A package is a directory holding `manifest.json`:
 
 - Each attribute is a `register_attribute` spec, written one per line so a diff shows one attribute per change.
 - Packages follow the agents' rule: where the kernel finds a near match in the package or in a package it depends on, the manifest names it in `distinct_from`.
-- `skills` lists skill files in the package's directory. Both lists are empty until M4.
+- `skills` lists the package's skills, each a `SKILL.md` in its directory, with a `name` and a `description` in its frontmatter ([Agent Skills](https://agentskills.io)).
 
 ## Installing
 
@@ -45,7 +46,8 @@ factstore install demo packages/ecom-ops  # dependencies must be installed or gi
   - A store whose attributes were registered some other way doesn't count as having the package, even if every attribute matches. Stores loaded before M3 are like this. Give the dependency in the same call (`factstore install STORE packages/core packages/ecom-ops`); it registers nothing.
 - **Installing again writes nothing.** That holds when the store already has every attribute with the same type, cardinality and uniqueness: no transaction and no new actor.
   - A new version registers only what it adds, as the same actor.
-  - A conflicting definition already in the store refuses the package.
+  - It may also make the two changes the kernel allows to an attribute: cardinality from one to many, and uniqueness from none to identity. These go in a transaction of their own, before the registration. If the store's values collide under a new identity, nothing is written.
+  - Any other difference from the store refuses the package.
   - Docs in the store are left as they are.
 - **The kernel learns no names.** The installer is generic code in [`factstore/packages.py`](../factstore/src/factstore/packages.py) and `admin.install`.
   - The kernel's tests run on bare stores without core (`init_store(..., core=False)`), so a change to core can't break them.
@@ -58,9 +60,11 @@ factstore/.venv/bin/pytest packages/tests
 ```
 
 They check the M3 exit:
-- both packages install on an empty store, each in one transaction by its own actor;
+- each package installs on an empty store in one transaction, by its own actor;
 - installing twice changes nothing;
-- 15 near-duplicates an agent might register are refused, each naming the package attribute it duplicates.
+- 19 near-duplicates an agent might register are refused, each naming the package attribute it duplicates.
+
+They also check that a store with ecom-ops 0.1.0 upgrades to 0.2.0, and that every skill has the frontmatter agents load it by.
 
 ## What the near-match check catches
 
@@ -95,4 +99,7 @@ To find out what the exit test should hold the kernel to, I tried 30 plausible a
 - **Composite identity (OQ4): the default.** A factory's code for an item is one identity attribute holding `"<supplier code>:<factory code>"` (`factory/item_code`, e.g. `NBBW:MT-2231`), because codes repeat across factories. HS code is a plain attribute, since many SKUs share one.
 - **Sales-side identifiers stay out of ecom-ops.** The package has the per-source SKU IDs the crosswalk needs (Shopify variant, ASIN, FNSKU, Amazon seller SKU, 3PL item code), as the build plan says. Order, customer and receipt identifiers are left to the catalogue skill. In the fixture they are [`CATALOGUE`](../fixture/src/factstore_fixture/vocabulary.py): 11 attributes registered beyond the package (an M5 measure).
 - **`supplier/currency` stays.** It is the currency a supplier invoices in, a fact about the supplier. `core/currency` is the currency of the amounts on an entity.
-- **Gap for M4.** The fixture's commercial invoices and packing lists carry fields the package has no attributes for, such as invoice totals, weights and volumes. The ingestion skill (M4) decides what they need, and the package's next version adds it.
+- **Ecom-ops 0.2.0, for the ingestion skill (M4).**
+  - **`shipment/hbl` is an identity.** A shipment has two identifiers. The forwarder's booking (SO) number comes first. The house bill (HBL) arrives at departure, and it is the only one the supplier's commercial invoice, the pre-alert, the arrival notice and the customs entry carry. Both have to address the shipment.
+  - **A shipment line is keyed by the HBL and the PO line it carries:** `PBLHB2600032/PO-2026-0023/1`. It used to be the booking number and a line number, which no document listing shipment lines carries. A shipment carries a PO line at most once, so the pair is unique.
+- **What the commercial invoices and packing lists carry beyond the package stays in the documents.** That covers invoice totals, weights, volumes, carton numbers and seal numbers: the skill records nothing the package has no attribute for, and reports the gap instead. Nothing in the ten questions needs them. Landed cost, the stretch goal, would allocate freight by volume; if it is built, the package gains a volume per shipment line.

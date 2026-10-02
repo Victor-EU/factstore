@@ -1,0 +1,88 @@
+{
+ "model": "sonnet",
+ "turns": 20,
+ "tool_calls": 18,
+ "cost_usd": 0.4114780000000001,
+ "wall_seconds": 101,
+ "skill_used": [
+  "ecom-ops-ingest-documents"
+ ],
+ "subtype": "success",
+ "final": "All 135 supplier PDFs in `./exports/supplier_docs` are now in the store, each transaction tied to the document it came from. The counts after the load match what I read: 135 documents, 48 POs, 196 PO lines, 31 shipments, 166 shipment lines and 46 inspections. I didn't re-read individual facts back against the PDFs. A dry run covered all 135 first and raised no errors.\n\n**Documents read**\n- 48 proforma invoices.\n- 41 commercial invoice and packing list pairs.\n- 46 inspection reports.\n- None were skipped as already read, because the store held no documents before this run.\n- The folder had no chat exports, forwarder emails or broker emails, so none of those were read.\n\n**Entities created**\n- 48 purchase orders, each with the PI number, supplier, ETD, currency (RMB recorded as CNY) and status \"confirmed\".\n- 196 PO lines, matched to SKUs by factory item code. Every item code found its SKU.\n- 31 shipments, each with vessel, origin and destination, plus the container number on the 15 that aren't LCL.\n- 166 shipment lines, each with quantity and cartons.\n- 46 inspections, with the agency recorded as \"Linkcheck Inspection Services\".\n\n**Updated:** nothing. The supplier facts printed on the PIs (incoterm, payment terms) matched what the store already held, and so did every HS code on the invoices.\n\n**Confidence:** every fact went in at confidence 1, because each value is a printed field or table cell.\n\n**Notes for you**\n- **Shipments:** several shipments carry cargo from more than one PO, so one house bill number appears on up to three invoices. I kept each as one shipment and added lines to it.\n- **Re-inspections:** four POs failed a first inspection and passed a second. The PO and report numbers are in the table below. Both reports are recorded, as separate inspections, and nothing links the retest to the failure.\n\n| PO | FAIL report | PASS report |\n|---|---|---|\n| PO-2025-0145 | LCI-251116-002 | LCI-251125-007 |\n| PO-2025-0143 | LCI-251130-009 | LCI-251209-010 |\n| PO-2026-0013 | LCI-260615-033 | LCI-260623-035 |\n| PO-2026-0022 | LCI-260819-041 | LCI-260826-044 |\n\n- **Booking and status data:** shipments have no booking number, ETD, ETA or status yet, because those come from forwarder emails that weren't in the folder.\n- **Customs entries:** none were created, because there were no broker emails.\n- **PO status:** every PO is \"confirmed\". The documents don't say whether any PO is further along, such as in production or shipped.\n- **Vocabulary gaps:** no attribute holds the defect lists or inspection sampling levels (they stay in the reports), or the seal numbers, container volumes and weights.\n\nThe parsing and load scripts are in the session scratchpad (`parse.py`, `load.py`) if you want to re-run them.",
+ "wrote": {
+  "new_entities": 622,
+  "new_attributes": [],
+  "transactions": 135,
+  "facts": 3323
+ },
+ "evidence": {
+  "transactions": 135,
+  "with_evidence": 135,
+  "with_confidence": 135,
+  "without_evidence": []
+ },
+ "documents": {
+  "files": 135,
+  "recorded": 135,
+  "url_names_file": 135,
+  "other_documents": 0
+ },
+ "statements": {
+  "fields": {
+   "pi_number": {
+    "truth": 48,
+    "on_entity": 48,
+    "with_evidence": 48
+   },
+   "etd": {
+    "truth": 48,
+    "on_entity": 48,
+    "with_evidence": 48
+   },
+   "unit_price": {
+    "truth": 196,
+    "on_entity": 196,
+    "with_evidence": 196
+   },
+   "qc_result": {
+    "truth": 46,
+    "on_entity": 46,
+    "with_evidence": 46
+   },
+   "shipped": {
+    "truth": 166,
+    "on_entity": 166,
+    "with_evidence": 166
+   }
+  },
+  "truth": 504,
+  "on_entity": 504,
+  "with_evidence": 504,
+  "recall": 1.0,
+  "misses": {}
+ },
+ "indexed": {
+  "amazon/asin": 25,
+  "amazon/fnsku": 25,
+  "amazon/seller_sku": 25,
+  "document/hash": 135,
+  "factory/item_code": 49,
+  "location/code": 11,
+  "po_line/key": 196,
+  "po/number": 48,
+  "qc/report_no": 46,
+  "shipment/hbl": 31,
+  "shipment_line/key": 166,
+  "shopify/variant_id": 49,
+  "sku/code": 49,
+  "sku/upc": 49,
+  "supplier/code": 8,
+  "tpl/item_code": 49
+ },
+ "registered": [],
+ "files_skipped": [
+  "scratchpad/docs.json (66 KB)",
+  "scratchpad/idx.json (15 KB)",
+  "scratchpad/txt/ (135 files of extracted text)"
+ ]
+}

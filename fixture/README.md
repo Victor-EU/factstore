@@ -70,7 +70,7 @@ These are the problems the catalogue and ingestion skills will meet:
   - mixed Chinese and English, with dates written as `3/8` or `3月8号`;
   - voice notes, photos, stickers and small talk;
   - timestamps in New York time, from the ops manager's phone.
-- **Customers:** duplicate Shopify accounts made with plus aliases or another email provider.
+- **Customers:** duplicate Shopify accounts, made with plus aliases or another email provider. As in Shopify, no two accounts share an address: different people with the same name get `brian.wright2@...`.
 
 ## Outputs
 

@@ -1,0 +1,393 @@
+{
+ "model": "sonnet",
+ "turns": 35,
+ "tool_calls": 33,
+ "cost_usd": 1.1089131999999997,
+ "wall_seconds": 254,
+ "skill_used": [
+  "ecom-ops-ingest-documents"
+ ],
+ "subtype": "success",
+ "final": "I ingested the 8 WeChat chats and the ops inbox. Nothing failed; I dry-ran all 212 transactions first, then committed them. Afterwards the store held the expected 181 new documents, 18 changed PO ETDs, 32 booking numbers, 30 customs entries and 29 shipments marked delivered.\n\n## What I read\n- **Chats:** 811 messages across 8 suppliers.\n  - I treated the timestamps as New York time.\n  - For year-less dates like \"3/8\" I picked the next occurrence after the message, in China time.\n- **Emails:** 163, as follows.\n\n| Kind | Count |\n|---|---|\n| Booking confirmations | 32 |\n| Pre-alerts | 31 |\n| ETA updates | 7 |\n| Rolled bookings | 4 |\n| Arrival notices | 30 |\n| Customs entry summaries | 30 |\n| Warehouse receipts | 29 |\n\n- **Skipped as already read:** none. No chat or email hash was in the store beforehand.\n\n## What I wrote\n- **Documents:** 181 (163 emails and 18 chat messages), each tied to its transactions as evidence.\n- **PO ETDs:** 18 chat slips changed `po/etd`, for example PO-2025-0146 from 11/15 to 11/20. They are at confidence 0.9 because the dates had no year, and 4 of them name the PI number rather than the PO.\n- **Shipments:** all 31 existing shipments gained their booking number, and the 4 rolled bookings got new ETD and ETA.\n  - Pre-alerts set the actual ETD and ETA, and the container number where there is one.\n  - ETA updates and arrival notices followed in date order.\n  - Shipments carry `shipment/status` (booked, departed, arrived or delivered) and instants.\n  - Date-only dates are at 00:00 port-local time (China +08:00, New York or LA with daylight saving).\n- **New shipment:** one, `PBLXMN2609032` for PO-2026-0023. It has only a booking so far and is rolled to ETD 6 Oct 2026.\n- **Customs entries:** 30, each linked to its shipment by HBL or container, with value, duty (HTS, Section 301 and additional duties together) and fees (MPF plus HMF).\n\n## Confidence below 1\n- **Booking links (27 of 31):** 0.9, because the PO names in the booking were loose (\"po 0147\", \"PO8\", \"PO144\"). I matched each booking by vessel and voyage plus its POs, and found no mismatches or duplicates.\n- **Receipt emails (29):** 0.9. I set `shipment/status` \"delivered\" and `shipment/delivered_at` to the email's timestamp. The skill doesn't cover warehouse emails, but the vocabulary has these attributes and the receipt emails fit them. The instant is the email time, not a stated receipt time. Tell me if you'd rather I retract these.\n\n## Checked, nothing written\n- All 15 \"container loaded\" chat messages match the container numbers already in the store.\n- All 48 PI-time \"ETD \u2026\" messages match the ETDs from the PI PDFs.\n- Pre-alert vessels, containers and shipment lines (quantities and cartons) agree with the commercial invoice and packing list data already in the store.\n- I did not record these messages as documents, because they added no new fact.\n\n## Unresolved and gaps in the vocabulary\n- **Warehouse receipt details:** expected, received and damaged counts per SKU have no attribute.\n- **Chat content with no attribute:** deposit and balance payments, QC notices, holiday closures (CNY and National Day), sample couriers (the DHL AWB), quote requests and voice messages.\n- **Email details with no attribute:** the last free day, CY and SI cut-offs, the brokerage fee, and the reason for each ETA change or roll.\n- **Seal numbers:** no attribute.\n- **Hash convention for emails:** I hashed bytes from the `From ` line up to the blank separator line before the next message. If your convention differs, the email hashes won't match.",
+ "wrote": {
+  "new_entities": 213,
+  "new_attributes": [],
+  "transactions": 213,
+  "facts": 1861
+ },
+ "evidence": {
+  "transactions": 212,
+  "with_evidence": 212,
+  "with_confidence": 212,
+  "without_evidence": []
+ },
+ "statements": {
+  "fields": {
+   "email duty_total": {
+    "truth": 30,
+    "on_entity": 30,
+    "with_evidence": 30
+   },
+   "email eta": {
+    "truth": 70,
+    "on_entity": 70,
+    "with_evidence": 39
+   },
+   "email etd": {
+    "truth": 36,
+    "on_entity": 36,
+    "with_evidence": 36
+   },
+   "wechat container_no": {
+    "truth": 15,
+    "on_entity": 15,
+    "with_evidence": 0
+   },
+   "wechat etd": {
+    "truth": 70,
+    "on_entity": 66,
+    "with_evidence": 18
+   }
+  },
+  "truth": 221,
+  "on_entity": 217,
+  "with_evidence": 123,
+  "recall": 0.557,
+  "no_attribute_in_package": {
+   "wechat sample_awb": 15,
+   "email damaged": 74,
+   "wechat closed": 16,
+   "wechat price_change": 4
+  },
+  "misses": {
+   "wechat etd": [
+    {
+     "source": "wechat",
+     "ref": "wechat/NBBW_Lily.txt#5",
+     "at": "2025-10-09T15:25:00+08:00",
+     "subject": "PO-2025-0143",
+     "field": "etd",
+     "value": "2025-12-05",
+     "found": [
+      "2025-12-05"
+     ]
+    },
+    {
+     "source": "wechat",
+     "ref": "wechat/FSMJ_Grace.txt#5",
+     "at": "2025-10-09T15:27:00+08:00",
+     "subject": "PO-2025-0147",
+     "field": "etd",
+     "value": "2025-12-02",
+     "found": [
+      "2025-12-02"
+     ]
+    },
+    {
+     "source": "wechat",
+     "ref": "wechat/SZHT_Kevin.txt#6",
+     "at": "2025-10-09T17:24:00+08:00",
+     "subject": "PO-2025-0144",
+     "field": "etd",
+     "value": "2025-11-26",
+     "found": [
+      "2025-11-26",
+      "2025-12-02"
+     ]
+    },
+    {
+     "source": "wechat",
+     "ref": "wechat/YWLX_Amy.txt#6",
+     "at": "2025-10-09T18:02:00+08:00",
+     "subject": "PO-2025-0145",
+     "field": "etd",
+     "value": "2025-11-20",
+     "found": [
+      "2025-11-20",
+      "2025-11-24"
+     ]
+    },
+    {
+     "source": "wechat",
+     "ref": "wechat/XMYD_Eric.txt#5",
+     "at": "2025-10-09T18:11:00+08:00",
+     "subject": "PO-2025-0148",
+     "field": "etd",
+     "value": "2025-11-26",
+     "found": [
+      "2025-11-26",
+      "2025-12-03"
+     ]
+    }
+   ],
+   "email eta": [
+    {
+     "source": "email",
+     "ref": "email/ops_inbox.mbox <20251127110000.2@pacificbridge.example>",
+     "at": "2025-11-26T21:00:00+08:00",
+     "subject": "PBLYTN2511001",
+     "field": "eta",
+     "value": "2025-12-28",
+     "found": [
+      "2025-12-28 2025-12-28 2025-12-28",
+      "2026-01-03 2026-01-03 2026-01-03"
+     ]
+    },
+    {
+     "source": "email",
+     "ref": "email/ops_inbox.mbox <20251203130000.6@pacificbridge.example>",
+     "at": "2025-12-02T23:00:00+08:00",
+     "subject": "PBLXMN2512002",
+     "field": "eta",
+     "value": "2026-01-03",
+     "found": [
+      "2026-01-03 2026-01-03 2026-01-03",
+      "2026-01-12 2026-01-12 2026-01-12"
+     ]
+    },
+    {
+     "source": "email",
+     "ref": "email/ops_inbox.mbox <20251204110000.7@pacificbridge.example>",
+     "at": "2025-12-03T21:00:00+08:00",
+     "subject": "PBLYTN2512003",
+     "field": "eta",
+     "value": "2026-01-03",
+     "found": [
+      "2026-01-03 2026-01-03 2026-01-03"
+     ]
+    },
+    {
+     "source": "email",
+     "ref": "email/ops_inbox.mbox <20251206120000.9@pacificbridge.example>",
+     "at": "2025-12-05T22:00:00+08:00",
+     "subject": "PBLNGB2512004",
+     "field": "eta",
+     "value": "2026-01-09",
+     "found": [
+      "2026-01-09 2026-01-09 2026-01-09"
+     ]
+    },
+    {
+     "source": "email",
+     "ref": "email/ops_inbox.mbox <20251210130000.10@pacificbridge.example>",
+     "at": "2025-12-09T23:00:00+08:00",
+     "subject": "PBLNSA2512005",
+     "field": "eta",
+     "value": "2025-12-26",
+     "found": [
+      "2025-12-26 2025-12-26 2025-12-26"
+     ]
+    }
+   ],
+   "wechat container_no": [
+    {
+     "source": "wechat",
+     "ref": "wechat/SZHT_Kevin.txt#21",
+     "at": "2025-12-01T21:00:00+08:00",
+     "subject": "PBLYTN2512003",
+     "field": "container_no",
+     "value": "TCLU7231714",
+     "found": [
+      "TCLU7231714"
+     ]
+    },
+    {
+     "source": "wechat",
+     "ref": "wechat/NBQS_Sunny.txt#24",
+     "at": "2025-12-01T22:00:00+08:00",
+     "subject": "PBLNGB2512004",
+     "field": "container_no",
+     "value": "TCLU6622680",
+     "found": [
+      "TCLU6622680"
+     ]
+    },
+    {
+     "source": "wechat",
+     "ref": "wechat/NBBW_Lily.txt#30",
+     "at": "2025-12-15T19:00:00+08:00",
+     "subject": "PBLNGB2512006",
+     "field": "container_no",
+     "value": "SEGU1045204",
+     "found": [
+      "SEGU1045204"
+     ]
+    },
+    {
+     "source": "wechat",
+     "ref": "wechat/NBQS_Sunny.txt#42",
+     "at": "2026-01-07T18:00:00+08:00",
+     "subject": "PBLNGB2601008",
+     "field": "container_no",
+     "value": "TGHU7372239",
+     "found": [
+      "TGHU7372239"
+     ]
+    },
+    {
+     "source": "wechat",
+     "ref": "wechat/NBBW_Lily.txt#45",
+     "at": "2026-01-23T18:00:00+08:00",
+     "subject": "PBLNGB2601012",
+     "field": "container_no",
+     "value": "TGHU8545365",
+     "found": [
+      "TGHU8545365"
+     ]
+    }
+   ]
+  }
+ },
+ "indexed": {
+  "amazon/asin": 25,
+  "amazon/fnsku": 25,
+  "amazon/seller_sku": 25,
+  "customs/entry_no": 30,
+  "document/hash": 316,
+  "factory/item_code": 49,
+  "location/code": 11,
+  "po_line/key": 196,
+  "po/number": 48,
+  "qc/report_no": 46,
+  "shipment/booking_no": 32,
+  "shipment/hbl": 31,
+  "shipment_line/key": 166,
+  "shopify/variant_id": 49,
+  "sku/code": 49,
+  "sku/upc": 49,
+  "supplier/code": 8,
+  "tpl/item_code": 49
+ },
+ "registered": [],
+ "files_skipped": [
+  "scratchpad/docs.json (374 KB)",
+  "scratchpad/email_events.json (185 KB)",
+  "scratchpad/chat_events.json (34 KB)"
+ ],
+ "questions": {
+  "agree": 4,
+  "asked": 6,
+  "questions": {
+   "1": {
+    "agree": true,
+    "rows": 1,
+    "missing": [],
+    "extra": []
+   },
+   "2": {
+    "agree": false,
+    "rows": 6,
+    "missing": [
+     [
+      "PO-2025-0143",
+      "2025-12-05",
+      "2025-12-19"
+     ],
+     [
+      "PO-2025-0151",
+      "2026-01-22",
+      "2026-01-25"
+     ],
+     [
+      "PO-2025-0159",
+      "2026-03-21",
+      "2026-03-27"
+     ],
+     [
+      "PO-2026-0007",
+      "2026-06-01",
+      "2026-06-05"
+     ],
+     [
+      "PO-2026-0012",
+      "2026-07-07",
+      "2026-07-10"
+     ]
+    ],
+    "extra": [
+     [
+      "PO-2025-0159",
+      "2026-03-21",
+      "2026-03-25"
+     ]
+    ]
+   },
+   "4": {
+    "agree": true,
+    "rows": 1,
+    "missing": [],
+    "extra": []
+   },
+   "5": {
+    "agree": true,
+    "rows": 10,
+    "missing": [],
+    "extra": []
+   },
+   "6": {
+    "agree": true,
+    "rows": 1,
+    "missing": [],
+    "extra": []
+   },
+   "7": {
+    "agree": false,
+    "rows": 6,
+    "missing": [
+     [
+      "DGRF",
+      "USD",
+      "17800.8"
+     ],
+     [
+      "NBBW",
+      "USD",
+      "50301.6"
+     ],
+     [
+      "NBQS",
+      "USD",
+      "38312.08"
+     ],
+     [
+      "SZHT",
+      "USD",
+      "21566.88"
+     ],
+     [
+      "XMYD",
+      "USD",
+      "26875.2"
+     ]
+    ],
+    "extra": [
+     [
+      "DGRF",
+      "USD",
+      "97344"
+     ],
+     [
+      "FSMJ",
+      "CNY",
+      "457888.68"
+     ],
+     [
+      "HZTY",
+      "USD",
+      "49008"
+     ],
+     [
+      "NBBW",
+      "USD",
+      "323992.8"
+     ],
+     [
+      "NBQS",
+      "USD",
+      "184398.48"
+     ]
+    ]
+   }
+  }
+ }
+}

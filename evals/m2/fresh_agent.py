@@ -58,7 +58,7 @@ EXPECTED = [
         ("shipment/origin", "CNXMN"), ("shipment/destination", "USNYC"), ("shipment/vessel", "MV Coral Meridian 112E"),
         ("shipment/etd", "2026-10-09T10:00:00+00:00"), ("shipment/eta", "2026-11-12T13:00:00+00:00"),
         ("shipment/freight_cost", "2850"), ("core/currency", "USD")]],
-    *[(["shipment_line/key", f"PBLXMN2610032/{n}"], a, v) for n, qty, ctns in
+    *[(["shipment_line/key", f"PBLHB2600032/PO-2026-0023/{n}"], a, v) for n, qty, ctns in
       [(1, "660", "55"), (2, "1100", "55"), (3, "384", "32"), (4, "440", "22")]
       for a, v in [("core/part_of", ["shipment/booking_no", "PBLXMN2610032"]),
                    ("shipment_line/po_line", ["po_line/key", f"PO-2026-0023/{n}"]),

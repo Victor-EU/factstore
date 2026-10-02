@@ -1,0 +1,313 @@
+{
+ "model": "sonnet",
+ "runs": [
+  {
+   "run": 1,
+   "turns": 39,
+   "tool_calls": 37,
+   "cost_usd": 1.1285424000000004,
+   "wall_seconds": 336,
+   "skill_used": [
+    "factstore-catalogue"
+   ],
+   "subtype": "success",
+   "final": " created 8 suppliers and 26 PO stubs (below). |\n\nLeft out as the ingestion skill's: the emails, the WeChat chats, and the PDFs' POs, shipments, inspections and customs entries.\n\n## Crosswalk\nAll 49 SKU hubs carry every ID, so nothing is unmatched on the product side.\n\n- **Shopify variant ID:** 43 exact. 6 normalized (0.9), where Shopify's SKU is malformed (`AH-CTB-16-LRG`, `AHUTN0017NAT`, `AH-TRY-18-NAT`, `AH-JAR-22-STL`, `AH-TPT-23-CLR`, `ah-btl-0020-blk`). I used the well-formed spelling as the hub code.\n- **UPC and 3PL item code:** 49 exact, joined on the barcode, which Shopify and the 3PL share on every item.\n- **Amazon:** 25 hubs. 14 exact, 11 normalized (0.9) after dropping `-FBA`.\n- **Factory item code, supplier and HS code:** 49 corroborated (0.7). The factory's description equals the Shopify title plus variant, and there is no shared code. Codes are written as `NBBW:MT-1574`.\n- **Suppliers:** 8 `supplier/code` entities, taken from the WeChat file prefixes. I used them to map the 8 QuickBooks vendors to suppliers at exact confidence, because the QuickBooks and PDF email domains match. The remaining 3 vendors (forwarder, broker, 3PL) have no supplier hub.\n- **Receipts to shipments:** 16 exact by house bill of lading, 13 at 0.7 through the container plus the PO on the supplier invoice. 3 of the 13 have no PO on the receipt and were matched on the container alone.\n\n## Registered attributes\nI registered 15 attributes because the vocabulary had no way to hold these:\n- **Shopify identifiers:** `shopify/order_id`, `shopify/customer_id`, `shopify/line_item_id`.\n- **Amazon identifiers:** `amazon/order_id`, `amazon/order_line` (order ID/SKU, since the export has no line ID), `amazon/fba_shipment_id`.\n- **3PL identifiers:** `tpl/receipt_no`, `tpl/receipt_line`, `tpl/outbound_line`.\n- **QuickBooks identifier:** `quickbooks/vendor_name`. Its vendor list has no numeric ID, so the name is the key.\n- **Join keys:** `order/customer`, `line/sku` (shared by Shopify, Amazon and 3PL lines), `receipt/po`, `receipt/shipment`, `vendor/supplier`.\n\nField authority is recorded for the systems' own IDs (shopify, amazon, 3pl, quickbooks).\n\n## Duplicates\n- **Customers:** 149 duplicate Shopify accounts are marked `core/same_as`, in 146 clusters. They all point at the earliest account. No names, emails or addresses were written.\n- **Normalized mailbox:** 84 accounts (0.9), after removing plus-aliases and case.\n- **Same full name and address:** 65 accounts (0.7), with different mailboxes.\n\n## Sources disagree on SKU\n- **Our SKU:** the 3PL has typos (`BKL`, `WTH`, `SVL`, `HFL`, `BMA`) and blanks in 15 of its 49 Client SKU values. Shopify has the malformed spellings above. Amazon uses `-FBA` suffixes. I kept the spellings as evidence, not as separate hubs.\n- **On hand:** the 3PL reports On Hand, Allocated, Available and Damaged, and Shopify and Amazon each report their own quantity. I wrote no stock quantities, because they stay in the sources.\n\n## Decisions for you\n1. **Stub POs and shipments:** the receipts created 26 PO entities and 29 shipment entities that hold only their number. The ingestion skill should fill them in by looking them up on `po/number` or `shipment/hbl`.\n2. **Reused containers:** container numbers repeat across shipments over time. I matched only through a PO overlap or a single candidate, and wrote no ref where it was ambiguous. Nothing was left unresolved.\n3. **Stock positions:** I did not index `inventory/position` for the 3PL and FBA locations. Say if you want them.\n4. **Authority for `sku/hs_code`, `sku/supplier`, `factory/item_code`:** I recorded none, since none of the four systems owns them. The supplier documents and the customs broker are the real sources.\n5. **Customers:** the 149 same-person marks rest on the matching rules above. A human may want to spot-check the 65 name-and-address ones.\n\nNo record has disappeared from a source, and I found nothing about a deleted person. This was a first run and the store was empty.",
+   "wrote": {
+    "new_entities": 204927,
+    "new_attributes": [
+     "shopify/order_id",
+     "shopify/customer_id",
+     "shopify/line_item_id",
+     "order/customer",
+     "line/sku",
+     "amazon/order_id",
+     "amazon/order_line",
+     "amazon/fba_shipment_id",
+     "tpl/receipt_no",
+     "tpl/receipt_line",
+     "tpl/outbound_line",
+     "receipt/po",
+     "receipt/shipment",
+     "quickbooks/vendor_name",
+     "vendor/supplier"
+    ],
+    "transactions": 191,
+    "facts": 470304
+   },
+   "crosswalk": {
+    "systems": {
+     "upc": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "shopify_variant_id": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "amazon_seller_sku": {
+      "truth": 25,
+      "stored": 25,
+      "correct": 25,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "asin": {
+      "truth": 25,
+      "stored": 25,
+      "correct": 25,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "fnsku": {
+      "truth": 25,
+      "stored": 25,
+      "correct": 25,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "tpl_item_code": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "factory_code": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "hs_code": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "supplier": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     }
+    },
+    "precision": 1.0,
+    "recall": 1.0,
+    "skus_in_truth": 49,
+    "hubs": 49,
+    "hubs_with_true_code": 49,
+    "factory_prefix_exact": 49
+   },
+   "duplicates": {
+    "truth_pairs": 283,
+    "visible_pairs": 171,
+    "marked_pairs": 152,
+    "correct": 152,
+    "precision": 1.0,
+    "recall": 0.889
+   },
+   "personal_data": {
+    "personal_values": 0,
+    "examples": [],
+    "values_with_at_sign": []
+   },
+   "indexed": {
+    "amazon/asin": 25,
+    "amazon/fba_shipment_id": 49,
+    "amazon/fnsku": 25,
+    "amazon/order_id": 38264,
+    "amazon/order_line": 43513,
+    "amazon/seller_sku": 25,
+    "document/hash": 24,
+    "factory/item_code": 49,
+    "po/number": 26,
+    "quickbooks/vendor_name": 11,
+    "shipment/hbl": 29,
+    "shopify/customer_id": 21129,
+    "shopify/line_item_id": 37773,
+    "shopify/order_id": 26546,
+    "shopify/variant_id": 49,
+    "sku/code": 49,
+    "sku/upc": 49,
+    "supplier/code": 8,
+    "tpl/item_code": 49,
+    "tpl/outbound_line": 37331,
+    "tpl/receipt_line": 146,
+    "tpl/receipt_no": 29
+   },
+   "registered": [
+    "shopify/order_id",
+    "shopify/customer_id",
+    "shopify/line_item_id",
+    "order/customer",
+    "line/sku",
+    "amazon/order_id",
+    "amazon/order_line",
+    "amazon/fba_shipment_id",
+    "tpl/receipt_no",
+    "tpl/receipt_line",
+    "tpl/outbound_line",
+    "receipt/po",
+    "receipt/shipment",
+    "quickbooks/vendor_name",
+    "vendor/supplier"
+   ],
+   "files_skipped": []
+  },
+  {
+   "run": 2,
+   "turns": 10,
+   "tool_calls": 8,
+   "cost_usd": 0.15801740000000003,
+   "wall_seconds": 28,
+   "skill_used": [
+    "factstore-catalogue"
+   ],
+   "subtype": "success",
+   "final": "I ran the catalogue again and wrote nothing to the store, because the sources haven't changed since the last run.\n\n**What I checked**\n- **File hashes:** every indexed export hashes identically to the document the store recorded: Shopify orders and products, Amazon orders, FBA shipments and inventory, 3PL outbound, receipts and inventory, and the QuickBooks vendor list.\n- **Record counts:** the exports match the store exactly.\n\n| Record kind | Count in exports and store |\n|---|---|\n| Shopify orders | 26,546 |\n| Shopify line items | 37,773 |\n| Shopify customers | 21,129 |\n| Amazon orders | 38,264 |\n| Amazon order lines | 43,513 |\n| 3PL outbound lines | 37,331 |\n\nSince a second run on unchanged sources must write nothing, I stopped there. I left the store's entity count unmeasured, since nothing was written.\n\n**Where the crosswalk stands**\n- 49 SKU hubs exist.\n- Every hub carries a Shopify variant, a 3PL item code, a UPC, an HS code and a supplier.\n- 25 hubs carry the Amazon ASIN, FNSKU and seller SKU. The other 24 have no Amazon listing in the exports.\n- 149 duplicate customer accounts are already marked with `core/same_as`.\n\n**For you to decide**\n- **QuickBooks transaction list:** `quickbooks/transaction_list_by_vendor.csv` is not in the store's document records. It is general ledger data, so I left it unindexed, as the skill requires.\n- **Supplier documents:** `supplier_docs/` has 135 PDFs and the store records 24 of them. I did not add the other 111. Reading them into the store (POs, shipments and so on) belongs to the vocabulary's ingestion skill, not this one.\n- **WeChat chats and ops inbox:** these are messages, which also belong to ingestion. The store has no record of them being catalogued.\n- **Records gone from sources:** none. The counts match, so nothing has disappeared.\n\nI registered no attributes and found no new duplicates or conflicting terms.",
+   "wrote": {
+    "new_entities": 0,
+    "new_attributes": [],
+    "transactions": 0,
+    "facts": 0
+   },
+   "crosswalk": {
+    "systems": {
+     "upc": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "shopify_variant_id": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "amazon_seller_sku": {
+      "truth": 25,
+      "stored": 25,
+      "correct": 25,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "asin": {
+      "truth": 25,
+      "stored": 25,
+      "correct": 25,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "fnsku": {
+      "truth": 25,
+      "stored": 25,
+      "correct": 25,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "tpl_item_code": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "factory_code": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "hs_code": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "supplier": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     }
+    },
+    "precision": 1.0,
+    "recall": 1.0,
+    "skus_in_truth": 49,
+    "hubs": 49,
+    "hubs_with_true_code": 49,
+    "factory_prefix_exact": 49
+   },
+   "duplicates": {
+    "truth_pairs": 283,
+    "visible_pairs": 171,
+    "marked_pairs": 152,
+    "correct": 152,
+    "precision": 1.0,
+    "recall": 0.889
+   },
+   "personal_data": {
+    "personal_values": 0,
+    "examples": [],
+    "values_with_at_sign": []
+   },
+   "indexed": {
+    "amazon/asin": 25,
+    "amazon/fba_shipment_id": 49,
+    "amazon/fnsku": 25,
+    "amazon/order_id": 38264,
+    "amazon/order_line": 43513,
+    "amazon/seller_sku": 25,
+    "document/hash": 24,
+    "factory/item_code": 49,
+    "po/number": 26,
+    "quickbooks/vendor_name": 11,
+    "shipment/hbl": 29,
+    "shopify/customer_id": 21129,
+    "shopify/line_item_id": 37773,
+    "shopify/order_id": 26546,
+    "shopify/variant_id": 49,
+    "sku/code": 49,
+    "sku/upc": 49,
+    "supplier/code": 8,
+    "tpl/item_code": 49,
+    "tpl/outbound_line": 37331,
+    "tpl/receipt_line": 146,
+    "tpl/receipt_no": 29
+   },
+   "registered": [
+    "shopify/order_id",
+    "shopify/customer_id",
+    "shopify/line_item_id",
+    "order/customer",
+    "line/sku",
+    "amazon/order_id",
+    "amazon/order_line",
+    "amazon/fba_shipment_id",
+    "tpl/receipt_no",
+    "tpl/receipt_line",
+    "tpl/outbound_line",
+    "receipt/po",
+    "receipt/shipment",
+    "quickbooks/vendor_name",
+    "vendor/supplier"
+   ],
+   "files_skipped": []
+  }
+ ]
+}

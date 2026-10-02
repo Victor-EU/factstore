@@ -119,6 +119,7 @@ class Simulation:
         self._po_seq = {2025: 142, 2026: 0}
         self._pi_seq: dict[str, int] = defaultdict(int)
         self._n = defaultdict(int)               # counters for IDs
+        self._emails: set[str] = set()           # shoppers' addresses given out: one person each
         self._share_cache: dict = {}
         self._month = defaultdict(lambda: defaultdict(int))
         self._customer_id = 8_812_400_000_000
@@ -256,7 +257,7 @@ class Simulation:
                     who = self.customers[min(i, len(self.customers) - 1)]
                     tz = who.person.tz
                 else:
-                    who = people.person(self.rng, self._n["person"])
+                    who = people.person(self.rng, self._n["person"], self._emails)
                     self._n["person"] += 1
                     tz = who.tz
                 hour = self.rng.choices(range(24), weights=HOUR_WEIGHTS)[0]
@@ -305,7 +306,8 @@ class Simulation:
             duplicate_of = None
             if self.customers and rng.random() < 0.015:  # a past customer signing up again
                 original = rng.choice(self.customers)
-                who = dataclasses.replace(original.person, email=people.alias_email(rng, original.person.email))
+                who = dataclasses.replace(original.person,
+                                          email=people.alias_email(rng, original.person.email, self._emails))
                 duplicate_of = original.id
             self._customer_id += rng.randint(2_000_000, 40_000_000)
             customer = Customer(self._customer_id, who, when, duplicate_of)
@@ -498,7 +500,7 @@ class Simulation:
             closure = sum(1 for i in range((optimistic - start).days) if factory_capacity(start + timedelta(days=i)) == 0
                           and (start + timedelta(days=i)).weekday() != 6)
             optimistic -= timedelta(days=closure // 2)
-        po.etd = optimistic + timedelta(days=7)
+        po.etd = po.quoted_etd = optimistic + timedelta(days=7)
         po.status = "confirmed"
         filename = f"{po.pi_number}.pdf"
         self.documents.append(Document("proforma_invoice", filename, d, po))
@@ -1012,7 +1014,7 @@ class Simulation:
         prior = int(0.7 * BASE_ORDERS_PER_DAY["shopify"] * self.scale * 1.1 * (YEAR_START - SIM_START).days)
         span = (YEAR_START - SIM_START).days * 86400
         for i in range(prior):
-            person = people.person(self.rng, self._n["person"])
+            person = people.person(self.rng, self._n["person"], self._emails)
             self._n["person"] += 1
             self._customer_id += self.rng.randint(2_000_000, 40_000_000)
             created = at(SIM_START, 0, US_EAST) + timedelta(seconds=span * (i + self.rng.random()) / prior)

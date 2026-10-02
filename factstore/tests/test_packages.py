@@ -1,13 +1,14 @@
 """Vocabulary packages: manifests, and installing them in one registration each."""
 
 import json
+import re
 
 import psycopg
 import pytest
 from psycopg.conninfo import make_conninfo
 
 from conftest import ADMIN_DSN
-from factstore import RegistrationRefused, admin, cli, packages
+from factstore import RegistrationRefused, TransactError, admin, cli, packages
 from factstore.packages import PackageError
 
 
@@ -69,6 +70,34 @@ def test_a_new_version_registers_only_what_it_adds_as_the_same_actor(tmp_path, s
     [result] = admin.install(ADMIN_DSN, store_name, [packages.load(manifest(tmp_path / "v2", "test-orders", ORDERS))])
     assert result.registered == ["order/total"] and result.existing == ["order/number", "order/placed_at"]
     assert list(actors(db)).count("test-orders") == 1
+
+
+def test_a_new_version_may_make_an_attribute_many_or_identity(tmp_path, store_name, db):
+    admin.install(ADMIN_DSN, store_name, [packages.load(manifest(tmp_path, "test-orders", ORDERS))])
+    v2 = [spec("order/placed_at", "instant", doc="When the customer placed an order."),
+          spec("order/number", unique="identity", doc="Our number for a sales order, e.g. SO-1042."),
+          {**spec("order/total", "decimal", doc="What the customer paid for an order, tax included."),
+           "cardinality": "many", "unique": "identity"},
+          spec("order/channel", doc="Sales channel an order came through.")]
+    (tmp_path / "v2").mkdir()
+    [result] = admin.install(ADMIN_DSN, store_name, [packages.load(manifest(tmp_path / "v2", "test-orders", v2))])
+    assert result.evolved == ["order/total"] and result.registered == ["order/channel"]
+    assert result.evolve_tx < result.tx
+    assert db.execute("select cardinality, uniq from attr where ident = 'order/total'").fetchone() == ("many", "identity")
+    writers = db.execute("select distinct actor from tx where id in (%s, %s)", (result.evolve_tx, result.tx)).fetchall()
+    assert writers == [(actors(db)["test-orders"],)]
+
+
+def test_an_evolution_the_values_refuse_writes_nothing(tmp_path, store, store_name, db):
+    admin.install(ADMIN_DSN, store_name, [packages.load(manifest(tmp_path, "test-orders", ORDERS))])
+    store.transact([{"e": f"tmp:{i}", "a": "order/total", "v": "10.00"} for i in range(2)])
+    before = last_tx(db)
+    v2 = [{**spec("order/total", "decimal", doc="What the customer paid for an order, tax included."),
+           "unique": "identity"}, spec("order/channel", doc="Sales channel an order came through.")]
+    (tmp_path / "v2").mkdir()
+    with pytest.raises(TransactError):
+        admin.install(ADMIN_DSN, store_name, [packages.load(manifest(tmp_path / "v2", "test-orders", v2))])
+    assert last_tx(db) == before
 
 
 def test_no_login_outlives_an_install(tmp_path, store_name, db):
@@ -141,6 +170,12 @@ def test_the_cli_installs_and_reports(tmp_path, store_name, capsys):
     assert "test-orders 0.1.0: registered 3 attributes in transaction" in capsys.readouterr().out
     assert cli.main(["--admin-dsn", ADMIN_DSN, "install", store_name, directory]) == 0
     assert capsys.readouterr().out == "test-orders 0.1.0: already installed\n"
+    (tmp_path / "v2").mkdir()
+    v2 = str(manifest(tmp_path / "v2", "test-orders", [{**ORDERS[1], "cardinality": "many"}, *ORDERS[::2],
+                                                       spec("order/channel", doc="Sales channel an order came through.")]))
+    assert cli.main(["--admin-dsn", ADMIN_DSN, "install", store_name, v2]) == 0
+    assert re.fullmatch(r"test-orders 0.1.0: evolved order/placed_at in transaction \d+; registered 1 attributes in"
+                        r" transaction \d+, 3 already registered\n", capsys.readouterr().out)
     lines = str(manifest(tmp_path, "test-lines", LINES, depends_on=["test-missing"]))
     assert cli.main(["--admin-dsn", ADMIN_DSN, "install", store_name, lines]) == 1
     assert "test-missing, which is neither installed" in capsys.readouterr().err

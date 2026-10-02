@@ -129,7 +129,7 @@ Patterns expressed entirely with registered attributes, in the `core/` namespace
 | External identity / index | `shopify/order_id`, `stripe/customer_id` as identity attributes on the entity. **The catalogue is just facts.** |
 | Field authority | `core/authoritative_source` as a fact about the attribute entity. |
 | Money | Each amount is a `decimal` attribute named for what it is (`invoice/subtotal`, `invoice/tax`, `invoice/total`); the entity carries one `core/currency` covering all of them. An amount in another currency goes on a part (`core/part_of`) with its own currency. A package rule, not a type. |
-| Documents | An entity with `document/hash` and `document/url`; referenced via `core/evidence` on a transaction. |
+| Documents | An entity with `document/hash` and `document/url`; referenced via `core/evidence` on a transaction. A chat message or an email is a document of its own, so evidence points at the message, not the whole export. |
 | Domain time | `core/period`, `core/valid_from`, `core/valid_to` as ordinary `date` attributes, distinct from the transaction's `fs/at`. |
 | Acting for someone | `core/on_behalf_of` (ref) on the transaction. |
 | Extraction confidence | `core/confidence` (decimal) on the transaction. Fields with different confidence go in different transactions (§1). |

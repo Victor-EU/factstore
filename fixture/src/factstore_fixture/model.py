@@ -52,6 +52,7 @@ class Po:
     pi_number: str | None = None
     pi_date: date | None = None
     etd: date | None = None      # the supplier's current promise, then the actual departure
+    quoted_etd: date | None = None  # the ETD on the proforma invoice
     ready: date | None = None
     deposit_paid: date | None = None
     balance_paid: date | None = None

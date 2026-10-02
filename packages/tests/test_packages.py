@@ -1,5 +1,9 @@
-"""Build plan M3 exit: both packages install on an empty store; installing twice changes nothing;
-registering a near-duplicate of a package attribute is refused."""
+"""Build plan M3 exit: the packages install on an empty store; installing twice changes nothing;
+registering a near-duplicate of a package attribute is refused. Plus factstore-skills (M4): its
+shape vocabulary installs like a package, and every package's skills are well-formed."""
+
+import json
+import re
 
 import pytest
 
@@ -8,6 +12,7 @@ from factstore import RegistrationRefused, admin, connect, packages
 
 CORE = packages.load(PACKAGES / "core")
 ECOM_OPS = packages.load(PACKAGES / "ecom-ops")
+SKILLS = packages.load(PACKAGES.parent / "factstore-skills")
 
 
 def registrations(conn) -> dict[str, tuple[int, int]]:
@@ -24,14 +29,16 @@ def snapshot(conn) -> tuple:
                         " (select count(*) from actor_login)").fetchone()
 
 
-def test_both_install_on_an_empty_store_each_in_one_transaction():
+def test_each_installs_on_an_empty_store_in_one_transaction():
     name = new_store()
     try:
-        [result] = admin.install(ADMIN_DSN, name, [ECOM_OPS])
-        assert result.registered == [a["ident"] for a in ECOM_OPS.attributes]
+        results = admin.install(ADMIN_DSN, name, [ECOM_OPS, SKILLS])
+        for package, result in zip([ECOM_OPS, SKILLS], results):
+            assert result.registered == [a["ident"] for a in package.attributes]
         with owner(name) as conn:
             assert registrations(conn) == {"factstore-core": (1, len(CORE.attributes)),
-                                           "factstore-ecom-ops": (1, len(ECOM_OPS.attributes))}
+                                           "factstore-ecom-ops": (1, len(ECOM_OPS.attributes)),
+                                           "factstore-skills": (1, len(SKILLS.attributes))}
     finally:
         admin.drop_store(ADMIN_DSN, name)
 
@@ -39,8 +46,8 @@ def test_both_install_on_an_empty_store_each_in_one_transaction():
 def test_they_install_together_in_dependency_order():
     name = new_store(core=False)
     try:
-        results = admin.install(ADMIN_DSN, name, [ECOM_OPS, CORE])
-        assert [r.package for r in results] == ["factstore-core", "factstore-ecom-ops"]
+        results = admin.install(ADMIN_DSN, name, [SKILLS, ECOM_OPS, CORE])
+        assert [r.package for r in results] == ["factstore-core", "factstore-skills", "factstore-ecom-ops"]
     finally:
         admin.drop_store(ADMIN_DSN, name)
 
@@ -48,12 +55,32 @@ def test_they_install_together_in_dependency_order():
 def test_installing_twice_changes_nothing():
     name = new_store()
     try:
-        admin.install(ADMIN_DSN, name, [ECOM_OPS])
+        admin.install(ADMIN_DSN, name, [ECOM_OPS, SKILLS])
         with owner(name) as conn:
             before = snapshot(conn)
-            again = admin.install(ADMIN_DSN, name, [CORE, ECOM_OPS])
-            assert [r.tx for r in again] == [None, None]
+            again = admin.install(ADMIN_DSN, name, [CORE, ECOM_OPS, SKILLS])
+            assert [r.tx for r in again] == [None, None, None]
             assert snapshot(conn) == before
+    finally:
+        admin.drop_store(ADMIN_DSN, name)
+
+
+def test_ecom_ops_0_2_0_makes_the_house_bill_an_identity(tmp_path):
+    """0.1.0 had shipment/hbl as a plain attribute. Upgrading evolves it, as the same actor."""
+    v1 = tmp_path / "ecom-ops"
+    v1.mkdir()
+    raw = json.loads((PACKAGES / "ecom-ops" / "manifest.json").read_text())
+    raw.update(version="0.1.0", skills=[], attributes=[{**a, "unique": "none"} if a["ident"] == "shipment/hbl" else a
+                                                       for a in raw["attributes"]])
+    (v1 / "manifest.json").write_text(json.dumps(raw))
+    name = new_store()
+    try:
+        admin.install(ADMIN_DSN, name, [packages.load(v1)])
+        [result] = admin.install(ADMIN_DSN, name, [ECOM_OPS])
+        assert (result.evolved, result.tx) == (["shipment/hbl"], None)
+        with owner(name) as conn:
+            assert conn.execute("select uniq from attr where ident = 'shipment/hbl'").fetchone() == ("identity",)
+            assert registrations(conn)["factstore-ecom-ops"] == (1, len(ECOM_OPS.attributes))
     finally:
         admin.drop_store(ADMIN_DSN, name)
 
@@ -63,7 +90,7 @@ def agent():
     """A store with both packages, and an agent's credential for it."""
     name = new_store()
     try:
-        admin.install(ADMIN_DSN, name, [ECOM_OPS])
+        admin.install(ADMIN_DSN, name, [ECOM_OPS, SKILLS])
         cred = admin.create_actor(ADMIN_DSN, name, "test agent")
         with connect(cred.dsn) as store:
             yield store
@@ -89,6 +116,11 @@ NEAR_DUPLICATES = [
     ("po/currency", "string", "Currency of a purchase order.", "core/currency"),
     ("invoice/currency", "string", "ISO 4217 currency code of an invoice.", "core/currency"),
     ("core/source", "string", "Which system is authoritative for an attribute.", "core/authoritative_source"),
+    # The ontology skill's vocabulary. Synonyms (shape/label, shape/description) pass, as in M3.
+    ("shape/shape_name", "string", "Confirmed name of a shape.", "shape/name"),
+    ("entity_type/name", "string", "Name of a kind of thing the store holds, e.g. Purchase order.", "shape/name"),
+    ("shape/attributes", "ref", "Attributes every entity of a shape carries.", "shape/signature"),
+    ("shape/doc_text", "string", "One line describing a shape.", "shape/doc"),
 ]
 
 
@@ -100,8 +132,20 @@ def test_a_near_duplicate_of_a_package_attribute_is_refused(agent, ident, type_,
 
 
 def test_distinct_from_names_only_the_package_and_its_dependencies():
-    known = {a["ident"] for a in CORE.attributes}
-    assert all(d in known for a in CORE.attributes for d in a.get("distinct_from", []))
-    known |= {a["ident"] for a in ECOM_OPS.attributes}
-    assert ECOM_OPS.depends_on == ("factstore-core",)
-    assert all(d in known for a in ECOM_OPS.attributes for d in a.get("distinct_from", []))
+    core = {a["ident"] for a in CORE.attributes}
+    assert all(d in core for a in CORE.attributes for d in a.get("distinct_from", []))
+    for package in (ECOM_OPS, SKILLS):
+        assert package.depends_on == ("factstore-core",)
+        known = core | {a["ident"] for a in package.attributes}
+        assert all(d in known for a in package.attributes for d in a.get("distinct_from", []))
+
+
+@pytest.mark.parametrize("package", [CORE, ECOM_OPS, SKILLS], ids=lambda p: p.name)
+def test_skills_are_agent_skills(package):
+    """Each skill is a SKILL.md with the frontmatter agents load it by: a name and a description."""
+    for skill in package.skills:
+        text = (package.path / skill).read_text()
+        front = re.match(r"---\nname: ([a-z0-9-]+)\ndescription: (.+)\n---\n", text)
+        assert front, f"{skill} has no name and description frontmatter"
+        assert len(front[1]) <= 64 and 0 < len(front[2]) <= 1024
+        assert front[1].startswith(("factstore-", package.name.removeprefix("factstore-")))

@@ -71,10 +71,13 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _installed(r: packages.InstallResult) -> str:
-    if r.tx is None:
-        return f"{r.package} {r.version}: already installed"
-    kept = f", {len(r.existing)} already registered" if r.existing else ""
-    return f"{r.package} {r.version}: registered {len(r.registered)} attributes in transaction {r.tx}{kept}"
+    done = []
+    if r.evolve_tx is not None:
+        done.append(f"evolved {', '.join(r.evolved)} in transaction {r.evolve_tx}")
+    if r.tx is not None:
+        kept = f", {len(r.existing)} already registered" if r.existing else ""
+        done.append(f"registered {len(r.registered)} attributes in transaction {r.tx}{kept}")
+    return f"{r.package} {r.version}: {'; '.join(done) or 'already installed'}"
 
 
 if __name__ == "__main__":

@@ -91,6 +91,16 @@ def load(store: Store, sim: Simulation, *, batch: int = 200, records: bool = Tru
     return stats
 
 
+def load_reference(store: Store, sim: Simulation) -> LoadStats:
+    """Only the master data: locations, suppliers, and SKUs with every system's ID for them. What a
+    perfect catalogue run leaves for the ingestion skill to build on (evals/m4)."""
+    stats = LoadStats()
+    started = time.perf_counter()
+    _write(store, stats, _master_data(sim))
+    stats.seconds = time.perf_counter() - started
+    return stats
+
+
 def order_batches(sim: Simulation, batch: int, max_orders: int | None = None):
     """This year's orders as lists of facts, `batch` orders each: for concurrent writers."""
     pending, n = [], 0
@@ -216,8 +226,8 @@ def _event_facts(event: Event) -> list[dict]:
                  f(e, "core/currency", "USD")]
         if s.container_no:
             facts.append(f(e, "shipment/container_no", s.container_no))
-        for n, line in enumerate(s.lines, 1):
-            ln = ["shipment_line/key", f"{s.booking_no}/{n}"]
+        for line in s.lines:
+            ln = ["shipment_line/key", f"{s.hbl}/{line.po_line.key}"]
             facts += [f(ln, "core/part_of", e), f(ln, "shipment_line/po_line", ["po_line/key", line.po_line.key]),
                       f(ln, "shipment_line/quantity", line.quantity), f(ln, "shipment_line/cartons", line.cartons)]
         return facts
