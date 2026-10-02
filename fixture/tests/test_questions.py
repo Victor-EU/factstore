@@ -11,7 +11,7 @@ import pytest
 
 from conftest import ADMIN_DSN
 from factstore import admin, connect
-from factstore_fixture.load import load
+from factstore_fixture.load import load, new_store
 from factstore_fixture.questions import JULY_1_MARK, QUESTIONS, REFERENCE_SQL, World, answers
 from factstore_fixture.simulate import Simulation
 
@@ -23,9 +23,8 @@ def loaded():
     except psycopg.OperationalError:
         pytest.skip("no Postgres at FACTSTORE_TEST_ADMIN_DSN; start one with `docker compose up -d`")
     name = f"t_{secrets.token_hex(4)}"
-    admin.init_store(ADMIN_DSN, name)
     try:
-        cred = admin.create_actor(ADMIN_DSN, name, "fixture loader")
+        cred = new_store(ADMIN_DSN, name)
         with connect(cred.dsn) as store:
             stats = load(store, Simulation(7), batch=1000, marks=[JULY_1_MARK])
             july_1 = stats.marks[JULY_1_MARK]

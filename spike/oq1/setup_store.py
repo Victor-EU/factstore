@@ -7,15 +7,14 @@ from datetime import datetime
 import factstore
 from factstore import admin
 from factstore_fixture.clock import US_EAST
-from factstore_fixture.load import load
+from factstore_fixture.load import load, new_store
 from factstore_fixture.simulate import Simulation
 
 ADMIN = "postgresql://postgres:postgres@localhost:54329/postgres"
 name = sys.argv[1] if len(sys.argv) > 1 else "fs_spike"
 
 admin.drop_store(ADMIN, name)
-admin.init_store(ADMIN, name)
-cred = admin.create_actor(ADMIN, name, "fixture loader")
+cred = new_store(ADMIN, name)
 reader = admin.create_actor(ADMIN, name, "spike reader")
 store = factstore.connect(cred.dsn)
 marks = [datetime(2026, 7, 1, tzinfo=US_EAST)]

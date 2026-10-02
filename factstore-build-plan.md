@@ -24,7 +24,7 @@ OQ1–OQ5 are the open questions in design §15.
 | Query language (OQ1) | `query` (M2) | end of M0 | **Decided: SQL over views** of the current-state table and the log, by the spike ([spike/oq1](spike/oq1/README.md)). Datalog is the runner-up. |
 | What the index holds (OQ2) | the ten questions (M0), the fixture's sales side (M1), the catalogue SKILL.md (M4) | end of M0 | Identifiers and join keys only. It is the reversible choice: fields can be copied in later, personal data cannot be un-copied. |
 | Excision and backups (OQ3) | value storage and `excise` (M1), the catalogue SKILL.md (M4), partner data (M5) | end of M0 | Physical deletion, with slice backups kept short-lived so an excision reaches them by expiry. Switching to crypto-shredding later means reworking value storage — safe until partner data lands, after which old backups keep plaintext. Re-ingestion: excise only together with deletion in the source system, so the next catalogue run finds nothing to bring back. No identifier is kept and the kernel needs no change. |
-| Composite identity (OQ4) | factory-code attributes (M3) | start of M3 | One identity attribute holding `"<factory id>:<code>"`. The M1 fixture uses this until then. |
+| Composite identity (OQ4) | factory-code attributes (M3) | start of M3 | **Decided: the default.** One identity attribute holding `"<supplier code>:<factory code>"`: `factory/item_code` in factstore-ecom-ops ([packages](packages/README.md)). |
 
 ## Milestones
 
@@ -108,6 +108,17 @@ Runs alongside M2 once M1's registration works.
 - **From the fixture.** The fixture's draft vocabulary becomes the two packages below; the fixture then installs them instead of registering its own.
 - **`packages/core/`.** The Part II conventions: `core/part_of`, `core/supersedes`, `core/same_as`, `core/authoritative_source`, `core/currency`, `core/evidence`, `core/period`, `core/valid_from`, `core/valid_to`, `core/on_behalf_of`, `core/confidence`, plus `document/hash` and `document/url`. Installed by `init`.
 - **`packages/ecom-ops/`.** `supplier/`, `po/`, `shipment/`, `inventory/` (with `inventory/location`). An identity attribute for each per-source SKU ID (Shopify variant, ASIN, FNSKU, 3PL SKU); factory codes per OQ4; HS code as a plain attribute, since many SKUs share one.
+
+**Status, 2026-10-02: exit met.**
+- Both packages are manifests in [packages/](packages/README.md). `factstore install` installs them, and `init` installs core.
+- The [tests](packages/tests/test_packages.py) check the exit:
+  - each package installs in one transaction, by an actor named after it;
+  - installing twice writes nothing;
+  - 15 near-duplicates of package attributes are refused.
+- The fixture installs ecom-ops and registers only 11 sales-side identifiers itself.
+- Two core docs were reworded so `order/part_of` and `po/currency` are refused.
+- Synonyms such as `inventory/qty_on_hand` still pass registration, though search finds the package attribute for them.
+- The fixture's commercial invoices carry fields the package has no attributes for. M4's ingestion skill decides what they need.
 
 **Exit:** both packages install on an empty store; installing twice changes nothing; registering a near-duplicate of a package attribute is refused.
 

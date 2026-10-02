@@ -11,7 +11,7 @@ cd fixture
 ../factstore/.venv/bin/pip install -e .
 ../factstore/.venv/bin/factstore-fixture report                 # realism report for the default world
 ../factstore/.venv/bin/factstore-fixture export ./out           # source files plus ground truth
-../factstore/.venv/bin/factstore-fixture load "<writer credential>"
+../factstore/.venv/bin/factstore-fixture load "<writer credential>"   # for a store with packages/ecom-ops installed
 ../factstore/.venv/bin/factstore-fixture bench --admin-dsn "$FACTSTORE_ADMIN_DSN"
 ../factstore/.venv/bin/pytest
 ```
@@ -105,7 +105,12 @@ The store stamps transactions with the time they are written, not the simulated 
 
 [questions.py](src/factstore_fixture/questions.py) holds the ten questions of build plan M0, an operator's questions about the supply side. Each comes with a reference answer, computed by a naive fold over the log, and reference SQL. The OQ1 spike chose the query language with them, and `tests/test_questions.py` answers them through `query`.
 
-The draft vocabulary ([vocabulary.py](src/factstore_fixture/vocabulary.py)) has 93 attributes. The kernel's near-match check flags 18 pairs, each declared with `distinct_from`. Some are real overlaps, such as `amazon/order_id` against `shopify/order_id`. Others are false positives from shared namespaces or templated docs, such as `sku/code` against `sku/hs_code`, and `qc/inspector` against `qc/inspected_on`.
+The loader writes with 93 attributes:
+- 13 from factstore-core, which `init` installs;
+- 69 from factstore-ecom-ops, which the store needs installed (`new_store` in [load.py](src/factstore_fixture/load.py) makes one that has it);
+- 11 sales-side identifiers it registers itself ([vocabulary.py](src/factstore_fixture/vocabulary.py)), as the catalogue skill would on its first run.
+
+The kernel's near-match check flags 18 pairs among them, each declared with `distinct_from` in the manifests or in `vocabulary.py`. Some are real overlaps, such as `amazon/order_id` against `shopify/order_id`. Others are false positives from shared namespaces or templated docs, such as `sku/code` against `sku/hs_code`, and `qc/inspector` against `qc/inspected_on`.
 
 ## Assumptions and simplifications
 

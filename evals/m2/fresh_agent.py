@@ -22,7 +22,7 @@ from decimal import Decimal
 from pathlib import Path
 
 from factstore import admin, connect
-from factstore_fixture.load import load
+from factstore_fixture.load import load, new_store
 from factstore_fixture.questions import JULY_1_MARK, QUESTIONS, World, answers
 from factstore_fixture.simulate import Simulation
 
@@ -68,8 +68,7 @@ EXPECTED = [
 
 def setup(name: str):
     admin.drop_store(ADMIN, name)
-    admin.init_store(ADMIN, name)
-    loader = admin.create_actor(ADMIN, name, "fixture loader")
+    loader = new_store(ADMIN, name)
     with connect(loader.dsn) as store:
         stats = load(store, Simulation(7), batch=1000, marks=[JULY_1_MARK])
         july_1 = stats.marks[JULY_1_MARK]

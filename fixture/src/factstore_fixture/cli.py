@@ -24,7 +24,7 @@ def main(argv: list[str] | None = None) -> int:
     p = commands.add_parser("export", help="write source-shaped files and ground truth")
     p.add_argument("outdir")
     p = commands.add_parser("load", help="load the world into a store through transact")
-    p.add_argument("dsn", help="a factstore writer credential")
+    p.add_argument("dsn", help="a writer credential for a store with packages/ecom-ops installed")
     p.add_argument("--batch", type=int, default=200, help="orders per transaction")
     p = commands.add_parser("bench", help="load throughput by transaction size and writers")
     p.add_argument("--admin-dsn", default=os.environ.get("FACTSTORE_ADMIN_DSN"))

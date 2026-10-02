@@ -18,3 +18,7 @@ build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+# init installs factstore-core, so the wheel carries it; a source checkout reads packages/core.
+[tool.hatch.build.targets.wheel.force-include]
+"../packages/core" = "factstore/core"

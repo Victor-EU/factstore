@@ -60,7 +60,13 @@ Attributes are the alphabet. They are the one thing in the system that is delibe
 
 Attributes change in one direction only. Value type never changes. Cardinality may go from `one` to `many`. Uniqueness may be added if no existing values collide. A mistake is deprecated, not edited: `fs/replaced_by` (ref) on the old attribute points to the new one, search and `stats` follow it, and old facts stay.
 
-The kernel's own attributes live in the reserved `fs/` namespace: the schema attributes above (`fs/type`, `fs/cardinality`, `fs/doc`, `fs/unique`, `fs/distinct_from`, `fs/replaced_by`) and the transaction stamps below. The starter vocabulary (Part II) lives in `core/`.
+The kernel's own attributes live in the reserved `fs/` namespace:
+- the schema attributes above: `fs/ident` (the name), `fs/type`, `fs/cardinality`, `fs/doc`, `fs/unique`, `fs/distinct_from` and `fs/replaced_by`;
+- the transaction stamps below;
+- `fs/name`, an actor's display name;
+- `fs/excised_entity` and `fs/excised_attribute`, which record an excision (§3).
+
+The starter vocabulary (Part II) lives in `core/`.
 
 ### Transaction
 An entity. The kernel stamps two attributes on it: `fs/actor`, taken from the authenticated credential — never from the payload — and `fs/at`, the commit time. Nothing else can write either. Credentials are issued to actors (a person, an agent, a package installer), and each actor is an entity. Anything else — evidence, reason, confidence, on whose behalf — is an ordinary attribute someone registers. Every fact belongs to exactly one transaction. Provenance is not a feature; it is the storage model.
@@ -224,7 +230,7 @@ Each per-source SKU ID is an identity attribute. HS code is not — many SKUs sh
 1. *Resolved after v0.4, below.*
 2. **What the index holds.** Identifiers and join keys only — always fresh, but queries call the source live — or copied fields: fast, but stale and full of personal data. Settle before the catalogue SKILL.md.
 3. **Excision and backups.** Deleting from the log does not reach backups or exports. Crypto-shredding (personal values encrypted with a key per entity; excision deletes the key) does, at the cost of a key store. Nor does excision stop re-ingestion: if the person is still in Shopify, the next catalogue run brings them back. Either the excision record keeps the source identifier and the catalogue skill skips anything it lists — retaining an identifier for a deleted person — or excision is also carried out in the source system, which the kernel cannot do itself.
-4. **Composite identity.** Factory codes are unique only within a factory. Compound identity attributes, or one namespace per factory?
+4. *Resolved after v0.4, below.*
 5. Is the e-commerce supply-side pain sharp enough to pay for before agents read WeChat reliably? The first slice now tests this (§18).
 
 **Resolved after v0.4**
@@ -233,6 +239,7 @@ Each per-source SKU ID is an identity attribute. HS code is not — many SKUs sh
   - Datalog's miss was a silently wrong total, from Datomic's set semantics.
   - SQL needed the fewest queries and runs on Postgres as written.
   - Datalog is the runner-up.
+- *Composite identity (open question 4):* one identity attribute holding `"<supplier code>:<factory code>"`, such as `factory/item_code` = `NBBW:MT-2231`. This was the build plan's default, adopted at the start of M3 ([packages](packages/README.md)). Compound identity attributes would be a kernel change, and one namespace per factory would make the vocabulary grow with every supplier.
 
 **Resolved in v0.4**
 - *Who may register attributes:* anyone with a credential, including builders' coding agents, through `register_attribute` and `distinct_from` (§1). Humans and packages only would stall the agent-first distribution.

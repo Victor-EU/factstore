@@ -7,15 +7,18 @@ cannot write as anyone else.
 
 import re
 import secrets
+from contextlib import contextmanager
 from dataclasses import dataclass
 from importlib import resources
 
 import psycopg
 from psycopg import sql
-from psycopg.conninfo import make_conninfo
+from psycopg.conninfo import conninfo_to_dict, make_conninfo
 
-from . import fs, kernel
+from . import fs, kernel, packages
 from .kernel import Change
+from .packages import InstallResult, Package, PackageError
+from .store import connect
 
 # Store names prefix role names, which Postgres caps at 63 characters.
 NAME_RE = re.compile(r"^[a-z][a-z0-9_]{0,39}$")
@@ -33,8 +36,9 @@ def roles(store: str) -> tuple[str, str, str]:
     return f"{store}_owner", f"{store}_writer", f"{store}_exciser"
 
 
-def init_store(admin_dsn: str, store: str) -> None:
-    """Create the database, its roles, the kernel schema and the fs/ attributes."""
+def init_store(admin_dsn: str, store: str, *, core: bool = True) -> InstallResult | None:
+    """Create the database, its roles, the kernel schema and the fs/ attributes, then install
+    factstore-core unless `core` is false."""
     _check_name(store)
     owner, writer, exciser = roles(store)
     with psycopg.connect(admin_dsn, autocommit=True) as conn:
@@ -51,6 +55,53 @@ def init_store(admin_dsn: str, store: str) -> None:
         cur.execute(_script("schema.sql", store))
         cur.execute(_script("views.sql", store))
         _bootstrap(cur)
+    return install(admin_dsn, store, [packages.core()])[0] if core else None
+
+
+def install(admin_dsn: str, store: str, pkgs: list[Package]) -> list[InstallResult]:
+    """Install packages, each after those it depends on. A package registers the attributes the
+    store lacks in one transaction, all or none, as an actor named after it. One the store already
+    has registers nothing and creates no actor."""
+    _check_name(store)
+    with _connect(admin_dsn, store) as conn:
+        order = packages.install_order(pkgs, packages.installed(conn))
+    return [_install(admin_dsn, store, p) for p in order]
+
+
+def _install(admin_dsn: str, store: str, package: Package) -> InstallResult:
+    with _connect(admin_dsn, store) as conn:
+        have = {row[0]: row[1:] for row in conn.execute("select ident, type, cardinality, uniq from attr")}
+    problems = []
+    for spec in package.attributes:
+        old = have.get(spec["ident"])
+        new = (spec.get("type"), spec.get("cardinality"), spec.get("unique", "none"))
+        if old is not None and old != new:
+            problems.append(f"{package.name}: {spec['ident']} is {'/'.join(map(str, new))} in the package"
+                            f" but {'/'.join(old)} in the store")
+    if problems:
+        raise PackageError(problems)
+    if all(spec["ident"] in have for spec in package.attributes):
+        return InstallResult(package.name, package.version, None, [], [s["ident"] for s in package.attributes])
+    with _login_as(admin_dsn, store, package.name) as cred, connect(cred.dsn) as s:
+        result = s.register_attribute(list(package.attributes))
+    return InstallResult(package.name, package.version, result.tx, result.registered, result.existing)
+
+
+@contextmanager
+def _login_as(admin_dsn: str, store: str, name: str):
+    """A credential, for the length of the block, for the actor called `name`; created if absent."""
+    with _connect(admin_dsn, store) as conn, conn.transaction(), conn.cursor() as cur:
+        kernel.lock(cur)
+        cur.execute("select min(e) from cur where a = %s and v_string = %s", (fs.NAME, name))
+        actor = cur.fetchone()[0] or _new_actor(cur, name)
+        cred = _add_login(cur, admin_dsn, store, actor, False)
+    try:
+        yield cred
+    finally:
+        role = conninfo_to_dict(cred.dsn)["user"]
+        with _connect(admin_dsn, store) as conn:
+            conn.execute("delete from actor_login where rolname = %s", (role,))
+            conn.execute(sql.SQL("drop role {}").format(sql.Identifier(role)))
 
 
 def upgrade_views(admin_dsn: str, store: str) -> None:
@@ -74,11 +125,7 @@ def create_actor(admin_dsn: str, store: str, name: str, *, excise: bool = False)
     """Create an actor named `name` and a credential for it."""
     with _connect(admin_dsn, store) as conn, conn.transaction(), conn.cursor() as cur:
         kernel.lock(cur)
-        schema = kernel.load_schema(cur)
-        actor = kernel.allocate(cur, 1)[0]
-        tx = kernel.begin_tx(cur)
-        kernel.write(cur, tx, [Change(actor, schema.fs(fs.NAME), name, True)])
-        return _add_login(cur, admin_dsn, store, actor, excise)
+        return _add_login(cur, admin_dsn, store, _new_actor(cur, name), excise)
 
 
 def create_credential(admin_dsn: str, store: str, actor: int, *, excise: bool = False) -> Credential:
@@ -124,6 +171,14 @@ def _bootstrap(cur) -> None:
                     Change(d.id, schema.fs(fs.DOC), d.doc, True)]
     changes.append(Change(fs.ADMIN_ACTOR, schema.fs(fs.NAME), "admin", True))
     kernel.write(cur, tx, changes)
+
+
+def _new_actor(cur, name: str) -> int:
+    schema = kernel.load_schema(cur)
+    actor = kernel.allocate(cur, 1)[0]
+    tx = kernel.begin_tx(cur)
+    kernel.write(cur, tx, [Change(actor, schema.fs(fs.NAME), name, True)])
+    return actor
 
 
 def _add_login(cur, admin_dsn: str, store: str, actor: int, excise: bool) -> Credential:

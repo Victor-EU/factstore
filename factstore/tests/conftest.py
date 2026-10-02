@@ -19,8 +19,9 @@ def postgres():
 
 @pytest.fixture
 def store_name():
+    """A bare store, without factstore-core: the kernel knows no names, so its tests don't either."""
     name = f"t_{secrets.token_hex(4)}"
-    admin.init_store(ADMIN_DSN, name)
+    admin.init_store(ADMIN_DSN, name, core=False)
     yield name
     admin.drop_store(ADMIN_DSN, name)
 

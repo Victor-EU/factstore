@@ -1,6 +1,6 @@
 # factstore
 
-The kernel from [the design](../factstore-design.md): facts, registered attributes and transactions on Postgres, the six calls, and the MCP server `factstore`. Build plan milestones M1 (the write path) and M2 (the read path, the MCP server and the SDK).
+The kernel from [the design](../factstore-design.md): facts, registered attributes and transactions on Postgres, the six calls, and the MCP server `factstore`. Build plan milestones M1 (the write path) and M2 (the read path, the MCP server and the SDK), and M3's package installer.
 
 ## Run it
 
@@ -15,9 +15,12 @@ The tests create and drop a store per test. To use a store yourself:
 
 ```bash
 export FACTSTORE_ADMIN_DSN=postgresql://postgres:postgres@localhost:54329/postgres
-.venv/bin/factstore init demo
+.venv/bin/factstore init demo                        # with factstore-core installed
+.venv/bin/factstore install demo ../packages/ecom-ops
 .venv/bin/factstore actor demo "catalogue agent"     # prints the actor ID and its credential
 ```
+
+[`packages/`](../packages/README.md) describes the package format and the two packages.
 
 ```python
 import factstore
@@ -52,7 +55,8 @@ With `FACTSTORE_DSN` set, the same calls work at module level: `factstore.transa
 | `read.py` | Running one read safely: read-only, rolled back, one statement, a timeout, a row cap |
 | `stats.py` | Attribute usage, signatures and ref connectivity |
 | `server.py` | The MCP server |
-| `admin.py`, `cli.py` | Creating stores, actors and credentials |
+| `admin.py`, `cli.py` | Creating stores, actors and credentials; installing packages |
+| `packages.py` | Package manifests, and the order to install them in |
 | `tools.py` | MCP tool descriptions and input schemas: the model-facing documentation |
 | `fs.py` | The kernel's own `fs/` attributes |
 | `tests/reference.py` | The reference reader: a naive fold over the log, used as the test oracle |
@@ -84,12 +88,9 @@ Advisory locks survive a rollback, so they are released after every read; a quer
 
 ## Decisions made while building
 
-- **Extra `fs/` attributes.** Besides the ones the design lists, the kernel uses:
-  - `fs/ident` for an attribute's name;
-  - `fs/name` for an actor's display name;
-  - `fs/excised_entity` and `fs/excised_attribute` to record an excision.
 - **Cardinality one is enforced at write time.** Asserting a new value writes an explicit retraction of the old one to the log. Current state is then a plain fold over assertions and retractions, whatever an attribute's cardinality was at the time.
 - **Redundant writes are dropped.** Asserting a value the entity already has, or retracting one it doesn't have, is reported as unchanged and not logged. A call that changes nothing writes no transaction, so re-running an ingestion leaves the log alone.
 - **Lookups create only from assertions.** A lookup that finds nothing creates the entity when the call asserts something. If the lookup is used only to retract, the call is an error.
 - **String equality has a hash index.** The btree on string values indexes their first 200 characters, so long values never break an insert. Equality goes through a hash index on the whole value, which `v = 'x'` on any view can use.
+- **Kernel tests run on bare stores.** `init` installs factstore-core, but the kernel's tests pass `core=False`: the kernel knows no names, so its tests shouldn't depend on core's. The packages have their own tests.
 - **Near-match thresholds.** These are a first calibration on sample attributes, set at the top of `store.py`; `tests/test_register.py` records the cases they were checked against. The "attributes registered" measure in M5 is what tunes them.

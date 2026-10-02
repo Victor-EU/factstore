@@ -1,0 +1,22 @@
+{
+  "name": "factstore-core",
+  "version": "0.1.0",
+  "doc": "The Part II conventions: composition, supersession, merges, money, documents, domain time and provenance.",
+  "depends_on": [],
+  "skills": [],
+  "attributes": [
+    {"ident": "core/part_of", "type": "ref", "cardinality": "many", "doc": "The whole this entity is part of or belongs to: a line's order, a shipment line's shipment."},
+    {"ident": "core/supersedes", "type": "ref", "cardinality": "one", "doc": "The earlier entity this one replaces in the world, e.g. a reissued invoice."},
+    {"ident": "core/same_as", "type": "ref", "cardinality": "one", "doc": "The surviving entity this duplicate stands for; follow it when reading."},
+    {"ident": "core/authoritative_source", "type": "string", "cardinality": "one", "doc": "System authoritative for an attribute, e.g. shopify; asserted on the attribute's own entity."},
+    {"ident": "core/currency", "type": "string", "cardinality": "one", "doc": "ISO 4217 code of the currency every amount on this entity is in, such as an order's or a purchase order's."},
+    {"ident": "core/evidence", "type": "ref", "cardinality": "many", "doc": "Document backing a transaction's facts, asserted on the transaction."},
+    {"ident": "core/period", "type": "date", "cardinality": "one", "doc": "First day of the accounting period an entity belongs to."},
+    {"ident": "core/valid_from", "type": "date", "cardinality": "one", "doc": "First date on which this entity's facts hold in the world."},
+    {"ident": "core/valid_to", "type": "date", "cardinality": "one", "doc": "Last date on which this entity's facts hold in the world.", "distinct_from": ["core/valid_from"]},
+    {"ident": "core/on_behalf_of", "type": "ref", "cardinality": "one", "doc": "Actor a transaction was written for, when the writer acts for someone else."},
+    {"ident": "core/confidence", "type": "decimal", "cardinality": "one", "doc": "How sure the writer is of a transaction's facts, from 0 to 1."},
+    {"ident": "document/hash", "type": "string", "cardinality": "one", "unique": "identity", "doc": "SHA-256 of a document's bytes, in hex."},
+    {"ident": "document/url", "type": "string", "cardinality": "one", "doc": "Where a document's bytes can be fetched."}
+  ]
+}

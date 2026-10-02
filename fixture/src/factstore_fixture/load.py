@@ -8,18 +8,20 @@ identifiers and join keys only (design open question 2's default). QuickBooks is
 general ledger, which the store never holds.
 
 Every entity is addressed through an identity attribute, so loading twice changes nothing.
+
+The store needs factstore-ecom-ops installed; new_store makes one that has it.
 """
 
 import time
 from dataclasses import dataclass, field
 
-from factstore import Store
+from factstore import FactstoreError, Store, admin, packages
 
 from .catalog import TPL
 from .clock import YEAR_START, US_EAST
 from .model import AmazonOrder, Event, ShopifyOrder
 from .simulate import Simulation
-from .vocabulary import ALL
+from .vocabulary import CATALOGUE, ECOM_OPS
 
 
 @dataclass
@@ -36,6 +38,13 @@ class LoadStats:
     marks: dict = field(default_factory=dict)
 
 
+def new_store(admin_dsn: str, name: str, actor: str = "fixture loader") -> admin.Credential:
+    """Create store `name` with factstore-ecom-ops installed, and a credential to load it with."""
+    admin.init_store(admin_dsn, name)
+    admin.install(admin_dsn, name, [packages.load(ECOM_OPS)])
+    return admin.create_actor(admin_dsn, name, actor)
+
+
 def load(store: Store, sim: Simulation, *, batch: int = 200, records: bool = True, sales: bool = True,
          max_orders: int | None = None, marks=(), progress=None) -> LoadStats:
     """Write the simulation into `store`. `records` covers master data and the supply-side history,
@@ -47,7 +56,11 @@ def load(store: Store, sim: Simulation, *, batch: int = 200, records: bool = Tru
     stats = LoadStats()
     started = time.perf_counter()
     if records:
-        store.register_attribute(ALL)
+        missing = {a["ident"] for a in packages.load(ECOM_OPS).attributes} - {
+            r[0] for r in store.conn.execute("select ident from attr")}
+        if missing:
+            raise FactstoreError(f"install {ECOM_OPS} in this store first: it lacks {len(missing)} of its attributes")
+        store.register_attribute(CATALOGUE)
         _write(store, stats, _master_data(sim))
     marks = sorted(marks)
     pending: list[dict] = []

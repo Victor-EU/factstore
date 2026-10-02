@@ -11,10 +11,10 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from factstore import admin, connect
+from factstore import connect
 from factstore_fixture.bench import FACTS_PER_SCALE
 from factstore_fixture.clock import US_EAST
-from factstore_fixture.load import load
+from factstore_fixture.load import load, new_store
 from factstore_fixture.simulate import Simulation
 
 ADMIN = "postgresql://postgres:postgres@localhost:54329/postgres"
@@ -23,8 +23,7 @@ name = sys.argv[1]
 facts = int(sys.argv[2]) if len(sys.argv) > 2 else 10_000_000
 scale = max(1.0, facts / FACTS_PER_SCALE)
 
-admin.init_store(ADMIN, name)
-cred = admin.create_actor(ADMIN, name, "fixture loader")
+cred = new_store(ADMIN, name)
 started = time.time()
 with connect(cred.dsn) as store:
     stats = load(store, Simulation(7, scale, keep_outbound=False), batch=1000,

@@ -6,12 +6,14 @@ import os
 from factstore_fixture.exports import export
 from factstore_fixture.load import load
 from factstore_fixture.simulate import Simulation
-from factstore_fixture.vocabulary import ALL, SHAPES
+from factstore_fixture.vocabulary import CATALOGUE, SHAPES
 
 
-def test_the_vocabulary_registers_without_refusals(store):
-    result = store.register_attribute(ALL)
-    assert len(result.registered) == len(ALL)
+def test_the_catalogue_attributes_register_beside_the_packages(store):
+    result = store.register_attribute(CATALOGUE)
+    assert len(result.registered) == len(CATALOGUE)
+    registered = {r[0] for r in store.conn.execute("select ident from attr")}
+    assert {a for spec in SHAPES.values() for a in spec["always"] + spec.get("often", [])} <= registered
 
 
 def test_loaded_entities_have_their_shapes(store):

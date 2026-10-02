@@ -21,7 +21,7 @@ import psycopg
 
 from factstore import admin, connect
 
-from .load import load, order_batches
+from .load import load, new_store, order_batches
 from .simulate import Simulation
 
 FACTS_PER_SCALE = 350_000  # sales facts a scale-1 world writes, measured
@@ -48,9 +48,8 @@ def run(admin_dsn: str, *, facts: int, batch: int, writers: int = 1, seed: int =
     """One configuration. `facts` sets the world's size; `cap_facts` stops the timed phase early."""
     scale = max(1.0, facts / FACTS_PER_SCALE)
     name = f"bench_{secrets.token_hex(3)}"
-    admin.init_store(admin_dsn, name)
     try:
-        cred = admin.create_actor(admin_dsn, name, "benchmark loader")
+        cred = new_store(admin_dsn, name, "benchmark loader")
         with connect(cred.dsn) as store:
             load(store, Simulation(seed, scale, keep_outbound=False), sales=False)
             before = _log_size(store)
@@ -136,9 +135,8 @@ def scale_run(admin_dsn: str, *, facts: int, batch: int = 1000, seed: int = 7, s
     grows; then time single-order writes against the full store, the way an agent writes."""
     scale = max(1.0, facts / FACTS_PER_SCALE)
     name = f"bench_{secrets.token_hex(3)}"
-    admin.init_store(admin_dsn, name)
     try:
-        cred = admin.create_actor(admin_dsn, name, "benchmark loader")
+        cred = new_store(admin_dsn, name, "benchmark loader")
         with connect(cred.dsn) as store:
             t = time.perf_counter()
             load(store, Simulation(seed, scale, keep_outbound=False), sales=False)

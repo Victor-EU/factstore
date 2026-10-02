@@ -5,6 +5,7 @@ import psycopg
 import pytest
 
 from factstore import admin, connect
+from factstore_fixture.load import new_store
 from factstore_fixture.simulate import Simulation
 
 ADMIN_DSN = os.environ.get("FACTSTORE_TEST_ADMIN_DSN", "postgresql://postgres:postgres@localhost:54329/postgres")
@@ -25,9 +26,8 @@ def store():
     except psycopg.OperationalError:
         pytest.skip("no Postgres at FACTSTORE_TEST_ADMIN_DSN; start one with `docker compose up -d`")
     name = f"t_{secrets.token_hex(4)}"
-    admin.init_store(ADMIN_DSN, name)
     try:
-        cred = admin.create_actor(ADMIN_DSN, name, "fixture test")
+        cred = new_store(ADMIN_DSN, name, "fixture test")
         with connect(cred.dsn) as s:
             yield s
     finally:

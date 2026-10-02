@@ -4,7 +4,8 @@ import argparse
 import os
 import sys
 
-from . import admin
+from . import admin, packages
+from .errors import FactstoreError
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -13,8 +14,12 @@ def main(argv: list[str] | None = None) -> int:
                         help="superuser connection string (default: $FACTSTORE_ADMIN_DSN)")
     commands = parser.add_subparsers(dest="command", required=True)
 
-    init = commands.add_parser("init", help="create a store")
+    init = commands.add_parser("init", help="create a store, with factstore-core installed")
     init.add_argument("store")
+
+    install = commands.add_parser("install", help="install vocabulary packages, each after those it depends on")
+    install.add_argument("store")
+    install.add_argument("package", nargs="+", help="a package's directory")
 
     actor = commands.add_parser("actor", help="create an actor and print its credential")
     actor.add_argument("store")
@@ -38,8 +43,16 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("give --admin-dsn or set FACTSTORE_ADMIN_DSN")
 
     if args.command == "init":
-        admin.init_store(args.admin_dsn, args.store)
-        print(f"created store {args.store}")
+        core = admin.init_store(args.admin_dsn, args.store)
+        print(f"created store {args.store}\n{_installed(core)}")
+    elif args.command == "install":
+        try:
+            results = admin.install(args.admin_dsn, args.store, [packages.load(p) for p in args.package])
+        except FactstoreError as e:
+            print(e, file=sys.stderr)
+            return 1
+        for result in results:
+            print(_installed(result))
     elif args.command == "actor":
         cred = admin.create_actor(args.admin_dsn, args.store, args.name, excise=args.excise)
         print(f"actor {cred.actor}\n{cred.dsn}")
@@ -55,6 +68,13 @@ def main(argv: list[str] | None = None) -> int:
         admin.drop_store(args.admin_dsn, args.store)
         print(f"dropped store {args.store}")
     return 0
+
+
+def _installed(r: packages.InstallResult) -> str:
+    if r.tx is None:
+        return f"{r.package} {r.version}: already installed"
+    kept = f", {len(r.existing)} already registered" if r.existing else ""
+    return f"{r.package} {r.version}: registered {len(r.registered)} attributes in transaction {r.tx}{kept}"
 
 
 if __name__ == "__main__":
