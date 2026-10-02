@@ -60,6 +60,7 @@ Write a mapping table in your working directory. Each field goes to one of three
 - **A new identifier or join key.**
   - An identifier goes in the source system's namespace, with `unique: identity` and a doc naming the system and the record ("Shopify's ID for a customer account.").
   - A join key is a `ref` from the record to the record it names, such as `order/customer` or `line/sku`. A line of a whole is `core/part_of` the whole.
+  - A record with no ID of its own still takes part in a join when it names other records, like a row in a warehouse's outbound file naming an order and an item. Index it under a key built from the fields that make it unique in its source, such as `#18301/ACMH-10021` for the order and the item code. Check that the key is unique before you use it.
   - Check a join key's values as you would an identifier's. A blank names nothing, so write no ref for it. A field holding several keys ("PO-1 / PO-2") is several refs, on a `many` attribute. Spellings need normalizing to the form the named record uses.
   - A ref by lookup creates the named record if the store lacks it, so a malformed value creates a bogus record.
   - Name a join key after the kind of record it is on and what it points to, such as `order/customer` or `receipt/shipment`. Reuse one across sources when the records are the same kind: a shop's and a marketplace's order lines can both use `line/sku`. Don't use a generic namespace shared by unrelated kinds of record.
@@ -103,7 +104,8 @@ How to write and check matches:
 - **Duplicates within one source,** such as one person with two customer accounts:
   - Keep both index entries.
   - Mark the newer one with `core/same_as` pointing at the account it duplicates, at the tier's confidence.
-  - Do this only on strong evidence: the same mailbox once normalized (plus-aliases, dots, case), or the same full name and postal address.
+  - Do this only on strong evidence: the same mailbox once normalized, or the same full name and postal address.
+  - Normalizing a mailbox means lowercasing it and dropping a plus-alias: `ann+shop@` is `ann@`. Drop dots only at providers that ignore them, such as Gmail. Elsewhere `ann.lee@` and `annlee@` are two mailboxes, often two people with the same name.
   - Compare in your working files. The store gets only the `core/same_as`.
 
 ### 5. Record field authority
@@ -135,6 +137,7 @@ factstore.query('select count(*) from "shopify/order_id"').rows
 ```
 
 - Put 1,000 to 5,000 facts in each transaction. A rejected transaction writes nothing and lists every problem: fix the batch and run it again.
+- Before a script writes a join key, print its distinct values that don't look like the IDs of the record they name: blanks, several IDs in one field ("PO-1 / PO-2"), and spellings unlike the rest. Split, normalize or skip each one, as step 3 says, before writing.
 - Run the script on a small sample first, check the result with `query`, then run it in full.
 - Record each export file you read as a document, and point every transaction written from it at that document:
   ```json

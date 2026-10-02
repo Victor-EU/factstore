@@ -1,6 +1,6 @@
 # factstore — Build Plan
 
-**Status:** Draft v0.2 · 2026-10-01 · for [design v0.4](factstore-design.md)
+**Status:** Draft v0.2 · 2026-10-02 · for [design v0.5](factstore-design.md)
 
 ## Goal
 
@@ -158,6 +158,33 @@ Runs alongside M2 once M1's registration works.
 - Write design v0.5 from what broke.
 
 **Exit:** report written; a go / change / stop decision on what comes next.
+
+**Status, 2026-10-02: report written, on the fixture** ([evals/m5](evals/m5/README.md)). No partner data has arrived, so the slice ran on the fixture's exports, as the risk table says. The decision is pending.
+- **How it ran.** Four slices, each from an empty store, with Sonnet: catalogue, ingestion of the PDFs, chats and email, a second catalogue run, the ontology, then a fresh agent answering the ten questions through `query`.
+- **The five measures.**
+  - Crosswalk precision and recall: 1.0 in every slice.
+  - Shapes: 14 to 16 of the operator's 18 kinds.
+  - Attributes registered beyond the packages: 12 to 16, all sales-side identifiers.
+  - New entities on re-run: none.
+  - Questions: 7 or 8 right of the 8 the sources can answer. The other two have no answer in any source, and every agent said so.
+- **OQ5.** On the fixture's chats, the skill put 66 of 70 ETD changes and all 15 container numbers on the right records. The pain question waits for a partner.
+- **What broke was skill text, never the kernel.** Each of the first three slices found a failure the one before hadn't, and the fourth, with every fix, found none. The fixes are in factstore-ecom-ops 0.2.1 and factstore-skills 0.1.1. They change skill text only.
+- **Design v0.5:**
+  - OQ2 resolved as identifiers and join keys only;
+  - a new OQ6, business time for backfilled history;
+  - stock at factories and in transit is derived;
+  - a proposed package for the sales side's identifiers.
+- **Recommendation: change, then go.** First:
+  - document dates (OQ6);
+  - the sales-side package;
+  - ecom-ops's stock attributes;
+  - the catalogue checking its own output.
+
+  Then run the slice on a partner's exports, at least twice.
+- **Against the risk table.**
+  - Trigram search never let a synonym of a package attribute through: everything registered was outside the packages.
+  - The chats were readable, apart from voice notes.
+  - Partner data was late, and M5 ran on the fixture.
 
 ## Partner track
 

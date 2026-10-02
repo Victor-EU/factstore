@@ -1,6 +1,6 @@
 {
   "name": "factstore-ecom-ops",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "doc": "Supply side of a brand that makes in China and sells online: suppliers, SKUs and their IDs in each system, purchase orders, inspections, shipments, customs entries and stock by location.",
   "depends_on": ["factstore-core"],
   "skills": ["ingest-documents/SKILL.md"],

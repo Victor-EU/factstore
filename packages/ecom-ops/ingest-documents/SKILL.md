@@ -55,10 +55,15 @@ You need:
    - the text of a message.
 
    If something matters and nothing in the vocabulary fits, don't register an attribute: list it in your report as a gap in the package.
-8. **Skip what you have read.** A document whose hash is in the store has been read already. Read it again only if asked.
-   ```sql
-   select count(*) from "core/evidence" ev join "document/hash" h on h.e = ev.v where h.v = '<sha256>'
-   ```
+8. **Skip what you have read.** A document has been read when the store holds the facts it gives, with the document as their evidence.
+   - Its hash being in the store isn't enough. Another skill may have cited it for less: the catalogue reads invoices for a product's item code and HS code, but not for the shipment.
+   - List what a document backs:
+     ```sql
+     select f.a, count(*) from facts f
+     join "core/evidence" ev on ev.e = f.tx join "document/hash" h on h.e = ev.v
+     where h.v = '<sha256>' group by 1
+     ```
+   - Read it again only if what it gives is missing, or if asked.
 
 ## Documents
 
@@ -97,7 +102,10 @@ The supplier confirms our PO. The PO is the one named "Your PO".
   - `po_line/sku`: the SKU, looked up by `factory/item_code` as `<supplier code>:<item no>`;
   - `po_line/quantity`;
   - `po_line/unit_price`.
-- **On the supplier,** as printed: `supplier/name_cn`, `supplier/address`, `supplier/incoterm`, `supplier/payment_terms`.
+- **On the supplier,** as printed: `supplier/name_cn`, `supplier/address`, `supplier/incoterm`, `supplier/payment_terms`. Also:
+  - `supplier/name`: the English legal name, capitalised as in the bank details ("Shenzhen Hetai Electric Appliance Co., Ltd."), not the letterhead's capitals;
+  - `supplier/currency`: the PI's currency;
+  - `supplier/port`: the UN/LOCODE of the price term's port (FOB Yantian is CNYTN).
 
 ### Commercial invoice and packing list (CI/PL)
 
@@ -128,6 +136,7 @@ Defect lists stay in the report.
 ### Supplier chat
 
 Most messages carry no facts. These do:
+- **A PO we sent** ("new PO PO-2026-0023 attached"): `po/placed_on`, the message's date in the export's time zone, and `po/supplier`, the supplier the chat is with.
 - **A new ETD for a PO:** `po/etd`.
   - Suppliers write dates in China time and without a year: "3/8" and "3月8号" are 8 March, in the next 8 March after the message.
   - The export's timestamps are in the exporter's time zone; the export header or the user tells you which.
