@@ -97,6 +97,14 @@ Orders cover the year to date. Purchasing history starts in July 2025.
 
 Every entity is addressed through an identity attribute, so loading twice creates no new entities. The purchasing history is replayed in order, so a second load re-records past status changes.
 
+Duplicate Shopify accounts get `core/same_as` pointing at the account they duplicate, as the catalogue skill would record after resolving them. Some form chains.
+
+The store stamps transactions with the time they are written, not the simulated time, so as-of reads cannot use simulated dates directly. `load(..., marks=[instant])` reports the last transaction written before each simulated instant.
+
+## The ten questions
+
+[questions.py](src/factstore_fixture/questions.py) holds the ten questions of build plan M0, an operator's questions about the supply side. Each comes with a reference answer, computed by a naive fold over the log, and reference SQL. The OQ1 spike chose the query language with them, and `tests/test_questions.py` answers them through `query`.
+
 The draft vocabulary ([vocabulary.py](src/factstore_fixture/vocabulary.py)) has 93 attributes. The kernel's near-match check flags 18 pairs, each declared with `distinct_from`. Some are real overlaps, such as `amazon/order_id` against `shopify/order_id`. Others are false positives from shared namespaces or templated docs, such as `sku/code` against `sku/hs_code`, and `qc/inspector` against `qc/inspected_on`.
 
 ## Assumptions and simplifications

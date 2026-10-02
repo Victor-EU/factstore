@@ -42,19 +42,32 @@ def init_store(admin_dsn: str, store: str) -> None:
             conn.execute(sql.SQL("create role {} nologin").format(sql.Identifier(role)))
         conn.execute(sql.SQL("create database {} owner {}").format(sql.Identifier(store), sql.Identifier(owner)))
 
-    schema = resources.files("factstore").joinpath("schema.sql").read_text()
-    for placeholder, value in (("__OWNER__", owner), ("__WRITER__", writer), ("__EXCISER__", exciser),
-                               ("__LOCK__", str(fs.WRITER_LOCK))):
-        schema = schema.replace(placeholder, value)
-
     with _connect(admin_dsn, store) as conn, conn.transaction(), conn.cursor() as cur:
         db = sql.Identifier(store)
         cur.execute(sql.SQL("revoke connect on database {} from public").format(db))
         cur.execute(sql.SQL("grant connect on database {} to {}, {}").format(
             db, sql.Identifier(writer), sql.Identifier(exciser)))
         cur.execute(sql.SQL("set local role {}").format(sql.Identifier(owner)))
-        cur.execute(schema)
+        cur.execute(_script("schema.sql", store))
+        cur.execute(_script("views.sql", store))
         _bootstrap(cur)
+
+
+def upgrade_views(admin_dsn: str, store: str) -> None:
+    """Rebuild the read-side views of an existing store from this version's views.sql."""
+    _check_name(store)
+    with _connect(admin_dsn, store) as conn, conn.transaction(), conn.cursor() as cur:
+        cur.execute(sql.SQL("set local role {}").format(sql.Identifier(roles(store)[0])))
+        cur.execute(_script("views.sql", store))
+
+
+def _script(name: str, store: str) -> str:
+    owner, writer, exciser = roles(store)
+    text = resources.files("factstore").joinpath(name).read_text()
+    for placeholder, value in (("__OWNER__", owner), ("__WRITER__", writer), ("__EXCISER__", exciser),
+                               ("__LOCK__", str(fs.WRITER_LOCK))):
+        text = text.replace(placeholder, value)
+    return text
 
 
 def create_actor(admin_dsn: str, store: str, name: str, *, excise: bool = False) -> Credential:

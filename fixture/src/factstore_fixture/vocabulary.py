@@ -171,7 +171,7 @@ SHAPES = {
     "Stock position": {"always": ["inventory/position", "inventory/sku", "inventory/location"],
                        "often": ["inventory/quantity", "inventory/counted_at"]},
     "Warehouse receipt": {"always": ["tpl/receipt_no", "receipt/shipment"]},
-    "Shopify customer": {"always": ["shopify/customer_id"]},
+    "Shopify customer": {"always": ["shopify/customer_id"], "often": ["core/same_as"]},
     "Shopify order": {"always": ["shopify/order_id", "order/customer"]},
     "Shopify order line": {"always": ["shopify/line_item_id", "core/part_of", "line/sku"]},
     "Amazon order": {"always": ["amazon/order_id"]},

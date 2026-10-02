@@ -1,7 +1,4 @@
-"""The store and its calls: transact, register_attribute, search_attributes, excise.
-
-query and stats arrive in M2.
-"""
+"""The store and its calls: transact, query, stats, register_attribute, search_attributes, excise."""
 
 import re
 from dataclasses import dataclass, field
@@ -9,7 +6,7 @@ from datetime import datetime
 
 import psycopg
 
-from . import fs, kernel, values
+from . import fs, kernel, read, stats as stats_, values
 from .errors import ExcisionError, PermissionDenied, RegistrationRefused, TransactError
 from .kernel import Attr, Change
 
@@ -77,15 +74,27 @@ class RegisterResult:
 
 
 def connect(dsn: str) -> "Store":
-    return Store(psycopg.connect(dsn, autocommit=True))
+    return Store(psycopg.connect(dsn, autocommit=True), dsn=dsn)
 
 
 class Store:
-    def __init__(self, conn: psycopg.Connection):
+    def __init__(self, conn: psycopg.Connection, dsn: str | None = None):
         self.conn = conn
+        self._dsn = dsn
+        self._reader: psycopg.Connection | None = None
 
     def close(self) -> None:
+        if self._reader is not None:
+            self._reader.close()
         self.conn.close()
+
+    def reader(self) -> psycopg.Connection:
+        """The connection reads run on: separate from writes, so a read can never write."""
+        if self._reader is None or self._reader.closed:
+            if self._dsn is None:
+                raise read.QueryError("this Store was built from a connection; use factstore.connect(dsn) to query")
+            self._reader = psycopg.connect(self._dsn, autocommit=True)
+        return self._reader
 
     def __enter__(self):
         return self
@@ -107,6 +116,20 @@ class Store:
         with self.conn.transaction(), self.conn.cursor() as cur:
             kernel.lock(cur)
             return _register(cur, kernel.load_schema(cur), specs)
+
+    def query(self, sql: str, *, as_of=None, max_rows: int = read.MAX_ROWS) -> read.QueryResult:
+        """One read-only SQL statement over the attribute views. See tools.QUERY."""
+        if not isinstance(sql, str):
+            raise TypeError("sql must be a string")
+        return read.execute(self.reader(), sql, as_of=as_of, max_rows=max_rows)
+
+    def stats(self, *, namespaces: list[str] | None = None, limit: int = stats_.DEFAULT_LIMIT,
+              include_kernel: bool = False) -> stats_.Stats:
+        """Attribute usage, signatures (co-occurrence) and ref connectivity over current state.
+        See tools.STATS."""
+        with self.conn.transaction(), self.conn.cursor() as cur:
+            return stats_.collect(cur, kernel.load_schema(cur), namespaces=namespaces, limit=limit,
+                                  include_kernel=include_kernel)
 
     def search_attributes(self, text: str, *, limit: int = 10) -> list[Attribute]:
         """Registered attributes whose name or doc resembles `text`, best first."""
@@ -724,14 +747,16 @@ def _near_matches(cur, new: list[_Spec], batch: dict[str, _Spec]) -> dict[str, l
         select n_ident, c_ident, c_doc,
                greatest(word_similarity(n_name, c_name), word_similarity(c_name, n_name)),
                similarity(lower(n_doc), lower(c_doc)),
-               split_part(n_ident, '/', 1) = split_part(c_ident, '/', 1)
+               split_part(n_ident, '/', 1) = split_part(c_ident, '/', 1),
+               string_to_array(split_part(c_ident, '/', 2), '_') <@ string_to_array(split_part(n_ident, '/', 2), '_')
+                 or string_to_array(split_part(n_ident, '/', 2), '_') <@ string_to_array(split_part(c_ident, '/', 2), '_')
         from named
         """,
         ([s.ident for s in new], [s.doc for s in new]),
     )
     refused: dict[str, list[NearMatch]] = {}
-    for ident, other, doc, name_sim, doc_sim, same_namespace in cur.fetchall():
-        if not _is_near(name_sim, doc_sim, same_namespace):
+    for ident, other, doc, name_sim, doc_sim, same_namespace, nested in cur.fetchall():
+        if not _is_near(name_sim, doc_sim, same_namespace, nested):
             continue
         if other in batch[ident].distinct_from or (other in batch and ident in batch[other].distinct_from):
             continue
@@ -739,7 +764,12 @@ def _near_matches(cur, new: list[_Spec], batch: dict[str, _Spec]) -> dict[str, l
     return refused
 
 
-def _is_near(name_sim: float, doc_sim: float, same_namespace: bool) -> bool:
+def _is_near(name_sim: float, doc_sim: float, same_namespace: bool, nested: bool) -> bool:
     if name_sim >= NEAR_NAME and (same_namespace or doc_sim >= NEAR_NAME_DOC):
+        return True
+    # One name's words inside the other's, in one namespace: po/revised_etd against po/etd. Trigrams
+    # miss these when the extra words are long, and they are how a new version of a value gets
+    # registered as a new attribute instead of asserted on the old one.
+    if same_namespace and nested:
         return True
     return doc_sim >= NEAR_DOC

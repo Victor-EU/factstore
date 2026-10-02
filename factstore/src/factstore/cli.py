@@ -26,6 +26,9 @@ def main(argv: list[str] | None = None) -> int:
     credential.add_argument("actor", type=int)
     credential.add_argument("--excise", action="store_true")
 
+    upgrade = commands.add_parser("upgrade", help="rebuild a store's read-side views from this version")
+    upgrade.add_argument("store")
+
     drop = commands.add_parser("drop", help="drop a store and its roles, irreversibly")
     drop.add_argument("store")
     drop.add_argument("--yes", action="store_true", help="confirm")
@@ -43,6 +46,9 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "credential":
         cred = admin.create_credential(args.admin_dsn, args.store, args.actor, excise=args.excise)
         print(cred.dsn)
+    elif args.command == "upgrade":
+        admin.upgrade_views(args.admin_dsn, args.store)
+        print(f"rebuilt the views of {args.store}")
     elif args.command == "drop":
         if not args.yes:
             parser.error(f"dropping {args.store} deletes it permanently; add --yes to confirm")

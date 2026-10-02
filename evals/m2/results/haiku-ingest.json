@@ -1,0 +1,60 @@
+{
+ "model": "haiku",
+ "expected": 46,
+ "present": 44,
+ "missing": [
+  {
+   "entity": [
+    "po/number",
+    "PO-2026-0030"
+   ],
+   "attribute": "po/status",
+   "expected": "confirmed",
+   "got": [],
+   "ok": false
+  },
+  {
+   "entity": [
+    "shipment/booking_no",
+    "PBLXMN2610032"
+   ],
+   "attribute": "shipment/status",
+   "expected": "booked",
+   "got": [],
+   "ok": false
+  }
+ ],
+ "new_attributes": [
+  "event/message",
+  "po/pi_amount",
+  "po/pi_issued_on",
+  "po/pi_payment_terms"
+ ],
+ "registered_with_distinct_from": [
+  "po/pi_payment_terms"
+ ],
+ "lines_booked_twice": [
+  [
+   "PO-2026-0023/1",
+   2
+  ],
+  [
+   "PO-2026-0023/2",
+   2
+  ],
+  [
+   "PO-2026-0023/3",
+   2
+  ],
+  [
+   "PO-2026-0023/4",
+   2
+  ]
+ ],
+ "agent_transactions": 3,
+ "turns": 24,
+ "tool_calls": 23,
+ "cost_usd": 0.16802850000000003,
+ "wall_seconds": 138,
+ "final": "Perfect! I've successfully recorded all the supply chain events in the factstore for October 1, 2026. Here's a summary of what was recorded:\n\n## 1. **PO-2026-0030** (New Order)\n- **Buyer:** Acme Hearth LLC\n- **Supplier:** Ningbo Mingtu Housewares (NBBW)\n- **Placed:** 2026-10-01 09:12\n- **Currency:** USD\n- **Lines:**\n  - AH-KTL-0001-SGE: 600 units @ $11.20 (Enamel Stovetop Kettle)\n  - AH-CSR-0003-RED: 300 units @ $16.50 (Enamel Casserole)\n- **Proforma Invoice:** MT261001-08\n  - Issued: 2026-10-01\n  - Total: $11,670.00\n  - Payment terms: 30% deposit, 70% before shipment\n  - Shipment: FOB Ningbo, ETD 2026-11-25\n\n## 2. **PO-2026-0025** (Updated)\n- **ETD postponed** from 2026-10-20 \u2192 **2026-10-27**\n- **Message recorded:** WeChat from \u738b\u7ecf\u7406 (Manager Wang, DGRF) - \"Glaze arrived late; delivery date postponed to 10/27, sorry!\"\n\n## 3. **PO-2026-0023** (QC Inspection)\n- **Inspection Report:** LCI-261001-047\n  - Date: 2026-10-01\n  - Supplier: Xiamen Yuanda Bamboo Products Co., Ltd.\n  - Sample size: 200\n  - **Result: PASS**\n\n## 4. **PO-2026-0023** (Shipment Booking)\n- **Amended booking:** PBLXMN2610032 (was LCL, now dedicated 20GP)\n- **Previous booking:** PBLXMN2609032\n- **HBL:** PBLHB2600032\n- **Route:** Xiamen \u2192 New York\n- **Vessel:** MV Coral Meridian 112E\n- **ETD:** 2026-10-09 18:00 (UTC+8)\n- **ETA:** 2026-11-12 08:00 (UTC-5)\n- **Ocean freight:** $2,850.00\n- **Container:** 1x 20GP\n- **Cargo breakdown:** 4 lines totaling 2,584 pcs in 164 cartons\n\nAll transactions have been timestamped and linked to the user's account (victor.zhang.eu@gmail.com)."
+}

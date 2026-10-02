@@ -4,3 +4,8 @@ __pycache__/
 .pytest_cache/
 .hypothesis/
 bench/*.log
+bench/*_store*.json
+bench/fs_*.json
+spike/oq1/cache/
+spike/oq1/store.json
+evals/m2/*.log

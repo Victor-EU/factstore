@@ -1,0 +1,82 @@
+{
+ "model": "haiku",
+ "expected": 46,
+ "present": 42,
+ "missing": [
+  {
+   "entity": [
+    "po/number",
+    "PO-2026-0030"
+   ],
+   "attribute": "po/placed_on",
+   "expected": "2026-10-01",
+   "got": [],
+   "ok": false
+  },
+  {
+   "entity": [
+    "po/number",
+    "PO-2026-0030"
+   ],
+   "attribute": "po/status",
+   "expected": "confirmed",
+   "got": [
+    "sent"
+   ],
+   "ok": false
+  },
+  {
+   "entity": [
+    "po/number",
+    "PO-2026-0025"
+   ],
+   "attribute": "po/etd",
+   "expected": "2026-10-27",
+   "got": [
+    "2026-10-20"
+   ],
+   "ok": false
+  },
+  {
+   "entity": [
+    "shipment/booking_no",
+    "PBLXMN2610032"
+   ],
+   "attribute": "shipment/mode",
+   "expected": "20GP",
+   "got": [
+    "FCL"
+   ],
+   "ok": false
+  }
+ ],
+ "new_attributes": [
+  "po/invoice_total",
+  "po/revised_etd",
+  "shipment/previous_booking"
+ ],
+ "registered_with_distinct_from": [],
+ "lines_booked_twice": [
+  [
+   "PO-2026-0023/1",
+   2
+  ],
+  [
+   "PO-2026-0023/2",
+   2
+  ],
+  [
+   "PO-2026-0023/3",
+   2
+  ],
+  [
+   "PO-2026-0023/4",
+   2
+  ]
+ ],
+ "agent_transactions": 2,
+ "turns": 26,
+ "cost_usd": 0.14418150000000002,
+ "wall_seconds": 108,
+ "final": "Perfect! I've successfully recorded all the supply chain information in the factstore. Here's a summary of what was captured:\n\n## Recorded Events (2026-10-01):\n\n### 1. **PO-2026-0030** (New Order - from Lisa & Mingtu)\n- **Supplier**: Ningbo Mingtu Housewares (NBBW)\n- **Status**: Sent\n- **Proforma Invoice**: MT261001-08\n- **Total**: USD 11,670.00\n- **ETD**: 2026-11-25 (FOB Ningbo)\n- **Payment Terms**: 30% deposit, 70% before shipment\n- **Line Items**:\n  - 600\u00d7 Enamel Stovetop Kettle 2.5L, Sage @ USD 11.20 = USD 6,720\n  - 300\u00d7 Enamel Casserole 24cm, Red @ USD 16.50 = USD 4,950\n\n### 2. **PO-2026-0025** (Delivery Delay - WeChat)\n- **Updated ETD**: Pushed from 2026-10-20 \u2192 **2026-10-27**\n- **Reason**: Glaze (coating material) delivery was delayed\n- **Supplier**: Dongguan (DGRF)\n\n### 3. **PO-2026-0023** (Inspection Complete - Linkcheck)\n- **Report**: LCI-261001-047\n- **Supplier**: Xiamen Yuanda Bamboo Products Co., Ltd.\n- **Result**: \u2705 PASS\n- **Sample Size**: 200 units\n- **Inspection Level**: II, AQL 2.5/4.0\n\n### 4. **Shipment for PO-2026-0023** (Booking Amendment)\n- **Old Booking**: PBLXMN2609032 (LCL) \u2192 **New: PBLXMN2610032** (20GP FCL)\n- **HBL**: PBLHB2600032\n- **Vessel**: MV Coral Meridian 112E\n- **ETD**: 2026-10-09 18:00 UTC+8 (Xiamen)\n- **ETA**: 2026-11-12 08:00 UTC-5 (New York)\n- **Ocean Freight**: USD 2,850.00\n- **Cargo**: 4 lines totaling 2,584 pcs in 164 cartons\n\nAll facts have been recorded with full provenance tracking (actor, timestamp, transaction ID 170148)."
+}

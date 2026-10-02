@@ -1,0 +1,15 @@
+{
+ "model": "sonnet",
+ "expected": 46,
+ "present": 46,
+ "missing": [],
+ "new_attributes": [],
+ "registered_with_distinct_from": [],
+ "lines_booked_twice": [],
+ "agent_transactions": 4,
+ "turns": 16,
+ "tool_calls": 15,
+ "cost_usd": 0.1582934,
+ "wall_seconds": 38,
+ "final": "All five items are recorded in the store.\n\n1. **PO-2026-0030 (Lisa's message and Mingtu's proforma invoice):** I created the PO for NBBW in USD, placed 2026-10-01.\n   - Line 1 is AH-KTL-0001-SGE, 600 pcs at 11.20. Line 2 is AH-CSR-0003-RED, 300 pcs at 16.50.\n   - The proforma invoice number is MT261001-08 and the ETD is 2026-11-25.\n   - I set the status to `confirmed`, because the proforma invoice has arrived. That matches how PO-2026-0029 is recorded.\n   - The unit prices match what NBBW charged on earlier POs, and the total works out to 11,670.00.\n   - The payment terms (30% deposit, 70% before shipment) were already on the supplier record, so I didn't store them again.\n2. **PO-2026-0025 (DGRF's WeChat message):** the ETD moved from 2026-10-20 to 2026-10-27.\n3. **PO-2026-0023 inspection:** I added report LCI-261001-047 (Linkcheck Inspection Services, 2026-10-01, sample size 200, PASS).\n   - The store has no field for the inspection level or AQL, so those two values are not recorded.\n   - The PO already had an earlier PASS report, LCI-260923-046 from 2026-09-23. I kept both, since this is a separate report.\n4. **Booking amendment for PO-2026-0023:** I updated the existing shipment record (the old LCL booking) rather than creating a new one.\n   - The booking number is now PBLXMN2610032 and the mode is 20GP. The vessel is MV Coral Meridian 112E and freight is USD 2,850.00.\n   - The ETD is 2026-10-09 18:00 +08:00 and the ETA is 2026-11-12 08:00 -05:00. The HBL stays PBLHB2600032, as in the amendment.\n   - Carton counts are now 55, 55, 32 and 22 for lines 1 to 4. Lines 1 and 4 changed from 33 and 11.\n   - The piece quantities already matched, and the shipment line keys now use the new booking number.\n   - There is no container number yet, so I left it empty.\n\nThe old values (LCL booking, ETD, ETA, freight and so on) are still in the store's history."
+}

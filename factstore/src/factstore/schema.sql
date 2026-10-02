@@ -74,6 +74,7 @@ create table cur (
 );
 create index cur_ea on cur (e, a);
 create index cur_avet_string on cur (a, left(v_string, 200)) where v_string is not null;
+create index cur_v_string on cur using hash (v_string) where v_string is not null; -- equality, any length
 create index cur_avet_decimal on cur (a, v_decimal) where v_decimal is not null;
 create index cur_avet_date on cur (a, v_date) where v_date is not null;
 create index cur_avet_instant on cur (a, v_instant) where v_instant is not null;
@@ -243,3 +244,5 @@ grant insert, update on attr to __WRITER__;
 grant insert, delete on cur, ident to __WRITER__;
 grant usage on sequence entity_seq to __WRITER__;
 grant execute on function fs_excise(bigint, bigint[]) to __EXCISER__;
+
+-- The read side (schemas current, asof and history) is in views.sql, applied after this file.

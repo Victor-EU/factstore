@@ -33,19 +33,30 @@ class LoadStats:
     orders: int = 0
     unchanged: int = 0
     timings: list = field(default_factory=list)
+    marks: dict = field(default_factory=dict)
 
 
 def load(store: Store, sim: Simulation, *, batch: int = 200, records: bool = True, sales: bool = True,
-         max_orders: int | None = None, progress=None) -> LoadStats:
+         max_orders: int | None = None, marks=(), progress=None) -> LoadStats:
     """Write the simulation into `store`. `records` covers master data and the supply-side history,
-    `sales` this year's orders, `batch` orders to a transaction."""
+    `sales` this year's orders, `batch` orders to a transaction.
+
+    The store stamps each transaction with the time it was written, not the simulated time, so
+    `marks` (simulated instants) are reported in `stats.marks` as the last transaction written
+    before each: what as-of reads use instead."""
     stats = LoadStats()
     started = time.perf_counter()
     if records:
         store.register_attribute(ALL)
         _write(store, stats, _master_data(sim))
+    marks = sorted(marks)
     pending: list[dict] = []
     for item in sim.run():
+        while marks and _when(item) >= marks[0]:
+            if pending:
+                _write(store, stats, pending, sales=True)
+                pending = []
+            stats.marks[marks.pop(0)] = _last_tx(store)
         if isinstance(item, Event):
             if records:
                 _write(store, stats, _event_facts(item))
@@ -102,9 +113,16 @@ def _write(store: Store, stats: LoadStats, facts: list[dict], *, sales: bool = F
         stats.timings.append((len(result.facts), elapsed))
 
 
+def _when(item):
+    return item.at if isinstance(item, Event) else item.created if isinstance(item, ShopifyOrder) else item.purchased
+
+
 def _this_year(order) -> bool:
-    when = order.created if isinstance(order, ShopifyOrder) else order.purchased
-    return when.astimezone(US_EAST).date() >= YEAR_START
+    return _when(order).astimezone(US_EAST).date() >= YEAR_START
+
+
+def _last_tx(store: Store) -> int:
+    return store.conn.execute("select max(id) from tx").fetchone()[0]
 
 
 def f(e, a, v):
@@ -226,7 +244,10 @@ def _event_facts(event: Event) -> list[dict]:
 def _order_facts(order) -> list[dict]:
     if isinstance(order, ShopifyOrder):
         e = ["shopify/order_id", str(order.id)]
-        facts = [f(e, "order/customer", ["shopify/customer_id", str(order.customer.id)])]
+        customer = ["shopify/customer_id", str(order.customer.id)]
+        facts = [f(e, "order/customer", customer)]
+        if order.customer.duplicate_of:  # the catalogue's identity resolution, done perfectly
+            facts.append(f(customer, "core/same_as", ["shopify/customer_id", str(order.customer.duplicate_of)]))
         for line in order.lines:
             ln = ["shopify/line_item_id", str(line.id)]
             facts += [f(ln, "core/part_of", e), f(ln, "line/sku", sku_ref(line.sku))]

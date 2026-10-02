@@ -74,7 +74,7 @@ That is the whole structure. Entities and relationships (aim 3) require nothing 
 | Call | Does |
 |---|---|
 | `transact` | Submit assertions and retractions as one transaction. Validates value types, cardinality and uniqueness. Temporary IDs (`"tmp:order"`) let new entities in the same call refer to each other — an order and its line items in one write — and the kernel returns the mapping to real IDs. A lookup (`["shopify/order_id", "1234"]`) addresses an entity by an identity attribute and creates it if absent, so re-running an ingestion updates instead of duplicating. Returns what was accepted. `dry_run: true` reports what would happen without writing, including attributes that would need registering. |
-| `query` | Facts, entities and traversals over refs, current state by default, with as-of (a transaction or a time). Language: open question 1. |
+| `query` | Facts, entities and traversals over refs, current state by default, with as-of (a transaction or a time). One read-only SQL statement over a view per attribute (§5). |
 | `stats` | Attribute usage counts, co-occurrence of attributes on entities, and which attribute groups are connected by which refs. The raw material an agent reads to describe the ontology. |
 
 Plus attribute registration (`search_attributes`, then `register_attribute`, which takes a batch so a package installs in one transaction) and `excise` (§3), which needs its own credential. Delivered as one MCP server (`factstore`) and a thin SDK (`import factstore`), with documentation written for models first.
@@ -105,6 +105,7 @@ Postgres. Four indexes — by entity, by attribute, by value, by transaction. Bo
 
 - **Writes are serialized.** One writer at a time (an advisory lock around `transact`), with the transaction ID assigned inside it. Postgres sequences hand out numbers before commit, so without this, transaction 101 can commit before 100 and an as-of query returns different answers over time. At this scale a single writer costs nothing.
 - **A current-state table** — the current values per entity and attribute — is updated in the same database transaction as the log. The log stays the source of truth. The table exists because filtering on several attributes over raw fact rows is where key-value storage in Postgres gets slow.
+- **Reads are SQL over views.** Every attribute is a view named after it: `"po/status"(e, v, tx)` for current state, and `history."po/status"(e, v, tx, op)` for every fact in the log. Registration creates the views. An as-of read resolves the same names to a fold of the log up to one transaction. `query` runs one statement in a read-only transaction that is always rolled back.
 
 A company whose fact log outgrows a single Postgres exports it to a real data platform; that is a feature, not a goal.
 
@@ -220,11 +221,18 @@ With only Part I–III built: the catalogue skill maps the sales side and the SK
 Each per-source SKU ID is an identity attribute. HS code is not — many SKUs share one — and factory codes are unique only within a factory (open question 4).
 
 ## 15. Open questions
-1. **Query language.** Datalog, SQL over views of the current-state table and the log (as-of needs the log), or a JSON pattern language. It decides what "documentation written for models first" looks like, and is the largest API decision left.
+1. *Resolved after v0.4, below.*
 2. **What the index holds.** Identifiers and join keys only — always fresh, but queries call the source live — or copied fields: fast, but stale and full of personal data. Settle before the catalogue SKILL.md.
 3. **Excision and backups.** Deleting from the log does not reach backups or exports. Crypto-shredding (personal values encrypted with a key per entity; excision deletes the key) does, at the cost of a key store. Nor does excision stop re-ingestion: if the person is still in Shopify, the next catalogue run brings them back. Either the excision record keeps the source identifier and the catalogue skill skips anything it lists — retaining an identifier for a deleted person — or excision is also carried out in the source system, which the kernel cannot do itself.
 4. **Composite identity.** Factory codes are unique only within a factory. Compound identity attributes, or one namespace per factory?
 5. Is the e-commerce supply-side pain sharp enough to pay for before agents read WeChat reliably? The first slice now tests this (§18).
+
+**Resolved after v0.4**
+- *Query language (open question 1):* SQL over views of the current-state table and the log (§5). Decided by the M0 spike ([spike/oq1](spike/oq1/README.md)). Fresh agents with Haiku, Sonnet and Opus answered the ten questions from a one-page doc per language:
+  - SQL and Datalog got 29 of 30 right, and JSON patterns 28.
+  - Datalog's miss was a silently wrong total, from Datomic's set semantics.
+  - SQL needed the fewest queries and runs on Postgres as written.
+  - Datalog is the runner-up.
 
 **Resolved in v0.4**
 - *Who may register attributes:* anyone with a credential, including builders' coding agents, through `register_attribute` and `distinct_from` (§1). Humans and packages only would stall the agent-first distribution.

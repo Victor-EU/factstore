@@ -63,6 +63,11 @@ def test_near_matches_inside_one_batch_need_distinct_from(store):
     (("customer/name", "Full name of a customer."), ("supplier/name", "Legal name of a supplier company."), False),
     (("shipment/status", "Where a shipment is: booked, at sea, at port, delivered."),
      ("po/status", "Where a purchase order is: draft, sent, confirmed, shipped, closed."), False),
+    # A new version of a value registered as a new attribute (Haiku did this in the M2 fresh-agent test).
+    (("po/etd", "Date the supplier's goods leave port: the latest promise until they sail, then the actual date."),
+     ("po/revised_etd", "Revised estimated time of departure after a supplier delay."), True),
+    (("shipment/booking_no", "Forwarder's booking (SO) number for an ocean shipment."),
+     ("shipment/container_no", "ISO 6346 number of the container a shipment travels in."), False),
 ])
 def test_near_match_calibration(store, existing, new, near):
     store.register_attribute(attr(existing[0], "string", doc=existing[1]))

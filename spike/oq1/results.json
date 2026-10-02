@@ -1,0 +1,72 @@
+[
+ {
+  "agent": "datalog-haiku",
+  "right": 9,
+  "wrong": [
+   7
+  ],
+  "queries": 36,
+  "errors": 4
+ },
+ {
+  "agent": "datalog-opus",
+  "right": 10,
+  "wrong": [],
+  "queries": 38,
+  "errors": 0
+ },
+ {
+  "agent": "datalog-sonnet",
+  "right": 10,
+  "wrong": [],
+  "queries": 24,
+  "errors": 0
+ },
+ {
+  "agent": "json-haiku",
+  "right": 8,
+  "wrong": [
+   6,
+   8
+  ],
+  "queries": 29,
+  "errors": 11
+ },
+ {
+  "agent": "json-opus",
+  "right": 10,
+  "wrong": [],
+  "queries": 54,
+  "errors": 0
+ },
+ {
+  "agent": "json-sonnet",
+  "right": 10,
+  "wrong": [],
+  "queries": 27,
+  "errors": 0
+ },
+ {
+  "agent": "sql-haiku",
+  "right": 9,
+  "wrong": [
+   8
+  ],
+  "queries": 22,
+  "errors": 3
+ },
+ {
+  "agent": "sql-opus",
+  "right": 10,
+  "wrong": [],
+  "queries": 31,
+  "errors": 0
+ },
+ {
+  "agent": "sql-sonnet",
+  "right": 10,
+  "wrong": [],
+  "queries": 28,
+  "errors": 0
+ }
+]

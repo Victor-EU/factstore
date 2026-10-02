@@ -10,12 +10,13 @@ factstore.connect(dsn) and call the same methods on the Store it returns.
 import os
 
 from .errors import ExcisionError, FactstoreError, PermissionDenied, RegistrationRefused, TransactError
+from .read import QueryError, QueryResult
 from .store import Attribute, Fact, NearMatch, RegisterResult, Store, TransactResult, connect
 
 __all__ = [
-    "Attribute", "ExcisionError", "Fact", "FactstoreError", "NearMatch", "PermissionDenied",
-    "RegisterResult", "RegistrationRefused", "Store", "TransactError", "TransactResult",
-    "connect", "excise", "register_attribute", "search_attributes", "transact",
+    "Attribute", "ExcisionError", "Fact", "FactstoreError", "NearMatch", "PermissionDenied", "QueryError",
+    "QueryResult", "RegisterResult", "RegistrationRefused", "Store", "TransactError", "TransactResult",
+    "connect", "excise", "query", "register_attribute", "search_attributes", "stats", "transact",
 ]
 
 _default: Store | None = None
@@ -33,6 +34,14 @@ def _store() -> Store:
 
 def transact(facts: list[dict], *, dry_run: bool = False) -> TransactResult:
     return _store().transact(facts, dry_run=dry_run)
+
+
+def query(sql: str, *, as_of=None):
+    return _store().query(sql, as_of=as_of)
+
+
+def stats(*, namespaces: list[str] | None = None, limit: int = 50, include_kernel: bool = False):
+    return _store().stats(namespaces=namespaces, limit=limit, include_kernel=include_kernel)
 
 
 def register_attribute(specs: dict | list[dict]) -> RegisterResult:

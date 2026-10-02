@@ -1,0 +1,207 @@
+{
+ "model": "sonnet",
+ "right": 10,
+ "wrong": [],
+ "answers": {
+  "1": [
+   [
+    "PBLNGB2609031",
+    "departed",
+    "2026-10-23T09:00:00+00:00",
+    "2892"
+   ]
+  ],
+  "2": [
+   [
+    "PO-2025-0143",
+    "2025-12-05",
+    "2025-12-19"
+   ],
+   [
+    "PO-2025-0151",
+    "2026-01-22",
+    "2026-01-25"
+   ],
+   [
+    "PO-2025-0159",
+    "2026-03-21",
+    "2026-03-27"
+   ],
+   [
+    "PO-2026-0007",
+    "2026-06-01",
+    "2026-06-05"
+   ],
+   [
+    "PO-2026-0012",
+    "2026-07-07",
+    "2026-07-10"
+   ],
+   [
+    "PO-2026-0020",
+    "2026-09-12",
+    "2026-09-18"
+   ]
+  ],
+  "3": [
+   [
+    "PBLNGB2605021",
+    "departed",
+    "2026-07-03T09:00:00+00:00"
+   ],
+   [
+    "PBLNGB2606023",
+    "departed",
+    "2026-07-09T14:00:00+00:00"
+   ],
+   [
+    "PBLNGB2606025",
+    "departed",
+    "2026-07-31T10:00:00+00:00"
+   ],
+   [
+    "PBLNSA2606024",
+    "departed",
+    "2026-07-29T10:00:00+00:00"
+   ],
+   [
+    "PBLYTN2606022",
+    "departed",
+    "2026-07-05T13:00:00+00:00"
+   ]
+  ],
+  "4": [
+   [
+    "8",
+    "210772.93",
+    "69713.56",
+    "993.58"
+   ]
+  ],
+  "5": [
+   [
+    "DGRF",
+    "PASS",
+    "3"
+   ],
+   [
+    "FSMJ",
+    "PASS",
+    "4"
+   ],
+   [
+    "HZTY",
+    "FAIL",
+    "1"
+   ],
+   [
+    "HZTY",
+    "PASS",
+    "3"
+   ],
+   [
+    "NBBW",
+    "PASS",
+    "5"
+   ],
+   [
+    "NBQS",
+    "PASS",
+    "4"
+   ],
+   [
+    "SZHT",
+    "PASS",
+    "4"
+   ],
+   [
+    "XMYD",
+    "PASS",
+    "4"
+   ],
+   [
+    "YWLX",
+    "FAIL",
+    "1"
+   ],
+   [
+    "YWLX",
+    "PASS",
+    "4"
+   ]
+  ],
+  "6": [
+   [
+    "AH-MIT-0009-NAT",
+    "44120708296354",
+    "X009X2DSQB",
+    "AH-MIT-0009-NAT",
+    "ACMH-10161",
+    "YWLX:106",
+    "YWLX"
+   ]
+  ],
+  "7": [
+   [
+    "DGRF",
+    "USD",
+    "17800.80"
+   ],
+   [
+    "NBBW",
+    "USD",
+    "50301.60"
+   ],
+   [
+    "NBQS",
+    "USD",
+    "38312.08"
+   ],
+   [
+    "SZHT",
+    "USD",
+    "21566.88"
+   ],
+   [
+    "XMYD",
+    "USD",
+    "26875.20"
+   ],
+   [
+    "YWLX",
+    "CNY",
+    "93063.20"
+   ]
+  ],
+  "8": [
+   [
+    "3",
+    "6"
+   ]
+  ],
+  "9": [
+   [
+    "fixture loader",
+    "154906",
+    "2026-10-02T07:33:28.684040+00:00"
+   ]
+  ],
+  "10": [
+   [
+    "FAC-YWLX",
+    "factory",
+    "1560"
+   ],
+   [
+    "OCEAN",
+    "in_transit",
+    "2520"
+   ]
+  ]
+ },
+ "turns": 14,
+ "tool_calls": 13,
+ "cost_usd": 0.132016,
+ "wall_seconds": 30,
+ "final": "Answers to the ten questions follow. The JSON block at the end carries the same rows.\n\n1. One shipment carries SKU AH-KTL-0001-BLK in transit: booking PBLNGB2609031, departed, ETA 2026-10-23 09:00 UTC, 2,892 units.\n2. Six of NBBW's POs now have a later ETD than the first one recorded. PO-2026-0024 is unchanged, so I left it out.\n3. As of transaction 103813, five shipments were departed or arrived. All five were departed, and none were arrived.\n4. Eight customs entries were filed from 1 April to 30 June 2026. Entered value totals 210,772.93, duty 69,713.56 and fees 993.58.\n5. Of the 2026 inspections, all passed except one each at HZTY and YWLX.\n6. ASIN B0BVUGZ3AT is SKU AH-MIT-0009-NAT, made by YWLX.\n7. Open PO value is in USD for every supplier except YWLX, which is in CNY. HZTY has no open POs.\n8. The person behind that Shopify customer has 3 accounts and 6 orders, counting accounts linked through core/same_as.\n9. PO-2026-0023's current ETD was recorded by \"fixture loader\" in transaction 154906, at 2026-10-02 07:33:28 UTC.\n10. SKU AH-TWL-0007-NAT was last counted on 2026-10-01 at 04:00 UTC: 1,560 units at the factory location FAC-YWLX and 2,520 at the in_transit location OCEAN.\n\n```json\n{\"answers\": [\n{\"question\":1,\"rows\":[[\"PBLNGB2609031\",\"departed\",\"2026-10-23T09:00:00+00:00\",\"2892\"]]},\n{\"question\":2,\"rows\":[[\"PO-2025-0143\",\"2025-12-05\",\"2025-12-19\"],[\"PO-2025-0151\",\"2026-01-22\",\"2026-01-25\"],[\"PO-2025-0159\",\"2026-03-21\",\"2026-03-27\"],[\"PO-2026-0007\",\"2026-06-01\",\"2026-06-05\"],[\"PO-2026-0012\",\"2026-07-07\",\"2026-07-10\"],[\"PO-2026-0020\",\"2026-09-12\",\"2026-09-18\"]]},\n{\"question\":3,\"rows\":[[\"PBLNGB2605021\",\"departed\",\"2026-07-03T09:00:00+00:00\"],[\"PBLNGB2606023\",\"departed\",\"2026-07-09T14:00:00+00:00\"],[\"PBLNGB2606025\",\"departed\",\"2026-07-31T10:00:00+00:00\"],[\"PBLNSA2606024\",\"departed\",\"2026-07-29T10:00:00+00:00\"],[\"PBLYTN2606022\",\"departed\",\"2026-07-05T13:00:00+00:00\"]]},\n{\"question\":4,\"rows\":[[\"8\",\"210772.93\",\"69713.56\",\"993.58\"]]},\n{\"question\":5,\"rows\":[[\"DGRF\",\"PASS\",\"3\"],[\"FSMJ\",\"PASS\",\"4\"],[\"HZTY\",\"FAIL\",\"1\"],[\"HZTY\",\"PASS\",\"3\"],[\"NBBW\",\"PASS\",\"5\"],[\"NBQS\",\"PASS\",\"4\"],[\"SZHT\",\"PASS\",\"4\"],[\"XMYD\",\"PASS\",\"4\"],[\"YWLX\",\"FAIL\",\"1\"],[\"YWLX\",\"PASS\",\"4\"]]},\n{\"question\":6,\"rows\":[[\"AH-MIT-0009-NAT\",\"44120708296354\",\"X009X2DSQB\",\"AH-MIT-0009-NAT\",\"ACMH-10161\",\"YWLX:106\",\"YWLX\"]]},\n{\"question\":7,\"rows\":[[\"DGRF\",\"USD\",\"17800.80\"],[\"NBBW\",\"USD\",\"50301.60\"],[\"NBQS\",\"USD\",\"38312.08\"],[\"SZHT\",\"USD\",\"21566.88\"],[\"XMYD\",\"USD\",\"26875.20\"],[\"YWLX\",\"CNY\",\"93063.20\"]]},\n{\"question\":8,\"rows\":[[\"3\",\"6\"]]},\n{\"question\":9,\"rows\":[[\"fixture loader\",\"154906\",\"2026-10-02T07:33:28.684040+00:00\"]]},\n{\"question\":10,\"rows\":[[\"FAC-YWLX\",\"factory\",\"1560\"],[\"OCEAN\",\"in_transit\",\"2520\"]]}\n]}\n```"
+}

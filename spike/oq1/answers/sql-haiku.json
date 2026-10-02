@@ -1,0 +1,98 @@
+{
+  "answers": [
+    {
+      "question": 1,
+      "rows": [["PBLNGB2609031", "departed", "2026-10-23T09:00:00Z", "2892"]],
+      "query": "select sb.v as booking_number, ss.v as status, se.v as eta, sum(sq.v) as units from \"sku/code\" sc join \"po_line/sku\" ps on ps.v = sc.e join \"shipment_line/po_line\" spl on spl.v = ps.e join \"core/part_of\" sl on sl.e = spl.e join \"shipment/booking_no\" sb on sb.e = sl.v join \"shipment/status\" ss on ss.e = sl.v left join \"shipment/eta\" se on se.e = sl.v join \"shipment_line/quantity\" sq on sq.e = spl.e where sc.v = 'AH-KTL-0001-BLK' and ss.v in ('departed', 'arrived') group by sb.v, ss.v, se.v order by sb.v",
+      "as_of": null
+    },
+    {
+      "question": 2,
+      "rows": [
+        ["PO-2025-0143", "2025-12-05", "2025-12-19"],
+        ["PO-2025-0151", "2026-01-22", "2026-01-25"],
+        ["PO-2025-0159", "2026-03-21", "2026-03-27"],
+        ["PO-2026-0007", "2026-06-01", "2026-06-05"],
+        ["PO-2026-0012", "2026-07-07", "2026-07-10"],
+        ["PO-2026-0020", "2026-09-12", "2026-09-18"]
+      ],
+      "query": "with first_etds as (select e, min(v) as v from history.\"po/etd\" where op = 'assert' group by e) select pn.v as po_number, fe.v as first_etd, ce.v as current_etd from \"supplier/code\" sc join \"po/supplier\" ps on ps.v = sc.e join \"po/number\" pn on pn.e = ps.e join \"po/etd\" ce on ce.e = pn.e join first_etds fe on fe.e = pn.e where sc.v = 'NBBW' and ce.v > fe.v order by pn.v",
+      "as_of": null
+    },
+    {
+      "question": 3,
+      "rows": [
+        ["PBLNGB2605021", "departed", "2026-07-03T09:00:00Z"],
+        ["PBLNGB2606023", "departed", "2026-07-09T14:00:00Z"],
+        ["PBLNGB2606025", "departed", "2026-07-31T10:00:00Z"],
+        ["PBLNSA2606024", "departed", "2026-07-29T10:00:00Z"],
+        ["PBLYTN2606022", "departed", "2026-07-05T13:00:00Z"]
+      ],
+      "query": "select sb.v as booking_number, ss.v as status, se.v as eta from \"shipment/booking_no\" sb join \"shipment/status\" ss on ss.e = sb.e left join \"shipment/eta\" se on se.e = sb.e where ss.v in ('departed', 'arrived') order by sb.v",
+      "as_of": 103815
+    },
+    {
+      "question": 4,
+      "rows": [["8", "210772.93", "69713.56", "993.58"]],
+      "query": "select count(*) as entries, sum(ev.v) as entered_value, sum(d.v) as duty, sum(f.v) as fees from \"customs/entry_no\" en join \"customs/filed_on\" fo on fo.e = en.e left join \"customs/entered_value\" ev on ev.e = en.e left join \"customs/duty\" d on d.e = en.e left join \"customs/fees\" f on f.e = en.e where fo.v >= '2026-04-01' and fo.v <= '2026-06-30'",
+      "as_of": null
+    },
+    {
+      "question": 5,
+      "rows": [
+        ["DGRF", "PASS", "3"],
+        ["FSMJ", "PASS", "4"],
+        ["HZTY", "FAIL", "1"],
+        ["HZTY", "PASS", "3"],
+        ["NBBW", "PASS", "5"],
+        ["NBQS", "PASS", "4"],
+        ["SZHT", "PASS", "4"],
+        ["XMYD", "PASS", "4"],
+        ["YWLX", "FAIL", "1"],
+        ["YWLX", "PASS", "4"]
+      ],
+      "query": "select sc.v as supplier_code, qr.v as result, count(*) as count from \"qc/po\" qp join \"po/supplier\" ps on ps.e = qp.v join \"supplier/code\" sc on sc.e = ps.v join \"qc/inspected_on\" io on io.e = qp.e join \"qc/result\" qr on qr.e = qp.e where io.v >= '2026-01-01' and io.v < '2027-01-01' group by sc.v, qr.v order by sc.v, qr.v",
+      "as_of": null
+    },
+    {
+      "question": 6,
+      "rows": [["AH-MIT-0009-NAT", "44120708296354", "X009X2DSQB", "AH-MIT-0009-NAT", "ACMH-10161", "YWLX:106", "YWLX"]],
+      "query": "select sk.v as sku_code, sv.v as shopify_variant_id, fn.v as fnsku, as_sku.v as seller_sku, tp.v as tpl_item_code, fi.v as factory_item_code, sc.v as supplier_code from \"amazon/asin\" aa join \"sku/code\" sk on sk.e = aa.e left join \"shopify/variant_id\" sv on sv.e = aa.e left join \"amazon/fnsku\" fn on fn.e = aa.e left join \"amazon/seller_sku\" as_sku on as_sku.e = aa.e left join \"tpl/item_code\" tp on tp.e = aa.e left join \"factory/item_code\" fi on fi.e = aa.e join \"sku/supplier\" ss on ss.e = aa.e join \"supplier/code\" sc on sc.e = ss.v where aa.v = 'B0BVUGZ3AT'",
+      "as_of": null
+    },
+    {
+      "question": 7,
+      "rows": [
+        ["DGRF", "USD", "17800.80"],
+        ["NBBW", "USD", "50301.60"],
+        ["NBQS", "USD", "38312.08"],
+        ["SZHT", "USD", "21566.88"],
+        ["XMYD", "USD", "26875.20"],
+        ["YWLX", "CNY", "93063.20"]
+      ],
+      "query": "select sc.v as supplier_code, cur.v as currency, sum(q.v * p.v) as value from \"supplier/code\" sc join \"po/supplier\" ps on ps.v = sc.e join \"po/number\" pn on pn.e = ps.e join \"po/status\" pst on pst.e = pn.e join \"core/part_of\" line on line.v = pn.e join \"po_line/quantity\" q on q.e = line.e join \"po_line/unit_price\" p on p.e = line.e join \"core/currency\" cur on cur.e = pn.e where pst.v not in ('shipped', 'received') group by sc.v, cur.v order by sc.v",
+      "as_of": null
+    },
+    {
+      "question": 8,
+      "rows": [["2", "0"]],
+      "query": "with recursive follow_same_as as (select e as account from \"shopify/customer_id\" where v = '8995877069469' union all select s.v from follow_same_as join \"core/same_as\" s on s.e = follow_same_as.account) select (select count(distinct account) from follow_same_as) as accounts, (select count(distinct so.e) from follow_same_as ff join \"shopify/order_id\" so on so.e = ff.account) as orders",
+      "as_of": null
+    },
+    {
+      "question": 9,
+      "rows": [["fixture loader", "154908", "2026-10-02T06:06:53.842452Z"]],
+      "query": "select fname.v as actor, petd.tx as transaction, fat.v as time from \"po/number\" pn join \"po/etd\" petd on petd.e = pn.e join \"fs/actor\" a on a.e = petd.tx join \"fs/name\" fname on fname.e = a.v join \"fs/at\" fat on fat.e = petd.tx where pn.v = 'PO-2026-0023'",
+      "as_of": null
+    },
+    {
+      "question": 10,
+      "rows": [
+        ["FAC-YWLX", "factory", "1560"],
+        ["OCEAN", "in_transit", "2520"]
+      ],
+      "query": "select lc.v as location_code, lk.v as kind, iq.v as quantity from \"sku/code\" sc join \"inventory/sku\" pos on pos.v = sc.e join \"inventory/location\" il on il.e = pos.e join \"location/code\" lc on lc.e = il.v join \"location/kind\" lk on lk.e = il.v left join \"inventory/quantity\" iq on iq.e = pos.e where sc.v = 'AH-TWL-0007-NAT' and lk.v in ('factory', 'in_transit') order by lc.v",
+      "as_of": null
+    }
+  ]
+}

@@ -21,7 +21,7 @@ OQ1–OQ5 are the open questions in design §15.
 
 | Decision | Blocks | Decide by | If still open |
 |---|---|---|---|
-| Query language (OQ1) | `query` (M2) | end of M0 | Cannot stay open. The M0 spike decides it. |
+| Query language (OQ1) | `query` (M2) | end of M0 | **Decided: SQL over views** of the current-state table and the log, by the spike ([spike/oq1](spike/oq1/README.md)). Datalog is the runner-up. |
 | What the index holds (OQ2) | the ten questions (M0), the fixture's sales side (M1), the catalogue SKILL.md (M4) | end of M0 | Identifiers and join keys only. It is the reversible choice: fields can be copied in later, personal data cannot be un-copied. |
 | Excision and backups (OQ3) | value storage and `excise` (M1), the catalogue SKILL.md (M4), partner data (M5) | end of M0 | Physical deletion, with slice backups kept short-lived so an excision reaches them by expiry. Switching to crypto-shredding later means reworking value storage — safe until partner data lands, after which old backups keep plaintext. Re-ingestion: excise only together with deletion in the source system, so the next catalogue run finds nothing to bring back. No identifier is kept and the kernel needs no change. |
 | Composite identity (OQ4) | factory-code attributes (M3) | start of M3 | One identity attribute holding `"<factory id>:<code>"`. The M1 fixture uses this until then. |
@@ -47,6 +47,11 @@ About ten weeks end to end. The partner track runs from M0 and is the likeliest 
 - **Query language spike.** Three candidates: a JSON pattern language (the tool's input schema), Datalog, and SQL over views of the current-state table and the log (as-of needs the log). Write a one-page doc for each; a model writes the ten questions' queries from that doc alone; score against hand-written references. The candidate that models get right most often wins.
 
 **Exit:** OQ1 decided; OQ2 and OQ3 decided or their defaults adopted; tool descriptions reviewed; ten questions written.
+
+**Status, 2026-10-02:**
+- The ten questions are written from the stress test ([questions.py](fixture/src/factstore_fixture/questions.py)), pending a partner's operator.
+- OQ1 is decided by the spike.
+- OQ2 and OQ3 run on their defaults.
 
 ### M1 — Write path
 
@@ -82,6 +87,13 @@ Plus a benchmark, with no threshold yet: fixture load throughput, which feeds th
 - **`stats`:** usage counts, co-occurrence and ref connectivity over current state. Deprecated attributes are reported under their replacement.
 - **MCP server** `factstore` exposing the tools under bare names, with the credential in the server config. `excise` is exposed only when the server is started with an excision credential.
 - **SDK:** `factstore.transact`, `query`, `stats`, `search_attributes`, `register_attribute`, `excise`.
+
+**Status, 2026-10-02: exit met.**
+- `query` is SQL over per-attribute views, as decided in M0.
+- The property test checks the views against the reference reader.
+- The ten questions answer correctly in at most 315 ms each at 10.3M facts ([bench](bench/README.md)).
+- A fresh Sonnet agent passes both parts of the last test ([evals/m2](evals/m2/README.md)).
+- A fresh Haiku agent answers the ten questions, but its ingestion still double-books an amended shipment and registers extra attributes. That is M4's ingestion skill.
 
 **Exit:**
 - `query` agrees with the reference reader on current state and as-of, over random histories.

@@ -1,0 +1,14 @@
+{
+ "model": "sonnet",
+ "expected": 46,
+ "present": 46,
+ "missing": [],
+ "new_attributes": [],
+ "registered_with_distinct_from": [],
+ "lines_booked_twice": [],
+ "agent_transactions": 4,
+ "turns": 17,
+ "cost_usd": 0.1932202,
+ "wall_seconds": 52,
+ "final": "All five items are recorded in the store.\n\n1. **PO-2026-0030 (Mingtu, NBBW):** I created the PO in USD, placed 2026-10-01, with PI MT261001-08 and ETD 2026-11-25. The lines are:\n   - Line 1: AH-KTL-0001-SGE, 600 at 11.20.\n   - Line 2: AH-CSR-0003-RED, 300 at 16.50.\n\n   I set the status to `confirmed` because the proforma has already arrived. That matches how PO-2026-0029 is recorded. The PI total of 11,670.00 matches the lines, and the unit prices match PO-2026-0024.\n\n2. **Proforma MT261001-08:** This is covered by the PO above. The store has no field for payment terms on a PO, and they already match Mingtu's supplier terms.\n\n3. **PO-2026-0025 (DGRF):** I moved the ETD from 2026-10-20 to 2026-10-27, per \u738b\u7ecf\u7406's message. The earlier date stays in the history. The status is still `in_production`.\n\n4. **Inspection LCI-261001-047:** I added it as a new PASS result for PO-2026-0023, with sample size 200, inspected 2026-10-01. The existing 2026-09-23 report (LCI-260923-046, PASS, sample 125) is untouched, so the PO now has two reports. The store has no fields for inspection level or AQL, so those two values aren't recorded.\n\n5. **Booking amendment for PO-2026-0023:** I updated the existing shipment (same HBL, PBLHB2600032) rather than creating a new one. These values changed:\n\n   | Field | Old | New |\n   |---|---|---|\n   | Booking no. | PBLXMN2609032 | PBLXMN2610032 |\n   | Mode | LCL | 20GP |\n   | Vessel | MV Harbor Crest 099E | MV Coral Meridian 112E |\n   | ETD | 2026-10-06 13:00Z | 2026-10-09 10:00Z |\n   | ETA | 2026-11-07 13:00Z | 2026-11-12 13:00Z |\n   | Freight | 901.90 | 2,850.00 |\n\n   - **Shipment lines:** I re-keyed the four shipment lines to the new booking number. The line 1 carton count went from 33 to 55 and line 4 from 11 to 22. Lines 2 and 3 were already 55 and 32. Quantities were unchanged and already matched.\n   - **Container number:** I left it blank, since the forwarder said it will follow.\n   - **PO fields:** PO-2026-0023's own status (`ready`) and ETD (2026-10-01) are unchanged. The shipment status stays `booked`."
+}
