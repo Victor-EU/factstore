@@ -162,10 +162,11 @@ _TX = _New(TX_TEMPID)
 
 
 class _Lookup:
-    def __init__(self, attr: Attr, key: str, value):
+    def __init__(self, attr: Attr, key: str, value, index: int):
         self.attr = attr
         self.key = key
         self.value = value
+        self.index = index  # the first input fact using this lookup
         self.target: int | _New | None = None
         self.asserted = False  # used by at least one assertion, so it may create its entity
 
@@ -327,7 +328,8 @@ class _Transaction:
         if len(key) > values.MAX_KEY_LENGTH:
             self.error(i, f"lookup {raw!r}: identity values are at most {values.MAX_KEY_LENGTH} characters")
             return None
-        found = self.lookups.setdefault((attr.id, key), _Lookup(attr, key, value))
+        found = self.lookups.get((attr.id, key)) or self.lookups.setdefault((attr.id, key),
+                                                                             _Lookup(attr, key, value, i))
         found.asserted |= assert_
         return found
 
@@ -359,7 +361,7 @@ class _Transaction:
                 else:
                     lk.target = _New(lk.label)
                     # Creating the entity asserts the value it was looked up by.
-                    ops.append(_Op(_first_index(ops, lk), True, lk.target, lk.attr, lk.value))
+                    ops.append(_Op(lk.index, True, lk.target, lk.attr, lk.value))
 
         for name in self.tempids.keys() - self.tempids_as_e:
             self.error(None, f"{name} is used as a value but never as an entity, so nothing would describe it")
@@ -551,10 +553,6 @@ class _Transaction:
             e = (ids[lk.target] if created else lk.target) if ids is not None else _label(lk.target)
             report.append({"lookup": lk.label, "e": e, "created": created})
         return report
-
-
-def _first_index(ops: list[_Op], lk: _Lookup) -> int:
-    return next(op.index for op in ops if op.e is lk or op.v is lk)
 
 
 def _target(x):

@@ -85,7 +85,9 @@ def write(cur, tx: int, changes: list[Change]) -> None:
             copy.write_row((c.e, c.a.id, *_columns(c), tx))
     identity = [(c.a.id, values.key(c.a.type, c.v), c.e) for c in asserted if c.a.unique == "identity"]
     if identity:
-        cur.executemany("insert into ident (a, key, e) values (%s, %s, %s)", identity)
+        with cur.copy("copy ident (a, key, e) from stdin") as copy:
+            for row in identity:
+                copy.write_row(row)
 
 
 def read_value(row) -> object:
