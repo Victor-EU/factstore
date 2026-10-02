@@ -23,6 +23,10 @@ class QueryError(FactstoreError):
     pass
 
 
+class BeforeFirstTransaction(QueryError):
+    """as_of is earlier than anything the store recorded."""
+
+
 @dataclass(frozen=True)
 class QueryResult:
     columns: list
@@ -53,7 +57,11 @@ def resolve_as_of(conn: psycopg.Connection, as_of) -> int | None:
         raise QueryError("as_of is a transaction ID or an instant")
     row = conn.execute("select max(id) from public.tx where at <= %s", (when,)).fetchone()
     if row[0] is None:
-        raise QueryError(f"the store has no transaction at or before {as_of}")
+        first = conn.execute("select min(at) from public.tx").fetchone()[0]
+        raise BeforeFirstTransaction(
+            f"the store has no transaction at or before {as_of}; its first was committed at "
+            f"{first.isoformat() if first else 'no time yet'}. as_of reads when facts were recorded, not when "
+            "they held in the world.")
     return row[0]
 
 

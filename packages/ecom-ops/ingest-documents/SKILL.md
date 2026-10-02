@@ -64,12 +64,19 @@ You need:
      where h.v = '<sha256>' group by 1
      ```
    - Read it again only if what it gives is missing, or if asked.
+   - A document in the store without its issue date (below) gets one when you read it.
 
 ## Documents
 
-Each document is an entity with two attributes:
+Each document is an entity with three attributes:
 - `document/hash`: the SHA-256 of its bytes, hex. This is its identity.
 - `document/url`: where it is, as a URL or its path under the export folder (`supplier_docs/MT251009-01.pdf`).
+- `document/issued_at`: when it was issued, as an instant.
+  - A PDF: the date printed on it (the PI's date, the invoice date, the inspection date), as midnight where it was issued: `2025-10-09T00:00:00+08:00` in China.
+  - A chat message: its timestamp, in the export's time zone.
+  - An email: its `Date` header.
+
+  The store's own time is when you write, and you are writing a year of history today. The issue date is how a reader asks what was known on a past date, so every document needs one.
 
 A chat message and an email are each a document of their own:
 - **Chat message.** Hash the message's lines exactly as exported (its header line with the time and sender, then its text), UTF-8, without the blank line after it. The url is `wechat/<file>#<n>`, where n counts messages from 1 within the file.
@@ -79,6 +86,7 @@ Create the document in the same transaction as the first facts from it. The look
 
 ```json
 [{"e": ["document/hash", "9f2c…"], "a": "document/url", "v": "supplier_docs/MT251009-01.pdf"},
+ {"e": ["document/hash", "9f2c…"], "a": "document/issued_at", "v": "2025-10-09T00:00:00+08:00"},
  {"e": "tmp:tx", "a": "core/evidence", "v": ["document/hash", "9f2c…"]},
  {"e": "tmp:tx", "a": "core/confidence", "v": "1"},
  {"e": ["po/number", "PO-2025-0143"], "a": "po/pi_number", "v": "MT251009-01"},
@@ -138,6 +146,7 @@ Defect lists stay in the report.
 Most messages carry no facts. These do:
 - **A PO we sent** ("new PO PO-2026-0023 attached"): `po/placed_on`, the message's date in the export's time zone, and `po/supplier`, the supplier the chat is with.
 - **A new ETD for a PO:** `po/etd`.
+  - Suppliers often name the order by their own PI number ("YD-26-003 大货要晚一点"), not our PO number. Find the PO whose `po/pi_number` it is, which the proforma invoice recorded, and address it by its PO number.
   - Suppliers write dates in China time and without a year: "3/8" and "3月8号" are 8 March, in the next 8 March after the message.
   - The export's timestamps are in the exporter's time zone; the export header or the user tells you which.
   - These are interpreted values, so give them confidence below 1.

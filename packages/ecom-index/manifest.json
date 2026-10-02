@@ -1,0 +1,24 @@
+{
+  "name": "factstore-ecom-index",
+  "version": "0.1.0",
+  "doc": "Identifiers and join keys for the records an online brand's systems own (Shopify, Amazon, the 3PL and QuickBooks), which the catalogue indexes.",
+  "depends_on": ["factstore-core", "factstore-ecom-ops"],
+  "skills": [],
+  "attributes": [
+    {"ident": "shopify/order_id", "type": "string", "cardinality": "one", "unique": "identity", "doc": "Shopify's ID for an order."},
+    {"ident": "shopify/order_name", "type": "string", "cardinality": "one", "unique": "identity", "doc": "Shopify's name for an order, as customers and the 3PL see it, e.g. #18301.", "distinct_from": ["shopify/order_id"]},
+    {"ident": "shopify/customer_id", "type": "string", "cardinality": "one", "unique": "identity", "doc": "Shopify's ID for a customer account."},
+    {"ident": "shopify/line_item_id", "type": "string", "cardinality": "one", "unique": "identity", "doc": "Shopify's ID for one line of an order.", "distinct_from": ["shopify/order_id"]},
+    {"ident": "amazon/order_id", "type": "string", "cardinality": "one", "unique": "identity", "doc": "Amazon's ID for an order, e.g. 113-1234567-1234567.", "distinct_from": ["shopify/order_id"]},
+    {"ident": "amazon/order_line", "type": "string", "cardinality": "one", "unique": "identity", "doc": "One item line of an Amazon order, as order ID / seller SKU.", "distinct_from": ["amazon/order_id"]},
+    {"ident": "amazon/fba_shipment_id", "type": "string", "cardinality": "one", "unique": "identity", "doc": "Amazon's ID for an inbound shipment of our stock to FBA, e.g. FBA19VV1M1CX."},
+    {"ident": "amazon/fba_line", "type": "string", "cardinality": "one", "unique": "identity", "doc": "One SKU in an FBA inbound shipment, as shipment ID / seller SKU."},
+    {"ident": "tpl/receipt_no", "type": "string", "cardinality": "one", "unique": "identity", "doc": "The 3PL's receipt number for goods it booked in."},
+    {"ident": "tpl/receipt_line", "type": "string", "cardinality": "one", "unique": "identity", "doc": "One item on a 3PL receipt, as receipt number / item code.", "distinct_from": ["tpl/receipt_no"]},
+    {"ident": "tpl/outbound_line", "type": "string", "cardinality": "one", "unique": "identity", "doc": "One item the 3PL shipped out against a Shopify order or an FBA inbound shipment, as the order reference / item code, e.g. #18301/ACMH-10021."},
+    {"ident": "quickbooks/vendor", "type": "string", "cardinality": "one", "unique": "identity", "doc": "QuickBooks's name for a vendor, unique within a QuickBooks company, on the supplier, forwarder or broker it names."},
+    {"ident": "order/customer", "type": "ref", "cardinality": "one", "doc": "Customer account that placed an order.", "distinct_from": ["shopify/customer_id"]},
+    {"ident": "line/sku", "type": "ref", "cardinality": "one", "doc": "SKU on a sales, receipt, outbound or transfer line."},
+    {"ident": "receipt/po", "type": "ref", "cardinality": "many", "doc": "Purchase order whose goods a warehouse receipt booked in; several when one receipt covers several POs.", "distinct_from": ["qc/po", "shipment_line/po_line"]}
+  ]
+}

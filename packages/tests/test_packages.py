@@ -1,6 +1,7 @@
 """Build plan M3 exit: the packages install on an empty store; installing twice changes nothing;
 registering a near-duplicate of a package attribute is refused. Plus factstore-skills (M4): its
-shape vocabulary installs like a package, and every package's skills are well-formed."""
+shape vocabulary installs like a package, and every package's skills are well-formed. And
+factstore-ecom-index (after M5): the names the slice's catalogue runs chose for themselves are refused."""
 
 import json
 import re
@@ -12,6 +13,7 @@ from factstore import RegistrationRefused, admin, connect, packages
 
 CORE = packages.load(PACKAGES / "core")
 ECOM_OPS = packages.load(PACKAGES / "ecom-ops")
+ECOM_INDEX = packages.load(PACKAGES / "ecom-index")
 SKILLS = packages.load(PACKAGES.parent / "factstore-skills")
 
 
@@ -32,12 +34,13 @@ def snapshot(conn) -> tuple:
 def test_each_installs_on_an_empty_store_in_one_transaction():
     name = new_store()
     try:
-        results = admin.install(ADMIN_DSN, name, [ECOM_OPS, SKILLS])
-        for package, result in zip([ECOM_OPS, SKILLS], results):
+        results = admin.install(ADMIN_DSN, name, [ECOM_OPS, ECOM_INDEX, SKILLS])
+        for package, result in zip([ECOM_OPS, ECOM_INDEX, SKILLS], results):
             assert result.registered == [a["ident"] for a in package.attributes]
         with owner(name) as conn:
             assert registrations(conn) == {"factstore-core": (1, len(CORE.attributes)),
                                            "factstore-ecom-ops": (1, len(ECOM_OPS.attributes)),
+                                           "factstore-ecom-index": (1, len(ECOM_INDEX.attributes)),
                                            "factstore-skills": (1, len(SKILLS.attributes))}
     finally:
         admin.drop_store(ADMIN_DSN, name)
@@ -46,8 +49,11 @@ def test_each_installs_on_an_empty_store_in_one_transaction():
 def test_they_install_together_in_dependency_order():
     name = new_store(core=False)
     try:
-        results = admin.install(ADMIN_DSN, name, [SKILLS, ECOM_OPS, CORE])
-        assert [r.package for r in results] == ["factstore-core", "factstore-skills", "factstore-ecom-ops"]
+        results = admin.install(ADMIN_DSN, name, [ECOM_INDEX, SKILLS, ECOM_OPS, CORE])
+        order = [r.package for r in results]
+        assert sorted(order) == sorted(p.name for p in (CORE, SKILLS, ECOM_OPS, ECOM_INDEX))
+        for p in (SKILLS, ECOM_OPS, ECOM_INDEX):
+            assert all(order.index(d) < order.index(p.name) for d in p.depends_on)
     finally:
         admin.drop_store(ADMIN_DSN, name)
 
@@ -55,11 +61,11 @@ def test_they_install_together_in_dependency_order():
 def test_installing_twice_changes_nothing():
     name = new_store()
     try:
-        admin.install(ADMIN_DSN, name, [ECOM_OPS, SKILLS])
+        admin.install(ADMIN_DSN, name, [ECOM_OPS, ECOM_INDEX, SKILLS])
         with owner(name) as conn:
             before = snapshot(conn)
-            again = admin.install(ADMIN_DSN, name, [CORE, ECOM_OPS, SKILLS])
-            assert [r.tx for r in again] == [None, None, None]
+            again = admin.install(ADMIN_DSN, name, [CORE, ECOM_OPS, ECOM_INDEX, SKILLS])
+            assert [r.tx for r in again] == [None, None, None, None]
             assert snapshot(conn) == before
     finally:
         admin.drop_store(ADMIN_DSN, name)
@@ -85,12 +91,36 @@ def test_ecom_ops_0_2_0_makes_the_house_bill_an_identity(tmp_path):
         admin.drop_store(ADMIN_DSN, name)
 
 
-@pytest.fixture(scope="module")
-def agent():
-    """A store with both packages, and an agent's credential for it."""
+def test_ecom_ops_0_3_0_leaves_the_stock_attributes_of_earlier_versions(tmp_path):
+    """0.3.0 dropped the stock attributes (stock is derived, design §14). A store that has them from
+    an earlier version keeps them, and the new version installs over it writing nothing."""
+    v021 = tmp_path / "ecom-ops"
+    v021.mkdir()
+    raw = json.loads((PACKAGES / "ecom-ops" / "manifest.json").read_text())
+    stock = [{"ident": "location/code", "type": "string", "cardinality": "one", "unique": "identity",
+              "doc": "Our code for a place stock can be, e.g. 3PL-NJ."},
+             {"ident": "inventory/quantity", "type": "decimal", "cardinality": "one",
+              "doc": "Units at a stock position when last counted."}]
+    raw.update(version="0.2.1", skills=[], attributes=raw["attributes"] + stock)
+    (v021 / "manifest.json").write_text(json.dumps(raw))
     name = new_store()
     try:
-        admin.install(ADMIN_DSN, name, [ECOM_OPS, SKILLS])
+        admin.install(ADMIN_DSN, name, [packages.load(v021)])
+        [result] = admin.install(ADMIN_DSN, name, [ECOM_OPS])
+        assert (result.tx, result.registered, result.evolved) == (None, [], [])
+        with owner(name) as conn:
+            assert conn.execute("select count(*) from attr where ident in ('location/code', 'inventory/quantity')"
+                                ).fetchone() == (2,)
+    finally:
+        admin.drop_store(ADMIN_DSN, name)
+
+
+@pytest.fixture(scope="module")
+def agent():
+    """A store with every package, and an agent's credential for it."""
+    name = new_store()
+    try:
+        admin.install(ADMIN_DSN, name, [ECOM_OPS, ECOM_INDEX, SKILLS])
         cred = admin.create_actor(ADMIN_DSN, name, "test agent")
         with connect(cred.dsn) as store:
             yield store
@@ -121,6 +151,18 @@ NEAR_DUPLICATES = [
     ("entity_type/name", "string", "Name of a kind of thing the store holds, e.g. Purchase order.", "shape/name"),
     ("shape/attributes", "ref", "Attributes every entity of a shape carries.", "shape/signature"),
     ("shape/doc_text", "string", "One line describing a shape.", "shape/doc"),
+    # factstore-ecom-index. The first five are names the slice's catalogue runs registered before it existed (M5).
+    ("amazon/order_line_key", "string", "One item line of an Amazon order, keyed by order ID and seller SKU.",
+     "amazon/order_line"),
+    ("amazon/inbound_shipment_id", "string", "Amazon's ID for an FBA inbound shipment.", "amazon/fba_shipment_id"),
+    ("tpl/receipt_line_key", "string", "One line of a 3PL receipt, as receipt number and item code.",
+     "tpl/receipt_line"),
+    ("tpl/outbound_key", "string", "One line of the 3PL's outbound file, as order reference and item code.",
+     "tpl/outbound_line"),
+    ("quickbooks/vendor_name", "string", "Vendor name in QuickBooks.", "quickbooks/vendor"),
+    ("shopify/order_number", "string", "Shopify order name such as #18301.", "shopify/order_name"),
+    # core 0.2.0
+    ("document/issue_date", "date", "Date printed on a document.", "document/issued_at"),
 ]
 
 
@@ -138,6 +180,9 @@ def test_distinct_from_names_only_the_package_and_its_dependencies():
         assert package.depends_on == ("factstore-core",)
         known = core | {a["ident"] for a in package.attributes}
         assert all(d in known for a in package.attributes for d in a.get("distinct_from", []))
+    assert ECOM_INDEX.depends_on == ("factstore-core", "factstore-ecom-ops")
+    known = core | {a["ident"] for p in (ECOM_OPS, ECOM_INDEX) for a in p.attributes}
+    assert all(d in known for a in ECOM_INDEX.attributes for d in a.get("distinct_from", []))
 
 
 @pytest.mark.parametrize("package", [CORE, ECOM_OPS, SKILLS], ids=lambda p: p.name)

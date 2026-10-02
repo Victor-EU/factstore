@@ -18,6 +18,7 @@ from mcp.server.stdio import stdio_server
 
 from . import tools
 from .errors import FactstoreError, RegistrationRefused, TransactError
+from .read import BeforeFirstTransaction
 from .store import Store, connect
 
 
@@ -43,6 +44,8 @@ def build(store: Store, exciser: Store | None = None) -> Server:
                            "near_matches": {k: [plain(m) for m in v] for k, v in exc.near_matches.items()},
                            "problems": exc.errors,
                            "next": REFUSAL_NEXT if exc.near_matches else None})
+        except BeforeFirstTransaction as exc:
+            return _error({"error": str(exc), "next": tools.WHAT_WAS_KNOWN})
         except (FactstoreError, TypeError, ValueError) as exc:
             return _error({"error": str(exc)})
         text = json.dumps(result, default=str, ensure_ascii=False)

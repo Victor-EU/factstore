@@ -34,7 +34,7 @@ _spec.loader.exec_module(m4)
 
 import measure  # noqa: E402
 import score  # noqa: E402  (evals/m4/score.py)
-from factstore import admin, connect  # noqa: E402
+from factstore import admin, connect, packages  # noqa: E402
 from factstore_fixture.exports import export  # noqa: E402
 from factstore_fixture.load import load, new_store  # noqa: E402
 from factstore_fixture.questions import JULY_1_MARK, QUESTIONS, World, answers  # noqa: E402
@@ -43,6 +43,16 @@ from factstore_fixture.simulate import Simulation  # noqa: E402
 ADMIN, REPO = m4.ADMIN, m4.REPO
 RESULTS = HERE / "results"
 REFERENCE = "fs_m5_reference"
+ECOM_OPS, ECOM_INDEX = REPO / "packages" / "ecom-ops", REPO / "packages" / "ecom-index"
+
+
+def empty_store(store: str) -> None:
+    """An empty store with the packages a company would install: core (by init), ecom-ops,
+    ecom-index (after M5's decision) and factstore-skills."""
+    admin.drop_store(ADMIN, store)
+    admin.init_store(ADMIN, store)
+    admin.install(ADMIN, store, [packages.load(ECOM_OPS), packages.load(ECOM_INDEX),
+                                 packages.load(REPO / "factstore-skills")])
 
 INGEST_PROMPT = """\
 Today is 1 October 2026. Our systems are already catalogued in the fact store. Ingest the supplier \
@@ -107,7 +117,7 @@ class Slice:
         self.store = f"fs_m5_{tag}"
         self.out = RESULTS / f"{model}-{tag}.json"
         if fresh:
-            m4.fresh(self.store)
+            empty_store(self.store)
         self.result = {"model": model, "store": self.store, "stages": {}}
         if not fresh and self.out.exists():
             self.result = json.loads(self.out.read_text())
@@ -156,14 +166,16 @@ class Slice:
         work = m4.workdir(self.root / "ingest", [REPO / "packages" / "ecom-ops" / "ingest-documents"],
                           self.export_dir, ["supplier_docs", "wechat", "email"])
         r = self.stage("ingest", INGEST_PROMPT, work, m4.FILE_TOOLS, AGENTS["ingest"])
+        world = json.loads((RESULTS / "world.json").read_text())
         with m4.owner(self.store) as conn, m4.owner(REFERENCE) as reference:
             r.update(evidence=score.evidence(conn, self.actors[AGENTS["ingest"]].actor),
                      documents=score.documents(conn, self.export_dir / "supplier_docs"),
+                     issue_dates=measure.issue_dates(conn, self.export_dir),
                      pdf_statements=score.pdf_statements(conn, self.export_dir),
                      message_statements=score.message_statements(conn, self.export_dir),
-                     store_questions=measure.store_questions(conn, reference),
+                     store_questions=measure.store_questions(conn, reference, world),
                      entities=measure.entity_counts(conn),
-                     unfilled=measure.unfilled(conn, REPO / "packages" / "ecom-ops"))
+                     unfilled=measure.unfilled(conn, ECOM_OPS, ECOM_INDEX))
         return r
 
     def rescore(self) -> dict:
@@ -171,7 +183,7 @@ class Slice:
         s = self.result["stages"]
         with m4.owner(self.store) as conn, m4.owner(REFERENCE) as reference:
             s["ingest"].update(entities=measure.entity_counts(conn),
-                               unfilled=measure.unfilled(conn, REPO / "packages" / "ecom-ops"))
+                               unfilled=measure.unfilled(conn, ECOM_OPS, ECOM_INDEX))
             s["ontology"]["shapes"] = measure.operator_shapes(conn, reference, self.export_dir / "truth")
         self.result["measures"] = self.measures()
         self.save()
@@ -224,6 +236,9 @@ class Slice:
             "registered_beyond_packages": registered,
             "rerun": {k: s["rerun"]["wrote"][k] for k in ("new_entities", "transactions", "facts")},
             "unfilled_package_attributes": s["ingest"].get("unfilled"),
+            "issue_dates": {k: {x: v[x] for x in ("recorded", "dated", "right")}
+                            for k, v in s["ingest"].get("issue_dates", {}).items()},
+            "store_questions": {k: s["ingest"]["store_questions"][k] for k in ("agree", "asked")},
             "questions": {k: s["questions"]["answers"][k] for k in ("right", "answerable", "wrong")},
             "wechat": {k: v for k, v in s["ingest"]["message_statements"]["fields"].items() if k.startswith("wechat")},
             "cost_usd": round(sum(v.get("cost_usd") or 0 for v in walk(s)), 2),

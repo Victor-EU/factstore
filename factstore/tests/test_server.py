@@ -65,3 +65,15 @@ def test_excise_is_offered_only_with_an_excision_credential(store_name, writer):
     async def calls(s):
         return [t.name for t in (await s.list_tools()).tools]
     assert "excise" in session({"FACTSTORE_DSN": writer.dsn, "FACTSTORE_EXCISE_DSN": excise.dsn}, calls)
+
+
+def test_as_of_before_the_store_existed_says_how_to_read_what_was_known_then(writer):
+    """A store loaded today from older documents has nothing as of last month. The error says what
+    as_of reads, and its next step is the description's pattern for business time."""
+    async def calls(s):
+        return await s.call_tool("query", {"sql": "select 1", "as_of": "2001-01-01T00:00:00Z"})
+    result = session({"FACTSTORE_DSN": writer.dsn}, calls)
+    assert result.is_error
+    body = payload(result)
+    assert "no transaction at or before" in body["error"]
+    assert "document/issued_at" in body["next"] and "select distinct on" in body["next"]

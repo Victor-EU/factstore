@@ -159,7 +159,7 @@ Runs alongside M2 once M1's registration works.
 
 **Exit:** report written; a go / change / stop decision on what comes next.
 
-**Status, 2026-10-02: report written, on the fixture** ([evals/m5](evals/m5/README.md)). No partner data has arrived, so the slice ran on the fixture's exports, as the risk table says. The decision is pending.
+**Status, 2026-10-02: exit met on the fixture** ([evals/m5](evals/m5/README.md)). No partner data has arrived, so the slice ran on the fixture's exports, as the risk table says. **Decision (Victor): change, then go.**
 - **How it ran.** Four slices, each from an empty store, with Sonnet: catalogue, ingestion of the PDFs, chats and email, a second catalogue run, the ontology, then a fresh agent answering the ten questions through `query`.
 - **The five measures.**
   - Crosswalk precision and recall: 1.0 in every slice.
@@ -180,7 +180,24 @@ Runs alongside M2 once M1's registration works.
   - ecom-ops's stock attributes;
   - the catalogue checking its own output.
 
-  Then run the slice on a partner's exports, at least twice.
+  Then run the slice on a partner's exports, at least twice. Accepted as recommended.
+- **The changes** ([evals/m5](evals/m5/README.md#after-the-decision), design v0.6):
+  - core 0.2.0 adds `document/issued_at`, and OQ6 is resolved as a convention;
+  - factstore-ecom-index 0.1.0 holds the sales side's identifiers;
+  - ecom-ops 0.3.0 drops the stock attributes, and question 10 derives stock;
+  - factstore-skills 0.2.0 gives the catalogue a step that checks its own output.
+- **The slice again, on the changes:** slices e, f and g.
+  - Crosswalk 1.0 / 1.0.
+  - All 16 of the operator's kinds.
+  - Nothing registered beyond the packages, against 12 to 16 before.
+  - All ten questions scored. g got all ten right on the first try.
+  - Every document dated, each date right.
+  - Two failures, both fixed in text:
+    - question agents found the business-time pattern reliably only once the as-of error carried it;
+    - one re-run retracted true duplicates, so the checks only report on a re-run.
+
+    The last slice ran with both fixes. One gap it found is fixed but not yet run: suppliers name orders by their PI number.
+- **Next: go.** Run the slice on a partner's exports, at least twice, with the partner's operator writing the ten questions and the list of kinds. Partner data is the only thing blocking.
 - **Against the risk table.**
   - Trigram search never let a synonym of a package attribute through: everything registered was outside the packages.
   - The chats were readable, apart from voice notes.

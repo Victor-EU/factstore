@@ -1,6 +1,6 @@
 # factstore — Design Doc
 
-**Status:** Draft v0.5 · 2026-10-02
+**Status:** Draft v0.6 · 2026-10-02
 **Name:** `factstore`. A technical name, not a product name. Referred to below as *the kernel* when discussing Part I and *the store* when discussing what it holds.
 
 **Naming scheme:**
@@ -9,6 +9,13 @@
 - `factstore-<package>` — a vocabulary package, e.g. `factstore-crm`, `factstore-ecom-ops`
 - MCP server `factstore`, tools `transact`, `query`, `stats`, `search_attributes`, `register_attribute`, `excise`. Tool names are bare: the server name is already the namespace, and some clients reject dots in tool names.
 - SDK `import factstore`, then `factstore.transact(...)`. Not `assert`, which is a Python keyword.
+
+**Changes in v0.6:** the decision after the first slice: change, then go ([evals/m5](evals/m5/README.md#after-the-decision)). Four changes, then the slice again on the fixture.
+- **Business time for backfilled history is a convention** (Part II; open question 6, resolved). A document carries `document/issued_at`, and what was known on a date is the facts whose evidence was issued by then. The kernel is unchanged; `query`'s description and its as-of error point at the store's own dates.
+- **The sales side's identifiers are a package,** `factstore-ecom-index` (§8). Every name the slice's runs had chosen for them is now refused as a near match.
+- **Stock at factories and on the water is derived** (§14). factstore-ecom-ops no longer has stock attributes, and question 10 of the ten is now a derivation.
+- **The catalogue checks its own output before it reports** (§6, step 7).
+- **The slice again** (§18): three more runs, each from an empty store. Nothing was registered beyond the packages, all 16 of the operator's kinds were found, and in the last run the re-run wrote nothing and all ten questions were right on the first try.
 
 **Changes in v0.5:** what building it found, up to the slice run on the synthetic fixture (build plan M1–M5, [evals/m5](evals/m5/README.md)). No partner data yet.
 - **The kernel needed no change from the slice.** Part I stands as v0.4 wrote it, with two details the build settled:
@@ -144,10 +151,10 @@ Patterns expressed entirely with registered attributes, in the `core/` namespace
 | Money | Each amount is a `decimal` attribute named for what it is (`invoice/subtotal`, `invoice/tax`, `invoice/total`); the entity carries one `core/currency` covering all of them. An amount in another currency goes on a part (`core/part_of`) with its own currency. A package rule, not a type. |
 | Documents | An entity with `document/hash` and `document/url`; referenced via `core/evidence` on a transaction. A chat message or an email is a document of its own, so evidence points at the message, not the whole export. |
 | Domain time | `core/period`, `core/valid_from`, `core/valid_to` as ordinary `date` attributes, distinct from the transaction's `fs/at`. |
-| Backfilled history (proposed, open question 6) | `document/issued_at` (instant) on a document: when it was sent or signed. As-of reads when a fact was written, which is the day of ingestion for history read from old documents. What was known on a date is then the facts whose evidence was issued by that date. |
+| Business time for backfilled history (v0.6) | `document/issued_at` (instant) on a document: when it was sent or signed. As-of reads when a fact was written, which is the day of ingestion for history read from old documents. What was known on a date is then the facts whose evidence was issued by that date, the latest issued winning: a filter on `history`, joined through `core/evidence`. |
 | Acting for someone | `core/on_behalf_of` (ref) on the transaction. |
 | Extraction confidence | `core/confidence` (decimal) on the transaction. Fields with different confidence go in different transactions (§1). |
-| Location on inventory | `inventory/location` (ref) on every inventory fact — first-class from day one or it breaks on day two. |
+| Location on inventory | Where a package stores stock counts, `inventory/location` (ref) on every one — first-class from day one or it breaks on day two. factstore-ecom-ops stores none: its stock is derived (§14). |
 
 ---
 
@@ -162,6 +169,7 @@ An agent with read access to the company's systems follows this and writes facts
 4. Resolve identities across sources. Each source's own ID is an identity attribute, so re-runs update rather than duplicate. Record cross-source matches as external-ID facts with `core/confidence`, matches of different confidence in different transactions. Mark confirmed duplicates with `core/same_as`.
 5. Record field authority as facts.
 6. Where sources disagree on a term, record each meaning rather than choosing one.
+7. Check what it wrote before reporting: bare records a join key created, the rules that marked duplicates, sources left out, and counts against the sources.
 
 Idempotent, read-only against sources, PII-aware, reluctant to register attributes. The output is facts in the same store as everything else; the index is not a separate system.
 
@@ -173,7 +181,7 @@ Idempotent, read-only against sources, PII-aware, reluctant to register attribut
 - The general ledger is never indexed, not even its IDs.
 - A re-run keeps the scope the store shows: a new source or kind of record is a proposal for a person.
 
-A join key's values are checked like identifiers, because a lookup creates what it names: a blank or a list such as "PO-1 / PO-2" otherwise becomes a bogus record. In the slice this is the step agents most often skip (§18).
+A join key's values are checked like identifiers, because a lookup creates what it names: a blank or a list such as "PO-1 / PO-2" otherwise becomes a bogus record. In the slice this is the step agents most often skip (§18), which is why step 7 looks for what it leaves behind.
 
 ## 7. Ontology skill (aim 3)
 An agent calls `stats`, reads attribute co-occurrence and ref connectivity, and describes the shapes it sees: "entities carrying `invoice/number`, `invoice/total`, `core/currency` and a `supplier` ref — 312 of them — call this *Invoice*; 98% also carry `core/period`." A human confirms a name, which is stored as a fact on a shape entity. Shapes stay derived; names are declared.
@@ -188,15 +196,15 @@ The shape vocabulary ships with `factstore-skills`:
 Members stay derived: the entities that carry the whole signature. Entities that hold only an ID nothing joins to are fragments, such as a record a join key created and nothing filled in. The skill reports fragments as gaps, not shapes. Nothing is recorded until a person confirms, and the transaction says on whose behalf.
 
 ## 8. Packages as vocabularies (aim 4)
-A package is a namespaced attribute set plus the conventions it relies on, plus one or more skills. The CRM package is `customer/`, `deal/`, `activity/` and a follow-up skill. The e-commerce ops package is `supplier/`, `po/`, `shipment/`, `inventory/` and an ingestion skill for supplier PDFs and chat exports. Installing a package registers attributes. Nothing else. A new version may evolve an attribute only as §1 allows: `one` to `many`, or adding identity. The installer applies the change as the package's actor, then registers what is new.
+A package is a namespaced attribute set plus the conventions it relies on, plus one or more skills. The CRM package is `customer/`, `deal/`, `activity/` and a follow-up skill. The e-commerce ops package is `supplier/`, `po/`, `shipment/`, `customs/` and an ingestion skill for supplier PDFs and chat exports. Installing a package registers attributes. Nothing else. A new version may evolve an attribute only as §1 allows: `one` to `many`, or adding identity. The installer applies the change as the package's actor, then registers what is new.
 
 A package's attributes should be ones its skill or the catalogue can fill. In the slice, 18 of factstore-ecom-ops's 69 attributes held nothing (§18):
 - some because a source owns the field, such as a product's title and price in Shopify;
 - freight cost, because only the general ledger has it;
-- stock positions, because no source counts them (§14);
+- stock positions, because no source counts them (§14), and dropped in v0.6;
 - a few the ingestion skill missed, since fixed.
 
-**Proposed: the sales side's identifiers go in a package.** Order, customer and line IDs, and the refs between them, are the same for every Shopify or Amazon seller. Left to the catalogue, each run names them its own way: one slice's `amazon/fba_shipment_id` is another's `amazon/inbound_shipment_id`. Registration should measure what is new about a company, and these aren't.
+**The sales side's identifiers are a package** (v0.6): `factstore-ecom-index`, for what Shopify, Amazon, the 3PL and QuickBooks own. Order, customer and line IDs, and the refs between them, are the same for every Shopify or Amazon seller. Left to the catalogue, each run named them its own way: one slice's `amazon/fba_shipment_id` was another's `amazon/inbound_shipment_id`. Registration should measure what is new about a company, and these aren't. With the package installed, the catalogue registered nothing in three runs (§18).
 
 A coding agent then builds the application on top — narrow MCP tools that call `query`, a plain UI, whatever the company needs. The kernel does not generate these.
 
@@ -272,7 +280,13 @@ Each per-source SKU ID is an identity attribute. HS code is not — many SKUs sh
 3. **Excision and backups.** Deleting from the log does not reach backups or exports. Crypto-shredding (personal values encrypted with a key per entity; excision deletes the key) does, at the cost of a key store. Nor does excision stop re-ingestion: if the person is still in Shopify, the next catalogue run brings them back. Either the excision record keeps the source identifier and the catalogue skill skips anything it lists — retaining an identifier for a deleted person — or excision is also carried out in the source system, which the kernel cannot do itself.
 4. *Resolved after v0.4, below.*
 5. Is the e-commerce supply-side pain sharp enough to pay for before agents read WeChat reliably? Only a partner can answer the first half. On the fixture's chats, the ingestion skill put 66 of 70 ETD changes and all 15 container numbers on the right records (§18). But the fixture was written alongside the skill, and its voice notes are unreadable by construction.
-6. **Business time for backfilled history.** As-of reads when a fact was written. A store built today from a year of documents has no transaction from before today, so "what did we expect on 1 July" has no as-of answer. Question 3 of the ten had no answer in the slice for this reason, and every first install will meet it. Proposed: a convention, not a kernel change. A document carries its date as `document/issued_at`, and a reader takes the facts whose evidence was issued by the date. The alternative is a second, writer-supplied time on the transaction, which would weaken invariant 2 (§3).
+6. *Resolved after v0.5, below.*
+
+**Resolved after v0.5**
+- *Business time for backfilled history (open question 6):* a convention, not a kernel change (Part II). As-of reads when a fact was written. So a store built today from a year of documents has no transaction from before today, and "what did we expect on 1 July" has no as-of answer. Every first install meets this. A document carries its date as `document/issued_at`, and a reader takes the values whose evidence was issued by the date, the latest issued winning. The alternative, a writer-supplied time on the transaction, would weaken invariant 2 (§3). On the fixture (§18):
+  - ingestion dated every document it recorded, each date right;
+  - the pattern, run on each slice's store, gives the world's as-of answer;
+  - question agents used the pattern once the as-of error carried it. With the pattern only in `query`'s description, one of two did.
 
 **Resolved after v0.4**
 - *What the index holds (open question 2):* identifiers and join keys only (§6). Copied fields are fast, but stale and full of personal data. In the slice on the fixture (§18):
@@ -331,3 +345,16 @@ Measured by:
   All were fixed in the skills (§6, §8), and the fourth run, with every fix, found nothing new. One run is a sample. A partner's data needs two runs, and checks for what these failures leave behind.
 
 Recommended next step: change, then go. Add document dates, a sales-side package, ecom-ops's stock attributes and the catalogue's own checks; then run on a partner's exports.
+
+**After the decision** (v0.6). The decision was change, then go, and the four changes are in v0.6. The slice ran three more times on the fixture:
+- **Crosswalk:** 1.0 / 1.0.
+- **Shapes:** all 16 of the operator's kinds (the list lost its two stock kinds).
+- **Attributes registered beyond the packages:** none, in every run.
+- **Re-run:** no new entities.
+  - One re-run retracted true duplicates its new checks couldn't re-justify. On a re-run the checks now only report, and the next re-run wrote nothing.
+- **Questions:** all ten scored, and all ten right in the last run.
+  - Question 3 reads document dates.
+  - Question 10 derives stock.
+- **Ingestion** dated every document it recorded, each date right.
+
+What remains is the "go": partner data.

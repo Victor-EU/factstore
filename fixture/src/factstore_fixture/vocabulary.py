@@ -1,50 +1,19 @@
-"""The vocabulary the loader writes with. The store-primary side comes from the packages:
-factstore-core, which init installs, and factstore-ecom-ops (ECOM_OPS), which the loader needs
-installed. The loader registers CATALOGUE itself: the sales-side identifiers Shopify, Amazon and
-the 3PL own, which the catalogue skill would register on its first run. They are the attributes
-registered beyond the package (build plan M5).
-
-Where the kernel's near-match check flags two attributes that really are different, the later
-one lists the earlier in distinct_from, as the packages' manifests do.
+"""The vocabulary the loader writes with comes from the packages: factstore-core, which init
+installs, factstore-ecom-ops (ECOM_OPS) for the supply side the store is primary for, and
+factstore-ecom-index (ECOM_INDEX) for the identifiers of the records Shopify, Amazon and the 3PL
+own. The loader registers nothing itself.
 """
 
 from pathlib import Path
 
-ECOM_OPS = Path(__file__).resolve().parents[3] / "packages" / "ecom-ops"
-
-
-def a(ident, type_, cardinality="one", doc="", unique="none"):
-    return {"ident": ident, "type": type_, "cardinality": cardinality, "doc": doc, "unique": unique,
-            "distinct_from": DISTINCT_FROM.get(ident, [])}
-
-
-# Pairs the kernel's near-match check flags in the catalogue's attributes, judged genuinely different.
-DISTINCT_FROM = {
-    "shopify/line_item_id": ["shopify/order_id"],
-    "amazon/order_id": ["shopify/order_id"],
-    "amazon/order_line": ["amazon/order_id"],
-    "order/customer": ["shopify/customer_id"],
-    "line/sku": ["po_line/sku"],
-}
-
-
-CATALOGUE = [
-    a("shopify/order_id", "string", "one", "Shopify's ID for an order.", "identity"),
-    a("shopify/customer_id", "string", "one", "Shopify's ID for a customer account.", "identity"),
-    a("shopify/line_item_id", "string", "one", "Shopify's ID for one line of an order.", "identity"),
-    a("amazon/order_id", "string", "one", "Amazon's ID for an order, e.g. 113-1234567-1234567.", "identity"),
-    a("amazon/order_line", "string", "one", "One item line of an Amazon order, as order ID / seller SKU.", "identity"),
-    a("amazon/fba_shipment_id", "string", "one", "Amazon's ID for an inbound shipment of our stock to FBA.", "identity"),
-    a("amazon/fba_line", "string", "one", "One SKU in an FBA inbound shipment, as shipment ID / seller SKU.", "identity"),
-    a("tpl/receipt_no", "string", "one", "The 3PL's receipt number for goods it booked in.", "identity"),
-    a("order/customer", "ref", "one", "Customer account that placed an order."),
-    a("line/sku", "ref", "one", "SKU on a sales or transfer line."),
-    a("receipt/shipment", "ref", "one", "Shipment a warehouse receipt booked in."),
-]
+PACKAGES = Path(__file__).resolve().parents[3] / "packages"
+ECOM_OPS = PACKAGES / "ecom-ops"
+ECOM_INDEX = PACKAGES / "ecom-index"
 
 
 # Ground truth for the ontology skill: the kinds of thing the loader writes and the attributes
-# each carries. "always" is on every entity of the shape; "often" on some.
+# each carries. "always" is on every entity of the shape; "often" on some. Stock is not a kind:
+# it is derived from POs and shipment lines (design §14).
 SHAPES = {
     "Supplier": {"always": ["supplier/code", "supplier/name", "supplier/name_cn", "supplier/address", "supplier/port",
                             "supplier/currency", "supplier/payment_terms", "supplier/incoterm",
@@ -53,7 +22,6 @@ SHAPES = {
                        "sku/retail_price", "core/currency", "factory/item_code", "tpl/item_code",
                        "shopify/variant_id"],
             "often": ["amazon/asin", "amazon/fnsku", "amazon/seller_sku", "sku/launched_on"]},
-    "Location": {"always": ["location/code", "location/name", "location/kind"]},
     "Purchase order": {"always": ["po/number", "po/supplier", "po/status", "po/placed_on", "core/currency"],
                        "often": ["po/pi_number", "po/etd"]},
     "Purchase order line": {"always": ["po_line/key", "core/part_of", "po_line/sku", "po_line/quantity"],
@@ -68,9 +36,7 @@ SHAPES = {
                                  "shipment_line/quantity", "shipment_line/cartons"]},
     "Customs entry": {"always": ["customs/entry_no", "customs/shipment", "customs/filed_on", "customs/entered_value",
                                  "customs/duty", "customs/fees", "core/currency"]},
-    "Stock position": {"always": ["inventory/position", "inventory/sku", "inventory/location"],
-                       "often": ["inventory/quantity", "inventory/counted_at"]},
-    "Warehouse receipt": {"always": ["tpl/receipt_no", "receipt/shipment"]},
+    "Warehouse receipt": {"always": ["tpl/receipt_no", "receipt/po"]},
     "Shopify customer": {"always": ["shopify/customer_id"], "often": ["core/same_as"]},
     "Shopify order": {"always": ["shopify/order_id", "order/customer"]},
     "Shopify order line": {"always": ["shopify/line_item_id", "core/part_of", "line/sku"]},

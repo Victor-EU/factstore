@@ -64,9 +64,12 @@ QUESTIONS = [
              "the transaction ID and the time it was recorded.",
      "columns": ["actor", "transaction", "time"]},
     {"id": 10,
-     "text": "How many units of SKU AH-TWL-0007-NAT were last counted at each location whose kind is factory "
-             "or in_transit? Give the location code, its kind and the quantity.",
-     "columns": ["location code", "kind", "quantity"]},
+     "text": "How many units of SKU AH-TWL-0007-NAT are at factories, and how many on the water? Nothing counts "
+             "them: at a factory are the units on lines of POs whose status is in_production or ready, less "
+             "those on shipments that have departed (status departed, arrived or delivered). On the water are "
+             "the units on shipments whose status is departed or arrived. Give one row per supplier with units "
+             "at its factory, as the supplier code and the units, and one row 'on the water' with its units.",
+     "columns": ["supplier code or on the water", "units"]},
 ]
 
 
@@ -184,11 +187,22 @@ def answers(w: World) -> dict[int, list[tuple]]:
     tx = max(t for e, a, v, t, op in w.log if e == po and a == w.ids["po/etd"] and op and v == etd.isoformat())
     out[9] = [(w.one(w.one(tx, "fs/actor"), "fs/name"), tx, w.one(tx, "fs/at"))]
 
-    # 10. Stock at factories and on the water.
+    # 10. Stock at factories and on the water, derived from POs and shipments (design §14).
     sku = w.lookup("sku/code", "AH-TWL-0007-NAT")
-    out[10] = [(w.one(loc, "location/code"), kind, w.one(p, "inventory/quantity"))
-               for p in w.having("inventory/sku", sku)
-               if (kind := w.one(loc := w.one(p, "inventory/location"), "location/kind")) in ("factory", "in_transit")]
+    sailed, water = defaultdict(Decimal), Decimal(0)
+    for sl in w.having("shipment_line/po_line"):
+        (s,) = w.now[(sl, w.ids["core/part_of"])]
+        status, line = w.one(s, "shipment/status"), w.one(sl, "shipment_line/po_line")
+        if status in ("departed", "arrived", "delivered"):
+            sailed[line] += w.one(sl, "shipment_line/quantity")
+        if status in ("departed", "arrived") and w.one(line, "po_line/sku") == sku:
+            water += w.one(sl, "shipment_line/quantity")
+    factory = defaultdict(Decimal)
+    for line in w.having("po_line/sku", sku):
+        (po,) = w.now[(line, w.ids["core/part_of"])]
+        if w.one(po, "po/status") in ("in_production", "ready"):
+            factory[w.one(w.one(po, "po/supplier"), "supplier/code")] += w.one(line, "po_line/quantity") - sailed[line]
+    out[10] = [(code, n) for code, n in factory.items() if n > 0] + ([("on the water", water)] if water > 0 else [])
     return out
 
 
@@ -284,12 +298,36 @@ join "fs/name" name on name.e = actor.v
 join "fs/at" at on at.e = etd.tx
 where n.v = 'PO-2026-0023'""", None),
     10: ("""
-select lc.v, lk.v, q.v
-from "sku/code" k
-join "inventory/sku" i on i.v = k.e
-join "inventory/location" il on il.e = i.e
-join "inventory/quantity" q on q.e = i.e
-join "location/code" lc on lc.e = il.v
-join "location/kind" lk on lk.e = il.v
-where k.v = 'AH-TWL-0007-NAT' and lk.v in ('factory', 'in_transit')""", None),
+with sailed as (
+  select pl.v as po_line, sum(q.v) as units
+  from "shipment_line/po_line" pl
+  join "shipment_line/quantity" q on q.e = pl.e
+  join "core/part_of" p on p.e = pl.e
+  join "shipment/status" st on st.e = p.v
+  where st.v in ('departed', 'arrived', 'delivered')
+  group by 1),
+factory as (
+  select sc.v as place, sum(lq.v - coalesce(s.units, 0)) as units
+  from "sku/code" k
+  join "po_line/sku" ls on ls.v = k.e
+  join "po_line/quantity" lq on lq.e = ls.e
+  join "core/part_of" lp on lp.e = ls.e
+  join "po/status" ps on ps.e = lp.v
+  join "po/supplier" sup on sup.e = lp.v
+  join "supplier/code" sc on sc.e = sup.v
+  left join sailed s on s.po_line = ls.e
+  where k.v = 'AH-TWL-0007-NAT' and ps.v in ('in_production', 'ready')
+  group by 1),
+water as (
+  select 'on the water' as place, sum(q.v) as units
+  from "sku/code" k
+  join "po_line/sku" ls on ls.v = k.e
+  join "shipment_line/po_line" pl on pl.v = ls.e
+  join "shipment_line/quantity" q on q.e = pl.e
+  join "core/part_of" p on p.e = pl.e
+  join "shipment/status" st on st.e = p.v
+  where k.v = 'AH-TWL-0007-NAT' and st.v in ('departed', 'arrived'))
+select place, units from factory where units > 0
+union all
+select place, units from water where units > 0""", None),
 }

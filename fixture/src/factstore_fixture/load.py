@@ -17,11 +17,10 @@ from dataclasses import dataclass, field
 
 from factstore import FactstoreError, Store, admin, packages
 
-from .catalog import TPL
 from .clock import YEAR_START, US_EAST
 from .model import AmazonOrder, Event, ShopifyOrder
 from .simulate import Simulation
-from .vocabulary import CATALOGUE, ECOM_OPS
+from .vocabulary import ECOM_INDEX, ECOM_OPS
 
 
 @dataclass
@@ -39,9 +38,10 @@ class LoadStats:
 
 
 def new_store(admin_dsn: str, name: str, actor: str = "fixture loader") -> admin.Credential:
-    """Create store `name` with factstore-ecom-ops installed, and a credential to load it with."""
+    """Create store `name` with factstore-ecom-ops and factstore-ecom-index installed, and a credential
+    to load it with."""
     admin.init_store(admin_dsn, name)
-    admin.install(admin_dsn, name, [packages.load(ECOM_OPS)])
+    admin.install(admin_dsn, name, [packages.load(ECOM_OPS), packages.load(ECOM_INDEX)])
     return admin.create_actor(admin_dsn, name, actor)
 
 
@@ -56,11 +56,10 @@ def load(store: Store, sim: Simulation, *, batch: int = 200, records: bool = Tru
     stats = LoadStats()
     started = time.perf_counter()
     if records:
-        missing = {a["ident"] for a in packages.load(ECOM_OPS).attributes} - {
-            r[0] for r in store.conn.execute("select ident from attr")}
-        if missing:
-            raise FactstoreError(f"install {ECOM_OPS} in this store first: it lacks {len(missing)} of its attributes")
-        store.register_attribute(CATALOGUE)
+        have = {r[0] for r in store.conn.execute("select ident from attr")}
+        for package in (ECOM_OPS, ECOM_INDEX):
+            if missing := {a["ident"] for a in packages.load(package).attributes} - have:
+                raise FactstoreError(f"install {package} in this store first: it lacks {len(missing)} of its attributes")
         _write(store, stats, _master_data(sim))
     marks = sorted(marks)
     pending: list[dict] = []
@@ -166,11 +165,6 @@ def sku_ref(sku):
 
 def _master_data(sim: Simulation) -> list[dict]:
     facts = []
-    for code, name, kind in [*[(f"FAC-{s.code}", f"{s.name} (factory)", "factory") for s in sim.suppliers],
-                             ("OCEAN", "On the water", "in_transit"), ("3PL-NJ", f"{TPL[0]}, {TPL[2]}", "3pl"),
-                             ("FBA-US", "Amazon FBA (US)", "fba")]:
-        loc = ["location/code", code]
-        facts += [f(loc, "location/name", name), f(loc, "location/kind", kind)]
     for s in sim.suppliers:
         e = ["supplier/code", s.code]
         facts += [f(e, "supplier/name", s.name), f(e, "supplier/name_cn", s.name_cn),
@@ -241,7 +235,7 @@ def _event_facts(event: Event) -> list[dict]:
     if kind == "shipment.delivered":
         e = shipment_ref(s)
         return [f(e, "shipment/status", "delivered"), f(e, "shipment/delivered_at", s.delivered.isoformat()),
-                f(["tpl/receipt_no", s.receipt.receipt_no], "receipt/shipment", e)]
+                *(f(["tpl/receipt_no", s.receipt.receipt_no], "receipt/po", po_ref(po)) for po in s.pos)]
     if kind == "customs.entered":
         e = ["customs/entry_no", s.entry_no]
         return [f(e, "customs/shipment", shipment_ref(s.shipment)), f(e, "customs/filed_on", s.filed.isoformat()),
@@ -253,14 +247,8 @@ def _event_facts(event: Event) -> list[dict]:
         return [fact for sku, *_ in s.lines
                 for fact in (f(["amazon/fba_line", f"{s.shipment_id}/{sku.amazon_seller_sku}"], "core/part_of", e),
                              f(["amazon/fba_line", f"{s.shipment_id}/{sku.amazon_seller_sku}"], "line/sku", sku_ref(sku)))]
-    if kind == "inventory.snapshot":
-        facts = []
-        for p in s:
-            e = ["inventory/position", p.key]
-            facts += [f(e, "inventory/sku", sku_ref(p.sku)), f(e, "inventory/location", ["location/code", p.location])]
-            if p.location.startswith("FAC-") or p.location == "OCEAN":  # the store is primary for these
-                facts += [f(e, "inventory/quantity", p.quantity), f(e, "inventory/counted_at", p.counted_at.isoformat())]
-        return facts
+    if kind == "inventory.snapshot":  # stock is derived from POs and shipments, or read in the 3PL (design §14)
+        return []
     raise ValueError(f"no loader for {kind}")
 
 

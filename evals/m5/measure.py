@@ -8,10 +8,12 @@ skills built.
 
 import csv
 import json
+import mailbox
 import re
 from collections import Counter, defaultdict
 from datetime import date, datetime, timezone
 from decimal import Decimal, InvalidOperation
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -123,10 +125,49 @@ def kind_signatures(conn, ident: str) -> list[set[str]]:
     return out
 
 
-def unfilled(conn, package: Path) -> list[str]:
-    """The package's attributes that hold no value in this store."""
-    idents = [a["ident"] for a in json.loads((package / "manifest.json").read_text())["attributes"]]
-    return [i for i in idents if rows(conn, f'select count(*) from current."{i}"')[0][0] == 0]
+def unfilled(conn, *packages: Path) -> dict[str, list[str]]:
+    """Each package's attributes that hold no value in this store."""
+    out = {}
+    for package in packages:
+        manifest = json.loads((package / "manifest.json").read_text())
+        out[manifest["name"]] = [a["ident"] for a in manifest["attributes"]
+                                 if rows(conn, f'select count(*) from current."{a["ident"]}"')[0][0] == 0]
+    return out
+
+
+def issue_dates(conn, export_dir: Path) -> dict:
+    """The documents ingestion reads, by kind: how many the store records, how many carry
+    document/issued_at, and how many carry the right one. A PDF's is the date the truth gives it, in
+    China; a chat message's is its timestamp in the export (New York time, as the prompt says); an
+    email's is its Date header."""
+    china = ZoneInfo("Asia/Shanghai")
+    pdf = {}
+    for line in open(export_dir / "truth" / "statements.jsonl"):
+        s = json.loads(line)
+        if s["source"] == "pdf":
+            pdf[s["ref"]] = datetime.fromisoformat(s["at"]).astimezone(china).date()
+    chats = {}
+    for f in sorted((export_dir / "wechat").glob("*.txt")):
+        for n, msg in enumerate(re.split(r"\n(?=\d{4}-\d\d-\d\d \d\d:\d\d:\d\d )", f.read_text())[1:], 1):
+            chats[f"wechat/{f.name}#{n}"] = datetime.strptime(msg[:19], "%Y-%m-%d %H:%M:%S").replace(tzinfo=NEW_YORK)
+    emails = {}
+    for f in (export_dir / "email").glob("*.mbox"):
+        for m in mailbox.mbox(str(f)):
+            emails["mid:" + m["Message-ID"].strip("<>")] = parsedate_to_datetime(m["Date"])
+    dated = dict(rows(conn, 'select u.v, d.v from current."document/url" u left join current."document/issued_at" d '
+                            'using (e)')) if has_attr(conn, "document/issued_at") else \
+        {u: None for (u,) in rows(conn, 'select v from current."document/url"')}
+    out = {}
+    for kind, truth, right in (("pdf", pdf, lambda got, want: got.astimezone(china).date() == want),
+                               ("chat message", chats, lambda got, want: got == want),
+                               ("email", emails, lambda got, want: got == want)):
+        here = {u: d for u, d in dated.items() if u in truth}
+        out[kind] = {"in_export": len(truth), "recorded": len(here),
+                     "dated": sum(d is not None for d in here.values()),
+                     "right": sum(d is not None and right(d, truth[u]) for u, d in here.items()),
+                     "wrong": [[u, str(d), str(truth[u])] for u, d in here.items()
+                               if d is not None and not right(d, truth[u])][:5]}
+    return out
 
 
 # --- the ten questions -------------------------------------------------------------------------
@@ -136,13 +177,33 @@ def unfilled(conn, package: Path) -> list[str]:
 SLICE_TEXT = {3: "As of 1 July 2026: which shipments had status departed or arrived, and what was each one's "
                  "ETA as recorded at that point? Give the booking number, status and ETA."}
 
+# Question 3 on a backfilled store: the values whose evidence was issued before 1 July (New York),
+# the latest issued winning (design Part II, business time). Slices a to d had no issue dates.
+SLICE_SQL = {3: """
+with known as (
+  select ev.e as tx, max(d.v) as issued
+  from "core/evidence" ev join "document/issued_at" d on d.e = ev.v
+  group by 1),
+status as (
+  select distinct on (h.e) h.e, h.v
+  from history."shipment/status" h join known k on k.tx = h.tx
+  where h.op = 'assert' and k.issued < '2026-07-01T00:00:00-04:00'
+  order by h.e, k.issued desc, h.tx desc),
+eta as (
+  select distinct on (h.e) h.e, h.v
+  from history."shipment/eta" h join known k on k.tx = h.tx
+  where h.op = 'assert' and k.issued < '2026-07-01T00:00:00-04:00'
+  order by h.e, k.issued desc, h.tx desc)
+select b.v, s.v, eta.v
+from status s
+join "shipment/booking_no" b on b.e = s.e
+left join eta on eta.e = s.e
+where s.v in ('departed', 'arrived')"""}
+
 # Questions whose data no export holds, so the slice can't answer them however well the skills run.
-NO_SOURCE = {
-    3: "The store's time is when a fact was written. The slice wrote the documents' history in October, so no "
-       "transaction holds what was known on 1 July.",
-    10: "No source counts stock at a factory or on the water. The direct loader writes those counts from the "
-        "simulation; the documents give production status and shipment lines, not counts.",
-}
+# Slices a to d had two: question 3 (no business time) and question 10 (stock counts). The decision
+# after M5 gave documents an issue date and made question 10 a derivation, so none are left.
+NO_SOURCE: dict[int, str] = {}
 
 
 def cell(v, exact_time=False) -> str:
@@ -224,12 +285,22 @@ def score_answers(given: dict, expected: dict) -> dict:
             "wrong": [q for q in scored if not out[q]["right"]], "questions": out}
 
 
-def store_questions(conn, reference) -> dict:
+def store_questions(conn, reference, world: dict | None = None) -> dict:
     """The reference SQL on the slice's store against the direct loader's world, for the questions
-    whose attribute names the packages fix (1, 2, 4–7) and question 8 when the catalogue chose the
-    loader's names. A question whose SQL names an attribute this store lacks is reported as such."""
+    whose attribute names the packages fix (1, 2, 4–7, 10) and question 8 when the store has the
+    loader's names. Question 3 runs SLICE_SQL against the world's answer, when the store has issue
+    dates."""
     ids = [1, 2, 4, 5, 6, 7] + ([8] if all(has_attr(conn, a) for a in ("order/customer", "shopify/customer_id")) else [])
-    return score.questions(conn, reference, ids)
+    ids += [10]
+    out = score.questions(conn, reference, ids)
+    if world is not None and has_attr(conn, "document/issued_at"):
+        got = Counter(tuple(cell(v) for v in r) for r in rows(conn, SLICE_SQL[3]))
+        want = Counter(tuple(cell(v) for v in r) for r in world["answers"]["3"])
+        out["questions"][3] = {"agree": got == want, "rows": sum(want.values()),
+                               "missing": [list(r) for r in (want - got)][:5], "extra": [list(r) for r in (got - want)][:5]}
+        out["agree"] += got == want
+        out["asked"] += 1
+    return out
 
 
 # --- the store as a whole ----------------------------------------------------------------------

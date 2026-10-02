@@ -1,6 +1,6 @@
 {
   "name": "factstore-skills",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "doc": "The catalogue and ontology skills, and the vocabulary the ontology skill records shapes with.",
   "depends_on": ["factstore-core"],
   "skills": ["catalogue/SKILL.md", "ontology/SKILL.md"],

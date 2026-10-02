@@ -126,6 +126,25 @@ Don't pick one meaning and force the other into it:
 - Each meaning is its own attribute in its system's namespace, with a doc saying whose meaning it is.
 - Report the disagreement.
 
+### 7. Check what you wrote
+
+Each check looks for what a common mistake leaves in the store. Fix what you find before you report.
+
+On a re-run, report what the checks find and change nothing. An earlier run's matches may rest on evidence your rules don't cover, such as one mailbox name at two providers, and a re-run on unchanged sources writes nothing (rule 4). The person decides.
+
+- **Records a join key created by mistake.** A lookup creates the record it names, so a malformed value leaves a record holding nothing but that value. For each identity your join keys point at, list the values on records that hold nothing else:
+  ```sql
+  select k.v from "po/number" k
+  where not exists (select 1 from facts f where f.e = k.e and f.a <> 'po/number')
+  ```
+  Compare them with the rest. A blank, a list ("PO-1 / PO-2") or an odd spelling is a bad join key: retract the ref, and write the right ones. A record that is bare because another skill fills it is expected, such as a PO a receipt names before ingestion reads the PO.
+- **Duplicates.**
+  - Count the `core/same_as` you wrote by the rule that matched each pair: the same mailbox, a normalized mailbox, or the same name and address.
+  - From each rule's pairs, read ten against the source records. If any pair is two different people, the rule is wrong. Retract its matches, fix the rule and match again.
+  - List any account that more than three others point at, through any number of `core/same_as` hops. It is more often a bad rule than one busy person.
+- **Sources left out.** Every file in every source is either indexed or named in your report with the reason. A file whose rows have no ID of their own but name other records is not a reason (step 3).
+- **Counts.** For each kind of record, the store holds as many as the source has distinct IDs.
+
 ## Writing in bulk
 
 Use the MCP tools to explore and for small writes. For thousands of records, write a script in your working directory that uses the SDK:
@@ -151,7 +170,8 @@ factstore.query('select count(*) from "shopify/order_id"').rows
 - Sources and record kinds indexed, with counts.
 - The crosswalk: for each system, how many hubs carry its ID, by tier, and what is unmatched and why.
 - Attributes registered, and why each was needed.
-- Duplicates marked.
+- Duplicates marked, by rule.
+- The checks of step 7: what each found, and what you fixed.
 - Terms the sources disagree on.
 - Anything left for a human to decide.
 
@@ -167,4 +187,5 @@ Follow the same steps.
   ```
   This leaves out transactions and attributes. The count rises only by records that are new in the sources.
 - A record gone from a source stays in the store, since it was true when seen. Report it.
+- Run the checks of step 7, and report what they find without changing anything.
 - A person excised from the store was also deleted in its source system. If you find them in a source again, report it instead of indexing them.

@@ -59,3 +59,15 @@ def test_reference_sql_answers_the_question(loaded, qid):
 def test_every_question_has_an_answer(loaded):
     _, _, expected = loaded
     assert all(expected[q["id"]] for q in QUESTIONS)
+
+
+def test_derived_stock_is_what_the_simulation_counted(loaded, world):
+    """Question 10 derives stock at factories and on the water from POs and shipments (design §14).
+    That is what the simulation counts in its snapshot, so nothing is lost by not storing it."""
+    _, _, expected = loaded
+    sim, items = world
+    counted = Counter()
+    for p in sim.inventory:
+        if p.sku.code == "AH-TWL-0007-NAT" and (p.location.startswith("FAC-") or p.location == "OCEAN"):
+            counted[("on the water" if p.location == "OCEAN" else p.location.removeprefix("FAC-"), p.quantity)] += 1
+    assert rows(expected[10]) == rows(counted.elements())

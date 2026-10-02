@@ -23,7 +23,7 @@ No partner data has arrived. The build plan's risk table covers this case: "Run 
 | 4. ontology | ontology agent | only the store | [`factstore-ontology`](../../factstore-skills/ontology/SKILL.md) |
 | 5. questions | question agent | only the store | none: the MCP server alone, as in [M2](../m2/README.md) |
 
-- **Store.** It starts with core, factstore-ecom-ops and factstore-skills installed, and nothing else. Their attributes are the same in every slice; only the skill text changed ([Results](#results)).
+- **Store.** Slices a to d start with core, factstore-ecom-ops and factstore-skills installed, and nothing else. Their attributes are the same in all four; only the skill text changed ([Results](#results)). Slices e and f also have factstore-ecom-index, and the package versions of [After the decision](#after-the-decision).
 - **Agents.** Each stage is `claude -p` with Sonnet, set up as in [M4](../m4/README.md):
   - its one skill in `.claude/skills`;
   - the factstore MCP server and no other, with no user settings;
@@ -44,7 +44,7 @@ No partner data has arrived. The build plan's risk table covers this case: "Run 
 |---|---|
 | Crosswalk | `truth/crosswalk.csv`: each SKU's IDs in nine systems, as links to our SKU code, after the re-run. |
 | Shapes | `truth/shapes.json`, the operator's list of 18 kinds of thing. Each kind is found in the store by its IDs, since the catalogue names the sales side itself. Its signature is what every entity of it carries in this store. It must match a recorded shape exactly. |
-| Attributes registered | Everything the four agents registered. The fixture's direct loader registers 11. |
+| Attributes registered | Everything the four agents registered. Until ecom-index, the fixture's direct loader registered 11; now it registers none. |
 | New entities on re-run | Entities the re-run created, leaving out transactions, attributes and actors. |
 | The ten questions | The question agent's answers, against the direct loader's world ([results/world.json](results/world.json)). Two exceptions: question 8 is checked against what the exports show, and question 9 against this store's own log, since it asks who wrote a value here. |
 
@@ -164,7 +164,84 @@ So, on the fixture, the skill reads the chats. Whether the pain is sharp enough 
   4. **The catalogue checks its own output** for the leftovers listed under "What varies" before it reports.
 - **Then go:** run the slice on a partner's exports, at least twice. Have the partner's operator write the ten questions and the list of kinds.
 
-The decision is Victor's.
+Victor decided on 2 October: change, then go, as recommended. The changes and the slices run on them are in [After the decision](#after-the-decision).
+
+## After the decision
+
+### The changes
+
+| Change | Where |
+|---|---|
+| **Documents carry their issue date.** What was known on a date is the values whose evidence was issued by then, the latest issued winning: a filter on `history`, joined through each transaction's evidence. | core 0.2.0 adds `document/issued_at`, and the ingestion skill writes it. `query`'s description shows the pattern, and its as-of error returns it as the next step. The kernel is unchanged. |
+| **The sales side's identifiers are a package.** | factstore-ecom-index 0.1.0, with 15 attributes. The fixture's loader now registers nothing itself. |
+| **Stock at factories and on the water is derived** from PO statuses and shipment lines. | ecom-ops 0.3.0 drops its 8 stock attributes. Question 10 is now a derivation, and the fixture no longer stores stock. A test checks that the derivation equals the simulation's own count. |
+| **The catalogue checks its own output** before it reports: bare records a join key made, the duplicate rules, sources left out, and counts. On a re-run it reports and changes nothing. | factstore-skills 0.2.0, catalogue step 7. The catalogue also keys records that have no ID of their own. |
+
+What changed in the scoring:
+- **The operator's list has 16 kinds.** It lost its two stock kinds.
+- **All ten questions are scored.**
+  - Question 3 asks what was known on 1 July, and is checked against the world's as-of answer.
+  - Question 10 is a derivation.
+- **Ingestion's issue dates are checked:**
+  - a PDF's against the date the truth gives it;
+  - a chat message's against its timestamp in the export;
+  - an email's against its `Date` header.
+- **A dry run came first, before any agent.** It gave slice d's documents their true issue dates and read question 3 through them, read-only. All 5 rows agree with the world's as-of answer.
+
+### Three more slices
+
+| | e | f | g |
+|---|---|---|---|
+| Crosswalk precision / recall | 1.0 / 1.0 | 1.0 / 1.0 | 1.0 / 1.0 |
+| The operator's 16 kinds: held, and matching a recorded shape | 16, 16 | 16, 16 | 16, 16 |
+| Attributes registered beyond the packages | **0** | **0** | **0** |
+| New entities on re-run | 0 | 0 | 0 |
+| Facts written on re-run | 0 | 9 (below) | 0 |
+| Questions right, of 10 | 10; 9 on the first try | 9; 8 on the first try | **10, first try** |
+| The question run directly on the store, agreeing with the world (3, 10 and the rest) | 9 of 9 | 9 of 9 | 9 of 9 |
+| Documents with the right issue date: PDFs, chat messages, emails | 135, 103, 163: all | 135, 115, 163: all | 135, 118, 163: all |
+| Duplicate customers: precision / recall | 1.0 / 0.89 | 1.0 / 0.92, then 0.87 after the re-run | 1.0 / 0.92 |
+| PDF statements whose own PDF is the evidence, of 504 | 504 | 504 | 504 |
+| WeChat ETDs on the right PO, of 70 | 64 | 66 | 60 (below) |
+| Package attributes left empty | 6 of ecom-ops's 61, 1 of ecom-index's 15 | the same | the same |
+| Personal values in the store | 0 | 0 | 0 |
+| Cost and wall time | $3.20, 15 min | $4.20, 21 min | $3.84, 19 min |
+
+- **Registration measures what is new about the company now.** With ecom-index installed, no agent registered anything in any slice. Before it, the catalogue registered 12 to 16 attributes.
+- **The empty attributes are fields a source owns:**
+  - a product's title, family, price and launch date (Shopify);
+  - freight cost (the general ledger);
+  - a supplier's contact (personal data);
+  - Amazon's own FBA lines, which this fixture's exports don't have.
+- **Each catalogue run did the new checks and reported them.** e, for one, read ten pairs from each duplicate rule against the source records ("All 20 look like one person"). It confirmed that the only bare records were the 26 POs that ingestion fills.
+
+### What the slices found
+
+1. **The store answered question 3 every time. Question agents found how only once the error showed them.**
+   - e's first agent tried `as_of`, got "no transaction at or before", and left question 3 empty. At that point the description only named the two attributes.
+   - With a worked example in the description, e's second agent answered all ten.
+   - f's first agent had the example, but the error only pointed to it, and it gave up again.
+   - The error now returns the pattern itself as its next step. With that, f's second agent and g's agent answered question 3.
+   - The example is a PO's ETD on 15 March, not question 3's shipments on 1 July.
+2. **f's re-run retracted 7 true duplicates.**
+   - The re-run ran step 7's duplicate check and re-judged the first run's matches by its own rules.
+   - Seven pairs are one mailbox name at two providers, such as `chris_m800@example.net` and `chris_m800@mail.example`. The first run had matched them, and the re-run retracted them.
+   - That wrote to the store on unchanged sources and broke question 8. Both of f's question agents got question 8 wrong.
+   - On a re-run, step 7 now reports and changes nothing. g's re-run wrote nothing.
+3. **Suppliers name the order by their own PI number.** "YD-26-003 大货要晚一点" is about PO-2026-0003.
+   - g missed 6 such ETDs and e missed 2. The other misses are the four durations seen in every slice.
+   - The ingestion skill now says to find the PO by its PI number. That fix is not yet run.
+
+### Where M5 ends
+
+- **Every measure holds on the changed system.** In g, which has every fix but the last one:
+  - the crosswalk is exact;
+  - every one of the operator's kinds is a recorded shape;
+  - nothing is registered beyond the packages;
+  - the re-run writes nothing;
+  - all ten questions are right on the first try;
+  - every document carries the right issue date.
+- **The decision's "then go" is next:** the slice on a partner's exports, run at least twice, with the partner's operator writing the ten questions and the list of kinds. Nothing else blocks it.
 
 ## Reproduce
 
@@ -178,7 +255,7 @@ cd evals/m5
 - `--stages ingest,rerun` continues on the store the earlier stages left.
 - `--budget` caps each agent session's spend, at $15 by default.
 - Each slice writes `results/<model>-<tag>.json`, with every transcript (`*.stream.jsonl`) and the agents' own scripts (`*-files/`), and leaves its store for inspection.
-- A slice costs about $3–4 and 15 minutes. M5's runs, including a smoke test, cost about $14.50.
+- A slice costs about $3–4 and 15–20 minutes. M5's runs cost about $26: $14.50 for a to d and a smoke test, and $11.24 for e to g, re-asked questions included.
 
 ## What the fixture can't tell
 

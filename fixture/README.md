@@ -11,7 +11,7 @@ cd fixture
 ../factstore/.venv/bin/pip install -e .
 ../factstore/.venv/bin/factstore-fixture report                 # realism report for the default world
 ../factstore/.venv/bin/factstore-fixture export ./out           # source files plus ground truth
-../factstore/.venv/bin/factstore-fixture load "<writer credential>"   # for a store with packages/ecom-ops installed
+../factstore/.venv/bin/factstore-fixture load "<writer credential>"   # for a store with packages/ecom-ops and ecom-index installed
 ../factstore/.venv/bin/factstore-fixture bench --admin-dsn "$FACTSTORE_ADMIN_DSN"
 ../factstore/.venv/bin/pytest
 ```
@@ -91,7 +91,8 @@ Orders cover the year to date. Purchasing history starts in July 2025.
 
 `load` writes the world through `transact` the way the skills eventually will:
 
-- **Full facts** for what the store is primary for: suppliers, SKUs and their crosswalk identifiers, POs, inspections, shipments, customs entries, and stock at factories and on the water.
+- **Full facts** for what the store is primary for: suppliers, SKUs and their crosswalk identifiers, POs, inspections, shipments and customs entries.
+- **No stock counts.** Stock at a factory or on the water follows from POs and shipment lines, which is how the simulation counts it; question 10 derives it (design §14). Stock at the 3PL and at Amazon stays in their exports.
 - **Identifiers and join keys only** for what Shopify, Amazon and the 3PL own (the design's default for open question 2).
 - **Nothing from QuickBooks**, which holds the general ledger.
 
@@ -105,12 +106,16 @@ The store stamps transactions with the time they are written, not the simulated 
 
 [questions.py](src/factstore_fixture/questions.py) holds the ten questions of build plan M0, an operator's questions about the supply side. Each comes with a reference answer, computed by a naive fold over the log, and reference SQL. The OQ1 spike chose the query language with them, and `tests/test_questions.py` answers them through `query`.
 
-The loader writes with 93 attributes:
-- 13 from factstore-core, which `init` installs;
-- 69 from factstore-ecom-ops, which the store needs installed (`new_store` in [load.py](src/factstore_fixture/load.py) makes one that has it);
-- 11 sales-side identifiers it registers itself ([vocabulary.py](src/factstore_fixture/vocabulary.py)), as the catalogue skill would on its first run.
+Question 10 changed after M5. It used to read stock counts the loader stored, and now derives stock from POs and shipments. The derived answer is the simulation's own count, and a test checks it. The OQ1 spike and M2 ran the earlier text.
 
-The kernel's near-match check flags 18 pairs among them, each declared with `distinct_from` in the manifests or in `vocabulary.py`. Some are real overlaps, such as `amazon/order_id` against `shopify/order_id`. Others are false positives from shared namespaces or templated docs, such as `sku/code` against `sku/hs_code`, and `qc/inspector` against `qc/inspected_on`.
+The loader's vocabulary is 90 attributes from three packages, and it registers nothing itself:
+- 14 from factstore-core, which `init` installs;
+- 61 from factstore-ecom-ops, the supply side;
+- 15 from factstore-ecom-index, the identifiers and join keys of what Shopify, Amazon and the 3PL own.
+
+The store needs the last two installed; `new_store` in [load.py](src/factstore_fixture/load.py) makes one that has them. Until M5's decision the loader registered 11 sales-side identifiers itself, as the catalogue skill would have; they are in ecom-index now.
+
+The kernel's near-match check flags 21 pairs among them, each declared with `distinct_from` in the manifests. Some are real overlaps, such as `amazon/order_id` against `shopify/order_id`. Others are false positives from shared namespaces or templated docs, such as `sku/code` against `sku/hs_code`, and `qc/inspector` against `qc/inspected_on`.
 
 ## Assumptions and simplifications
 

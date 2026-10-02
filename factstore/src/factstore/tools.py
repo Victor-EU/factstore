@@ -150,6 +150,17 @@ attribute, and before writing when unsure which attribute fits.""",
     },
 }
 
+WHAT_WAS_KNOWN = """\
+as_of reads when facts were recorded, not when they held in the world, so a store loaded today \
+from a year of documents has nothing as of last month. Read history instead, keeping each value \
+whose transaction's evidence (core/evidence) was issued by the date (document/issued_at), the \
+latest issued winning. Each PO's ETD as known at the start of 15 March 2026 in New York:
+select distinct on (h.e) h.e, h.v from history."po/etd" h
+join "core/evidence" ev on ev.e = h.tx
+join "document/issued_at" d on d.e = ev.v
+where h.op = 'assert' and d.v < '2026-03-15T00:00:00-04:00'
+order by h.e, d.v desc, h.tx desc"""
+
 QUERY = {
     "name": "query",
     "description": """\
@@ -188,6 +199,8 @@ path in its own subquery, or join along one path only.
 
 as_of: a transaction ID, or an instant with a timezone. Every view, history included, then shows \
 the store as it was after that transaction. Pass as_of rather than filtering on tx.
+
+What was known on a date: """ + WHAT_WAS_KNOWN + """
 
 facts(e, a, v, tx) lists every value as text with its attribute name: \
 select a, v from facts where e = 123.

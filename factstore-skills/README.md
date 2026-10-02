@@ -4,7 +4,7 @@ Build plan M4. The procedures of design Part III, for agents. Neither adds kerne
 
 | Skill | What it does |
 |---|---|
-| [`factstore-catalogue`](catalogue/SKILL.md) | Indexes a company's systems (design §6), from exports. Each record is indexed under its own system's ID, with refs to the records it names. It resolves the same thing across systems and records which system owns which field. Identifiers and join keys only, per open question 2. |
+| [`factstore-catalogue`](catalogue/SKILL.md) | Indexes a company's systems (design §6), from exports. Each record is indexed under its own system's ID, with refs to the records it names. It resolves the same thing across systems and records which system owns which field, then checks what it wrote before it reports. Identifiers and join keys only, per open question 2. |
 | [`factstore-ontology`](ontology/SKILL.md) | Reads `stats`, groups attribute signatures into shapes, and proposes names to a person (design §7). It records the names they confirm. |
 
 The ingestion skill for supplier documents belongs to its vocabulary: [`ecom-ops-ingest-documents`](../packages/ecom-ops/ingest-documents/SKILL.md) in factstore-ecom-ops.
