@@ -1,0 +1,184 @@
+{
+ "round": 4,
+ "use_case": "Read a supplier's orders and invoices, in layouts the skill hasn't seen",
+ "model": "sonnet",
+ "sample": 20,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 37,
+   "by_agent": {
+    "ingestion agent": [
+     "station/call_sign",
+     "station/market",
+     "org/name",
+     "order/key",
+     "order/number",
+     "order/station",
+     "order/agency",
+     "order/advertiser",
+     "order/flight_start",
+     "order/flight_end",
+     "order/original_date",
+     "order/alt_order_number",
+     "order/estimate_number",
+     "order/spots",
+     "order/gross_amount_usd",
+     "order/agency_commission_usd",
+     "order/net_amount_usd",
+     "order/tax_usd",
+     "order/total_with_tax_usd",
+     "order/status",
+     "order/office_sought",
+     "order/election_date",
+     "order/buyer_order_number",
+     "invoice/key",
+     "invoice/number",
+     "invoice/date",
+     "invoice/order",
+     "invoice/period_start",
+     "invoice/period_end",
+     "invoice/aired_spots",
+     "invoice/gross_amount_usd",
+     "invoice/agency_commission_usd",
+     "invoice/net_amount_usd",
+     "invoice/payment_terms",
+     "invoice/station",
+     "invoice/agency",
+     "invoice/advertiser"
+    ],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "ids": {},
+  "bare": {
+   "invoice/key": {
+    "entities": 4,
+    "bare": 0
+   },
+   "order/key": {
+    "entities": 20,
+    "bare": 0
+   },
+   "org/name": {
+    "entities": 29,
+    "bare": 29
+   },
+   "shape/name": {
+    "entities": 0,
+    "bare": 0
+   },
+   "station/call_sign": {
+    "entities": 19,
+    "bare": 10
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 0,
+   "allowed": []
+  },
+  "documents": {
+   "documents": 20,
+   "url": 20,
+   "issued_at": 20
+  },
+  "size": {
+   "facts": 906,
+   "entities": 97,
+   "transactions": 32
+  },
+  "evidence": {
+   "transactions": 24,
+   "with_evidence": 24,
+   "with_confidence": 24
+  },
+  "shapes": null,
+  "truth": {
+   "forms": {
+    "given": 20,
+    "recorded": 20,
+    "recorded_more_than_once": 0,
+    "dated": 20,
+    "scans": 2,
+    "scans_recorded": 2
+   },
+   "fields": {
+    "contract_num": {
+     "labelled": 20,
+     "found": 20
+    },
+    "property": {
+     "labelled": 19,
+     "found": 18
+    },
+    "advertiser": {
+     "labelled": 20,
+     "found": 18,
+     "found_by_ref": 3
+    },
+    "gross_amount": {
+     "labelled": 20,
+     "found": 20
+    },
+    "agency": {
+     "labelled": 12,
+     "found": 11,
+     "found_by_ref": 3
+    },
+    "product": {
+     "labelled": 18,
+     "found": 1
+    },
+    "flight_from": {
+     "labelled": 17,
+     "found": 14,
+     "unusable": 3
+    },
+    "flight_to": {
+     "labelled": 17,
+     "found": 13,
+     "unusable": 4
+    },
+    "tv_address": {
+     "labelled": 15,
+     "found": 5
+    }
+   },
+   "lines": {
+    "labelled": 269,
+    "unusable": 4,
+    "found": 3
+   },
+   "people": {
+    "emails_on_forms": 0,
+    "phones_on_forms": 7,
+    "values_holding_an_email": 0,
+    "values_holding_a_phone": 0,
+    "attributes_naming_a_role": 2
+   },
+   "marked": {
+    "contract_num": 1.0,
+    "property": 0.947,
+    "advertiser": 0.9,
+    "gross_amount": 1.0,
+    "lines": 0.011
+   }
+  },
+  "cost_usd": 1.53,
+  "wall_minutes": 6,
+  "questions": {
+   "right": 3,
+   "asked": 6,
+   "wrong": [
+    "2",
+    "4",
+    "5"
+   ]
+  }
+ }
+}

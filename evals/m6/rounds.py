@@ -16,6 +16,7 @@ from typing import Callable
 import round1
 import round2
 import round3
+import round4
 import round5
 
 
@@ -130,18 +131,31 @@ ROUNDS = {r.number: r for r in [
                "The funnel joins the marketplace by seller_id. Payments, and the ontology's shapes, are "
                "reported: nothing says how either should look.")),
     Round(
-        4, "Read supplier invoices and orders",
-        dataset="docile",
-        origin="https://github.com/rossumai/docile: the annotated set, with a token from "
-               "https://docile.rossum.ai (into data/docile/documents/)",
-        licence="The terms given with the token; read them before downloading.",
-        stages=("ingest", "rerun", "questions"), packages=("packages/ecom-ops", "factstore-skills"),
-        sources=("documents",), ingest_skill="packages/ecom-ops/ingest-documents",
-        prompts={"ingest": "Our suppliers' invoices and orders are in ./exports/documents. Ingest them into "
-                           "the fact store with the ecom-ops-ingest-documents skill."},
-        sizes="20 documents, then 100, then 500, each only once the smaller passes",
-        notes=("MIDD was the first choice; its public files hold only the annotations, not the PDFs.",
-               "The annotations give each document's fields and line items: the answer key.")),
+        4, "Read a supplier's orders and invoices, in layouts the skill hasn't seen",
+        dataset="vrdu",
+        origin="https://github.com/google-research-datasets/vrdu: ad-buy-form/ only (641 PDFs, 197 MB, and their "
+               "labels, 32 MB), by a sparse git clone into data/vrdu/repo/; data/vrdu/documents links to its pdfs/",
+        licence="None stated: the repo has no licence file and is archived. The forms are public records from the "
+                "FCC's public files. Internal testing only (Victor, 2026-10-03).",
+        stages=("ingest", "rerun", "questions"), packages=("factstore-skills",), sources=(round4.DOCUMENTS,),
+        ingest_skill="factstore-skills/ingest",
+        prompts={"ingest": "We track political TV ad buys. TV stations' orders, contracts and invoices for airtime, "
+                           "from their public files, are in ./exports/documents as PDFs. Record what they say in the "
+                           "fact store with the factstore-ingest skill, so that we can look it up later."},
+        sizes="20 forms, then 100, then 500, each only once the smaller passes; every sample holds the questions' 9",
+        questions=tuple({k: v for k, v in q.items() if k != "forms"} for q in round4.QUESTIONS),
+        answers=round4.answers, truth=round4.truth, sampler=round4.sample, judge=round4.judge,
+        notes=("Pass: all six questions; each form recorded once, with its issue date; every fact citing the form "
+               "it came from; for contract number, station, advertiser and gross amount, at least 90% of the "
+               "usable labels on a fact citing their form; at least 90% of the usable line items each found as "
+               "one record with its amount and dates; no salesperson's or buyer's name, email address or phone "
+               "number in the store; the re-run writes nothing.",
+               "Agency, product, flight dates and the station's address are reported, not marked. Agency is "
+               "labelled on fewer than half the forms, and the address is a company's.",
+               "In the trial every miss is checked against its form. A label the form contradicts is left out of "
+               "the key and counted.",
+               "DocILE, the first choice, had nothing under its download token (2026-10-03). MIDD's public files "
+               "hold only the annotations, not the PDFs.")),
     Round(
         5, "One mailbox in another industry, with no vocabulary package",
         dataset="enron",

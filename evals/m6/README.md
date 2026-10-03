@@ -10,7 +10,7 @@ Build plan M6. No design partner has data for us yet, and a partner may use fact
 | 1 | One product list across the marketplaces a brand sells on | An Indian clothing seller's reports: 7 CSVs, 70 MB | Catalogue: matching one product's codes across channels | All of it | Codes shared across files, by script; near matches checked by hand |
 | 2 | One shop's orders, customers and products, with real junk in its ID columns | Online Retail II, a UK gift retailer: 1M order lines, 95 MB | Catalogue at scale; its step 7 checks on real junk: postage and fee codes, cancellations, lines with no customer | All of it | Counted from the raw file |
 | 3 | A marketplace at scale, with a second dataset joined in and duplicate customers | Olist, a Brazilian marketplace, and its sales funnel: 11 CSVs, 126 MB | Catalogue; the ontology on a business it has no package for; questions | All of it | `customer_unique_id` says which customer IDs are one person |
-| 4 | Read supplier invoices and orders | DocILE: 6,680 real business documents, labelled | Ingestion on layouts it hasn't seen; registering beyond the package | 20, then 100, then 500 | The labels: each document's fields and line items |
+| 4 | Read a supplier's orders and invoices, in layouts the skill hasn't seen | VRDU's ad-buy forms: 641 TV stations' orders, contracts and invoices for political airtime, 221 MB | Ingestion on layouts it hasn't seen, with no package; line items; one campaign under several names | 20 forms, then 100, then 500 | The labels: each form's fields and line items |
 | 5 | One mailbox in another industry, with no vocabulary package | Enron, one gas trader's mailbox | Ingestion and the ontology with no package; the personal-data rule on real people | One trader's 103 messages, then a larger mailbox | Questions answered by hand; 50 facts checked by hand |
 
 [rounds.py](rounds.py) has each round's source, licence and stages.
@@ -21,12 +21,13 @@ Build plan M6. No design partner has data for us yet, and a partner may use fact
 - US import records (bills of lading). ImportYeti's terms forbid automated retrieval, and OEC's bulk download is $1,999 a month.
 - The Avocado email collection, which needs a paid LDC licence.
 - MIDD, the first choice for round 4. Its public files hold only the annotations, not the invoice PDFs.
+- DocILE, the second. Its bucket had nothing under the download token (2026-10-03), and its maintainers had left access requests unanswered since July.
 - WeChat. Nothing public exists, so the fixture stays its only test.
 
 **Licences.**
 - **Round 1:** licence "other", with no terms stated. It is a re-upload from data.world, used for internal testing only (Victor, 2026-10-02).
 - **Round 3:** Olist is CC BY-NC-SA 4.0. That fits, since factstore is MIT-licensed and not sold.
-- **Round 4:** DocILE's terms come with its download token. Read them first.
+- **Round 4:** VRDU states no licence: its repo has no licence file and is archived. The forms are public records from the FCC's public files. Internal testing only (Victor, 2026-10-03).
 - **Round 5:** Enron is CC BY 3.0 US, credited to ZL Technologies.
 
 ## Cadence
@@ -242,6 +243,45 @@ A full run took 4 minutes.
 
 Round 3 cost $2.21. Nothing changed, so the fixture's slice didn't run again.
 
+## Round 4: a supplier's orders and invoices, in layouts the skill hasn't seen
+
+**In progress: run b, on 100 forms.** DocILE had nothing under its download token, so VRDU's ad-buy forms stand in (Victor, 2026-10-03; [round4.py](round4.py)).
+- 641 TV stations' orders, contracts and invoices for political airtime, from the FCC's public files for 2012 and 2020.
+- Over 300 stations, dozens of layouts, and 12 line items to a form at the median.
+- 35 scans, and some text layers so garbled that only the page image reads.
+
+No package covers airtime, so ingestion runs on the general skill, `factstore-ingest`. The labels give each form's fields and line items. A label that doesn't read as its type, such as a date cut in two, is left out of the key and counted. The six questions' answers were read from the PDFs by hand.
+
+| Run | Forms | Questions | Contract number | Station | Advertiser | Gross | Line items | Cost |
+|---|---|---|---|---|---|---|---|---|
+| t | 20 | 3 of 6 | 100% | 95% | 90% | 100% | 1% | $1.53 |
+| t2 | 20 | 5 of 6 | 100% | 95% | 85% | 100% | 81% | $1.79 |
+| t3 | 20 | 6 of 6 | 95% | 100% | 100% | 100% | 97% | $1.92 |
+| a | 100 | 5 of 6 | 99% | 98% | 92% | 100% | 36% | $7.05 |
+
+The pass mark asks 90% of each. Every run recorded each form once with its issue date, scans included, wrote no email address, phone number or salesperson's name, and wrote nothing on its re-run. t and t2 were scored before the scorer's last fixes, below.
+
+**What broke, and the fixes** (factstore-skills 0.3.2):
+- **Line items (t).** The skill, written from a mailbox, said nothing about tables. The agent kept each order's totals and left its lines out. The skill now makes a table's rows records of their own, keyed by their record and row number, and checks that they add up to the printed total.
+- **Garbled text layers (t2).** The agent read a form's garbled text layer instead of its page images, which read cleanly, and lost its schedule. The skill now reads such a PDF from its images, as it does a scan.
+- **Scale (a).** At 20 forms the agent read each one. At 100 it wrote parsers for the layouts it knew and left 69 forms with their headers only, which its report said. The skill now works in batches of about 20, finishing each, lines included, before the next. A document a script can't parse, the agent reads itself.
+- **Withdrawing a value (a).** Correcting its first reads of the scans, the agent retracted the earlier transactions' evidence too, so the log lost why those values were written. The skill now retracts the value alone, citing the document read again.
+
+**Advertisers a station labels by their candidate,** such as "POL/Ben Salango/Governor/WV/Dem", are a person's name. They are 139 of the 635 labelled forms.
+- t2 kept them out, as the store's rule says. It didn't borrow the committee's name from other forms either, since no form it was citing states it.
+- Question 5 had asked for that campaign, so it moved to the Congressional Leadership Fund, which three spellings name and no form names by a person.
+- The mark counts these labels apart: recorded or kept out, either follows the rule.
+- Whether a political-ad tracker's store holds candidates' names is the business's decision, through `core/personal` (design §15, question 7).
+
+**The scorer's fixes:**
+- **One ref.** An advertiser or station is kept once, so its name sits on a fact citing the first form that named it. A later form's facts reach it by ref.
+- **Call signs.** "WSB" matches "WSB-TV".
+- **Local offices** count as a candidate's label, such as a magistrate.
+
+**Misses checked by hand:**
+- Run t3's one contract-number miss is real. The form's flattened text puts its "External #" before "Contract #", and the agent took the wrong one.
+- Its station misses were the call-sign match, fixed above.
+
 ## Round 5: one mailbox, with no package and no skill
 
 **Done, on run f.** Round 5 ran before round 4, since DocILE needs a download token (Victor, 2026-10-03). One gas trader's mailbox from Enron's West desk: custodian south-s, a 10.9 MB PST, read with libpst's `readpst`.
@@ -341,4 +381,4 @@ Design v0.7's open question 7 found that the server's rule kept personal data ou
 
 ## Status
 
-Rounds 0, 1, 2, 3 and 5 are done. Round 4, DocILE, waits on its download token. [Design v0.7](../../factstore-design.md) is drafted from the rounds done, and round 4's findings go into it when it runs.
+Rounds 0, 1, 2, 3 and 5 are done. Round 4 runs on VRDU's ad-buy forms, since DocILE's download had nothing under its token. Its trial passed on 20 forms; run b is on 100, after run a's fix. [Design v0.7](../../factstore-design.md) is drafted from the rounds done, and round 4's findings go into it when it runs.

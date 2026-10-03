@@ -215,7 +215,7 @@ A partner may use factstore for part of their data, not all of it: one channel's
 | 1 | One product list across the marketplaces a brand sells on | An Indian clothing seller's reports (Kaggle) |
 | 2 | One shop's orders, customers and products, with real junk in its ID columns | Online Retail II, a UK gift retailer |
 | 3 | A marketplace at scale, with a second dataset joined in and duplicate customers | Olist and its sales funnel |
-| 4 | Read supplier invoices and orders | DocILE's labelled business documents |
+| 4 | Read a supplier's orders and invoices, in layouts the skill hasn't seen | VRDU's ad-buy forms: TV stations' orders and invoices for airtime (DocILE had nothing under its token) |
 | 5 | One mailbox in another industry, with no vocabulary package | Enron, one person's mailbox |
 
 - **One round at a time, in order.** A round's fixes change the shared skills, so the next round tests them.
@@ -271,7 +271,7 @@ A partner may use factstore for part of their data, not all of it: one channel's
   - The store's MCP instructions state its rules: values, not copies of text; no personal data; each document once; every fact cites its document. With one line of instructions, agents had put people in the store.
   - A general ingestion skill, `factstore-ingest` (factstore-skills 0.3.0). Under the rules alone, what an agent recorded swung from 8 of 8 questions to 2.
   - The fixture's slice stayed as it was under the new instructions (slice o).
-- **Round 4 waits on DocILE's download token.**
+- **Round 4 runs on VRDU's ad-buy forms** (Victor, 2026-10-03). DocILE's download had nothing under its token, so 641 TV stations' orders, contracts and invoices for political airtime, from the FCC's public files, stand in.
 - **Design v0.7 is drafted** from rounds 1, 2, 3 and 5. It adds two open questions. One is personal data where the store is the source, which the business that owns the store decides; the default is none. The other is a vocabulary with no package. Round 4's findings go into it when the round runs.
 - **Question 7 is built** (core 0.3.0, ecom-ops 0.4.1, factstore-skills 0.3.1). The business's owner or a manager allows an attribute with `core/personal`, using their own credential, and the server's rule names the exception. It needed no kernel code.
   - With nothing allowed, round 5 (run g) passed every part of its mark, and the fixture's slice (p) wrote no personal data.

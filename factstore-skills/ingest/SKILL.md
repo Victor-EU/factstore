@@ -41,6 +41,7 @@ Each document is an entity with `document/hash`, `document/url` and `document/is
 ## Working through a mailbox or a folder
 
 1. **List the documents.** Extract each one's text, issue date, hash and url into your working directory, and group the copies. Read the attachments you can open: text, PDF, RTF, Word and spreadsheet files. List the ones you can't.
+   - A scan, or a PDF whose extracted text comes out garbled, is read from its page images: open the PDF itself, as you would an image. Don't settle for the parts of a garbled text layer that read cleanly.
 2. **Read every document, and keep what states something about the business.**
    - Mail sent to many is still read. A notice, a bulletin or a solicitation from another company carries numbers, dates and deadlines.
    - Skip a document only when it states nothing a person running the business would look up, such as social mail and company-wide announcements.
@@ -48,13 +49,15 @@ Each document is an entity with `document/hash`, `document/url` and `document/is
    - identifiers: deal, contract, order, invoice, notice, case and report numbers;
    - dates: effective, start and end, due, closing, delivery and payment dates;
    - quantities and prices, with their units and currency;
-   - statuses and decisions: approved, cancelled, placed on hold, lowered to, moved to.
+   - statuses and decisions: approved, cancelled, placed on hold, lowered to, moved to;
+   - a table's rows: the lines of an order, an invoice or a schedule. Each row is a record of its own, with what it is, its dates, its quantity, its rate and its amount. A document's totals don't replace its lines.
 
    A value belongs in the store when the document states it, whether or not an attribute exists for it yet.
 4. **Group the values into kinds of record,** such as a deal, a notice or a claim, and give each record a key:
    - its own identifier, when the document gives one: a deal number, a notice number;
    - otherwise a key built from what makes it unique, such as the company, the place and the start date: `acme/rotterdam/2001-04-26`. Never a person, and never a document's position in the folder.
    - an organisation is keyed by its name, spelled as the documents most often spell it: one record, however many documents name it.
+   - a table's row is keyed by its record's key and the row's number, as the document numbers it or else in its order: `acme/INV-2210/3`. It points at its record with `core/part_of`.
 5. **Register the attributes, in one batch.**
    - Search for each one first, and reuse an attribute whose doc fits.
    - Name a new one after the kind of record and the field: `notice/effective_from`, `deal/price`. One namespace per kind of record.
@@ -65,12 +68,15 @@ Each document is an entity with `document/hash`, `document/url` and `document/is
    - Facts from one document go in one transaction, with its evidence and confidence. Interpreted values go in a second one.
    - Create each document in the same transaction as its first facts, or on its own when it states nothing.
    - For more than a few hundred facts, write a script that uses the SDK (`import factstore`; `factstore.transact(facts)`, with the store in `FACTSTORE_DSN`). Run it on a few documents, and check the result with `query` before running the rest.
+   - A script reads only the layouts you wrote it for. Work through a large folder in batches of about 20 documents, and finish each batch before starting the next: every value its documents state is in the store, lines included. Read a document your script can't parse yourself, from its page images if its text is garbled. A document recorded with its header only is unfinished.
+   - To withdraw a value you wrote wrongly, retract that value alone, in a transaction citing the document you read again. Keep the earlier transaction's evidence, so the log still says why the value was written.
 7. **Where documents disagree, or one doubts itself,** record what each states, each citing its own document, and report the conflict. Don't pick a winner.
 
 ## Check what you wrote
 
 - **Documents.** The store holds one document for each distinct message or file, and each has an issue date unless you reported why not.
 - **Evidence.** Every transaction you wrote carries `core/evidence`.
+- **Lines against totals.** Every document that prints lines has them in the store, and where it prints a total, their amounts add up to it.
 - **No personal data.** List the string values you wrote, and look for names, email addresses and phone numbers outside the attributes the business allowed.
 - **Ten facts against their documents.** Draw ten facts, read each one's document, and check that it states them. If any doesn't, find what wrote it and fix the rule.
 
