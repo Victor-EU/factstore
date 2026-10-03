@@ -1,6 +1,7 @@
 ---
 name: factstore-ingest
 description: Read documents into a factstore when no vocabulary package covers their business, every fact backed by the document it came from. Covers emails and mailboxes, chat exports, PDFs and office files, in any industry. Use when asked to ingest, extract, read in or record what a mailbox or a folder of documents says, and no package's own ingestion skill fits.
+license: MIT
 ---
 
 # Read documents into the store, with no package

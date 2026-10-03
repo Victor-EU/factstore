@@ -1,6 +1,7 @@
 ---
 name: factstore-ontology
 description: Describe the kinds of thing a factstore holds, such as Purchase order or Shipment, by reading attribute co-occurrence and refs from the stats tool. Propose names to a person, and record the names they confirm as shapes. Use when asked what the store contains, to describe or name its entity types, ontology or data model, or to check recorded shapes against the data.
+license: MIT
 ---
 
 # Describe the store's shapes, and record the names a person confirms

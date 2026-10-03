@@ -20,6 +20,7 @@ A package is a directory holding `manifest.json`:
   "name": "factstore-ecom-ops",
   "version": "0.1.0",
   "doc": "One line on what the vocabulary covers.",
+  "license": "MIT",
   "depends_on": ["factstore-core"],
   "skills": [],
   "attributes": [
@@ -31,7 +32,8 @@ A package is a directory holding `manifest.json`:
 
 - Each attribute is a `register_attribute` spec, written one per line so a diff shows one attribute per change.
 - Packages follow the agents' rule: where the kernel finds a near match in the package or in a package it depends on, the manifest names it in `distinct_from`.
-- `skills` lists the package's skills, each a `SKILL.md` in its directory, with a `name` and a `description` in its frontmatter ([Agent Skills](https://agentskills.io)).
+- `skills` lists the package's skills, each a `SKILL.md` in its directory, with a `name` and a `description` in its frontmatter ([Agent Skills](https://agentskills.io)), and its `license`.
+- `license` is optional: an SPDX expression, for a package copied or published apart from this repository. Every package here is MIT, as the repository is.
 
 ## Installing
 

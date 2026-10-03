@@ -212,13 +212,15 @@ def test_distinct_from_names_only_the_package_and_its_dependencies():
 
 @pytest.mark.parametrize("package", [CORE, ECOM_OPS, SKILLS], ids=lambda p: p.name)
 def test_skills_are_agent_skills(package):
-    """Each skill is a SKILL.md with the frontmatter agents load it by: a name and a description."""
+    """Each skill is a SKILL.md with the frontmatter agents load it by, a name and a description,
+    and the package's license, since a skill is often copied on its own."""
     for skill in package.skills:
         text = (package.path / skill).read_text()
-        front = re.match(r"---\nname: ([a-z0-9-]+)\ndescription: (.+)\n---\n", text)
-        assert front, f"{skill} has no name and description frontmatter"
+        front = re.match(r"---\nname: ([a-z0-9-]+)\ndescription: (.+)\nlicense: (.+)\n---\n", text)
+        assert front, f"{skill} has no name, description and license frontmatter"
         assert len(front[1]) <= 64 and 0 < len(front[2]) <= 1024
         assert front[1].startswith(("factstore-", package.name.removeprefix("factstore-")))
+        assert front[3] == package.license == "MIT"
 
 
 def test_core_0_3_0_adds_personal_to_a_store_of_0_2_0(tmp_path):

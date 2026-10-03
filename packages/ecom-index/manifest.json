@@ -2,6 +2,7 @@
   "name": "factstore-ecom-index",
   "version": "0.2.0",
   "doc": "Identifiers and join keys for the records an online brand's systems own (Shopify, Amazon, the 3PL and QuickBooks), which the catalogue indexes.",
+  "license": "MIT",
   "depends_on": ["factstore-core", "factstore-ecom-ops"],
   "skills": [],
   "attributes": [

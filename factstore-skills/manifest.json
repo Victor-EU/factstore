@@ -2,6 +2,7 @@
   "name": "factstore-skills",
   "version": "0.3.2",
   "doc": "The catalogue, ontology and ingestion skills, and the vocabulary the ontology skill records shapes with.",
+  "license": "MIT",
   "depends_on": ["factstore-core"],
   "skills": ["catalogue/SKILL.md", "ontology/SKILL.md", "ingest/SKILL.md"],
   "attributes": [

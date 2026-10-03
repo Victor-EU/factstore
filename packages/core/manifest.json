@@ -2,6 +2,7 @@
   "name": "factstore-core",
   "version": "0.3.0",
   "doc": "The Part II conventions: composition, supersession, merges, money, documents, domain time and provenance.",
+  "license": "MIT",
   "depends_on": [],
   "skills": [],
   "attributes": [

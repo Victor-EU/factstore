@@ -1,6 +1,7 @@
 ---
 name: ecom-ops-ingest-documents
 description: Read supplier and logistics documents into a factstore with the factstore-ecom-ops vocabulary, every fact backed by the document it came from. Covers proforma invoices, commercial invoices and packing lists, inspection reports, supplier chats such as WeChat exports, and forwarder, customs broker and warehouse emails. Use when asked to ingest, extract, read in or record supplier PDFs, chat exports or shipping emails, or purchase orders, shipments, inspections and customs entries.
+license: MIT
 ---
 
 # Ingest supplier and logistics documents

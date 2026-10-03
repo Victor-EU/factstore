@@ -164,6 +164,13 @@ def test_manifests_are_checked_before_anything_is_written(tmp_path):
         packages.load(tmp_path / "Bad_Name")
 
 
+def test_a_manifest_may_name_its_license(tmp_path):
+    assert packages.load(manifest(tmp_path, "test-mit", [spec("x/a")], license="MIT")).license == "MIT"
+    assert packages.load(manifest(tmp_path, "test-none", [spec("x/a")])).license is None
+    with pytest.raises(PackageError, match="license must be an SPDX expression"):
+        packages.load(manifest(tmp_path, "test-bad", [spec("x/a")], license=["MIT"]))
+
+
 def test_the_cli_installs_and_reports(tmp_path, store_name, capsys):
     directory = str(manifest(tmp_path, "test-orders", ORDERS))
     assert cli.main(["--admin-dsn", ADMIN_DSN, "install", store_name, directory]) == 0

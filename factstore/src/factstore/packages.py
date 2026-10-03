@@ -6,6 +6,7 @@ A package is a directory holding manifest.json:
       "name": "factstore-ecom-ops",
       "version": "0.1.0",
       "doc": "One line on what the vocabulary covers.",
+      "license": "MIT",
       "depends_on": ["factstore-core"],
       "skills": [],
       "attributes": [
@@ -17,7 +18,8 @@ A package is a directory holding manifest.json:
 
 Each attribute is a register_attribute spec, distinct_from included: where the kernel finds a near
 match in the package or in a package it depends on, the manifest names it, as an agent would.
-`skills` are paths of skill files in the package's directory.
+`skills` are paths of skill files in the package's directory. `license` is optional: an SPDX
+expression, such as "MIT", for a package copied or published apart from its repository.
 
 admin.install registers the attributes a store lacks in one transaction, written by an actor named
 after the package, so the log says which package registered what. A new version may also make the
@@ -38,7 +40,7 @@ from .errors import FactstoreError
 MANIFEST = "manifest.json"
 NAME_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 REQUIRED = {"name", "version", "doc", "attributes"}
-OPTIONAL = {"depends_on", "skills"}
+OPTIONAL = {"license", "depends_on", "skills"}
 
 
 class PackageError(FactstoreError):
@@ -58,6 +60,7 @@ class Package:
     skills: tuple[str, ...]
     attributes: tuple[dict, ...]
     path: Path
+    license: str | None = None
 
 
 @dataclass(frozen=True)
@@ -95,6 +98,8 @@ def load(path) -> Package:
         problems.append(f"name must be lowercase words joined by hyphens, like factstore-ecom-ops, not {name!r}")
     if not isinstance(version, str) or not version.strip():
         problems.append("version must be a non-empty string")
+    if "license" in raw and (not isinstance(raw["license"], str) or not raw["license"].strip()):
+        problems.append('license must be an SPDX expression, such as "MIT"')
     if not isinstance(doc, str) or not doc.strip() or "\n" in doc:
         problems.append("doc must be one non-empty line")
     if not isinstance(depends_on, list) or not all(isinstance(d, str) and NAME_RE.match(d) for d in depends_on):
@@ -119,7 +124,8 @@ def load(path) -> Package:
             seen.add(ident)
     if problems:
         raise PackageError([f"{directory / MANIFEST}: {p}" for p in problems])
-    return Package(name, version, doc.strip(), tuple(depends_on), tuple(skills), tuple(attributes), directory)
+    return Package(name, version, doc.strip(), tuple(depends_on), tuple(skills), tuple(attributes), directory,
+                   raw.get("license"))
 
 
 def core() -> Package:

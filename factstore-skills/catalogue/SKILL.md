@@ -1,6 +1,7 @@
 ---
 name: factstore-catalogue
 description: Catalogue a company's systems into a factstore. Index each system's records under their own IDs, join them, resolve the same thing across systems (one product's codes in the shop, the marketplace, the warehouse and the factory; one customer with two accounts), and record which system owns which field. Use when asked to catalogue, index or map a company's data sources or exports into the fact store, or to re-run a catalogue after the sources change.
+license: MIT
 ---
 
 # Catalogue a company's systems
