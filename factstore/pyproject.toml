@@ -2,6 +2,7 @@
 name = "factstore"
 version = "0.1.0.dev0"
 description = "The facts component: entities, registered attributes, values and transactions, on Postgres."
+license = "MIT"
 requires-python = ">=3.12"
 dependencies = ["psycopg[binary]>=3.2", "mcp>=2.2"]
 

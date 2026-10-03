@@ -2,6 +2,7 @@
 name = "factstore-fixture"
 version = "0.1.0.dev0"
 description = "A synthetic cross-border brand for testing and benchmarking factstore: a direct loader and source-shaped exports."
+license = "MIT"
 requires-python = ">=3.12"
 dependencies = ["factstore"]
 
