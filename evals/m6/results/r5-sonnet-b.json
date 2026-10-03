@@ -1,0 +1,128 @@
+{
+ "round": 5,
+ "use_case": "One mailbox in another industry, with no vocabulary package",
+ "model": "sonnet",
+ "sample": null,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 21,
+   "by_agent": {
+    "ingestion agent": [
+     "email/folder",
+     "sitara/deal_number",
+     "deal/counterparty",
+     "deal/pricing_index",
+     "counterparty/name",
+     "counterparty/trading_status",
+     "notice/id",
+     "notice/pipeline",
+     "notice/type",
+     "notice/posted_on",
+     "notice/effective_from",
+     "notice/effective_to",
+     "restriction/id",
+     "restriction/pipeline",
+     "restriction/point",
+     "restriction/capacity_mmcfd",
+     "restriction/from",
+     "restriction/to",
+     "nomination/id",
+     "nomination/flow_month",
+     "nomination/volume_mmcfd"
+    ],
+    "ontology agent": [],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "ids": {},
+  "bare": {
+   "counterparty/name": {
+    "entities": 5,
+    "bare": 4
+   },
+   "nomination/id": {
+    "entities": 1,
+    "bare": 0
+   },
+   "notice/id": {
+    "entities": 8,
+    "bare": 0
+   },
+   "restriction/id": {
+    "entities": 4,
+    "bare": 0
+   },
+   "shape/name": {
+    "entities": 6,
+    "bare": 0
+   },
+   "sitara/deal_number": {
+    "entities": 3,
+    "bare": 0
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 0
+  },
+  "documents": {
+   "documents": 103,
+   "url": 103,
+   "issued_at": 96
+  },
+  "size": {
+   "facts": 1103,
+   "entities": 136,
+   "transactions": 30
+  },
+  "evidence": {
+   "transactions": 20,
+   "with_evidence": 20,
+   "with_confidence": 0
+  },
+  "shapes": 6,
+  "truth": {
+   "messages": {
+    "files": 249,
+    "distinct": 103,
+    "recorded": 103,
+    "recorded_more_than_once": 0,
+    "documents": 103
+   },
+   "people": {
+    "names_in_mailbox": 829,
+    "addresses_in_mailbox": 1084,
+    "phones_in_mailbox": 49,
+    "values_naming_a_person": 0,
+    "values_holding_an_address": 0,
+    "values_holding_a_phone": 0
+   },
+   "recorded": {
+    "document": 302,
+    "email": 249,
+    "core": 126,
+    "notice": 37,
+    "restriction": 23,
+    "counterparty": 6,
+    "deal": 5,
+    "sitara": 3,
+    "nomination": 3
+   }
+  },
+  "cost_usd": 2.14,
+  "wall_minutes": 7,
+  "questions": {
+   "right": 6,
+   "asked": 8,
+   "wrong": [
+    "6",
+    "7"
+   ]
+  }
+ }
+}

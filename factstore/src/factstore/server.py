@@ -61,7 +61,18 @@ REFUSAL_NEXT = (
 
 INSTRUCTIONS = """\
 A store of facts with provenance. Search attributes before registering one; query and stats \
-read, transact writes. Every write is stamped with your credential's actor and its time."""
+read, transact writes. Every write is stamped with your credential's actor and its time.
+
+What goes in, from any source:
+- Identifiers, the refs between records, and the values someone will look up, such as a date, a \
+quantity, a status or a deal number. Not copies of text: a message's body, a summary or a note \
+stays in its document.
+- No personal data. A person's name, email address, phone number and postal address stay in the \
+source. Name a record by its system's ID, and a document by its URL.
+- Each document once, however many copies of it you are given: one entity, identified by \
+document/hash, with document/url and document/issued_at.
+- Every fact you read from a document cites it: {"e": "tmp:tx", "a": "core/evidence", "v": \
+<the document>} in the same transaction."""
 
 
 def dispatch(store: Store, exciser: Store | None, name: str, args: dict):

@@ -16,6 +16,7 @@
 - **Stock at factories and on the water is derived** (§14). factstore-ecom-ops no longer has stock attributes, and question 10 of the ten is now a derivation.
 - **The catalogue checks its own output before it reports** (§6, step 7).
 - **The slice again** (§18): three more runs, each from an empty store. Nothing was registered beyond the packages, all 16 of the operator's kinds were found, and in the last run the re-run wrote nothing and all ten questions were right on the first try.
+- **factstore is MIT-licensed and not sold** (§13). Open question 5 asks whether a brand would adopt it, not pay for it.
 
 **Changes in v0.5:** what building it found, up to the slice run on the synthetic fixture (build plan M1–M5, [evals/m5](evals/m5/README.md)). No partner data yet.
 - **The kernel needed no change from the slice.** Part I stands as v0.4 wrote it, with two details the build settled:
@@ -252,7 +253,7 @@ The emerging "agentic data platform" is read-side: data products, `get_` tools, 
 The Semantic Web needed hand-authored ontologies because the reading agent was dumb. Now the reader is smart, so structure matters less for reading and more for writing: trust, provenance, and "why is this number this?" A fact is an RDF triple with a transaction stapled on, and the ontology is read off the data instead of written down.
 
 ## 13. Distribution
-The human buys it; the agent chooses it. A coding agent asked to "store customer contacts" should find this the obvious thing to reach for instead of `json.dump`. The competitor is not Salesforce; it is a founder with a coding agent, a Postgres and a folder of markdown. The pitch is the three invariants and the catalogue — the parts they shouldn't build and can't bolt on later.
+factstore is MIT-licensed and not sold. The human adopts it; the agent chooses it. A coding agent asked to "store customer contacts" should find this the obvious thing to reach for instead of `json.dump`. The competitor is not Salesforce; it is a founder with a coding agent, a Postgres and a folder of markdown. The pitch is the three invariants and the catalogue — the parts they shouldn't build and can't bolt on later.
 
 Invariant 3 makes registration expensive on purpose; distribution needs the store to be easier than `json.dump`. `register_attribute` is where the two meet: a coding agent is never blocked waiting for a human, but it cannot register silently — every new attribute names the near matches it rejected, in the log.
 
@@ -279,7 +280,7 @@ Each per-source SKU ID is an identity attribute. HS code is not — many SKUs sh
 2. *Resolved after v0.4, below.*
 3. **Excision and backups.** Deleting from the log does not reach backups or exports. Crypto-shredding (personal values encrypted with a key per entity; excision deletes the key) does, at the cost of a key store. Nor does excision stop re-ingestion: if the person is still in Shopify, the next catalogue run brings them back. Either the excision record keeps the source identifier and the catalogue skill skips anything it lists — retaining an identifier for a deleted person — or excision is also carried out in the source system, which the kernel cannot do itself.
 4. *Resolved after v0.4, below.*
-5. Is the e-commerce supply-side pain sharp enough to pay for before agents read WeChat reliably? Only a partner can answer the first half. On the fixture's chats, the ingestion skill put 66 of 70 ETD changes and all 15 container numbers on the right records (§18). But the fixture was written alongside the skill, and its voice notes are unreadable by construction.
+5. Is the e-commerce supply-side pain sharp enough for a brand to adopt factstore before agents read WeChat reliably? Only a partner can answer the first half. On the fixture's chats, the ingestion skill put 66 of 70 ETD changes and all 15 container numbers on the right records (§18). But the fixture was written alongside the skill, and its voice notes are unreadable by construction.
 6. *Resolved after v0.5, below.*
 
 **Resolved after v0.5**

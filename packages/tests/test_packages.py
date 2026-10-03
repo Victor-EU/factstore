@@ -115,6 +115,28 @@ def test_ecom_ops_0_3_0_leaves_the_stock_attributes_of_earlier_versions(tmp_path
         admin.drop_store(ADMIN_DSN, name)
 
 
+def test_ecom_ops_0_4_0_and_ecom_index_0_2_0_add_listings_to_a_store_of_the_versions_before(tmp_path):
+    """Amazon listings became records of their own after M6's round 1 (evals/m6): a store with
+    ecom-ops 0.3.0 and ecom-index 0.1.0 takes the new versions, registering only what they add."""
+    added = {"factstore-ecom-ops": ["listing/sku", "listing/asin"], "factstore-ecom-index": ["line/listing"]}
+    old = []
+    for package in (ECOM_OPS, ECOM_INDEX):
+        raw = json.loads((package.path / "manifest.json").read_text())
+        raw.update(version="0.0.9", skills=[], attributes=[a for a in raw["attributes"]
+                                                          if a["ident"] not in added[package.name]])
+        (tmp_path / package.path.name).mkdir()
+        (tmp_path / package.path.name / "manifest.json").write_text(json.dumps(raw))
+        old.append(packages.load(tmp_path / package.path.name))
+    name = new_store()
+    try:
+        admin.install(ADMIN_DSN, name, old)
+        results = admin.install(ADMIN_DSN, name, [ECOM_OPS, ECOM_INDEX])
+        assert {r.package: r.registered for r in results} == added
+        assert all(r.evolved == [] for r in results)
+    finally:
+        admin.drop_store(ADMIN_DSN, name)
+
+
 @pytest.fixture(scope="module")
 def agent():
     """A store with every package, and an agent's credential for it."""
@@ -163,6 +185,9 @@ NEAR_DUPLICATES = [
     ("shopify/order_number", "string", "Shopify order name such as #18301.", "shopify/order_name"),
     # core 0.2.0
     ("document/issue_date", "date", "Date printed on a document.", "document/issued_at"),
+    # ecom-ops 0.4.0 and ecom-index 0.2.0: Amazon listings
+    ("amazon/listing_asin", "ref", "ASIN an Amazon listing is listed under.", "listing/asin"),
+    ("order_line/listing", "ref", "Marketplace listing an order line names.", "line/listing"),
 ]
 
 

@@ -1,0 +1,237 @@
+{
+ "round": 2,
+ "use_case": "One shop's orders, customers and products, with real junk in its ID columns",
+ "model": "sonnet",
+ "sample": 300,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 3,
+   "by_agent": {
+    "catalogue agent": [
+     "shop/invoice_no",
+     "shop/customer_id",
+     "shop/order_line"
+    ],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "ids": {
+   "invoice": {
+    "in_source": 3039,
+    "attribute": "shop/invoice_no",
+    "in_store": 3033,
+    "found": 3033,
+    "found_ignoring_case": 3033,
+    "missing": 6,
+    "not_in_source": 0
+   },
+   "stock code": {
+    "in_source": 4070,
+    "attribute": "sku/code",
+    "in_store": 3893,
+    "found": 3883,
+    "found_ignoring_case": 4054,
+    "missing": 187,
+    "not_in_source": 10
+   },
+   "customer, as the file writes it": {
+    "in_source": 378,
+    "attribute": null
+   }
+  },
+  "bare": {
+   "amazon/asin": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/fba_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/fba_shipment_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/fnsku": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/order_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/order_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/seller_sku": {
+    "entities": 0,
+    "bare": 0
+   },
+   "customs/entry_no": {
+    "entities": 0,
+    "bare": 0
+   },
+   "factory/item_code": {
+    "entities": 0,
+    "bare": 0
+   },
+   "po_line/key": {
+    "entities": 0,
+    "bare": 0
+   },
+   "po/number": {
+    "entities": 0,
+    "bare": 0
+   },
+   "qc/report_no": {
+    "entities": 0,
+    "bare": 0
+   },
+   "quickbooks/vendor": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shape/name": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shipment/booking_no": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shipment/hbl": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shipment_line/key": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shop/customer_id": {
+    "entities": 378,
+    "bare": 378
+   },
+   "shopify/customer_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/line_item_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/order_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/order_name": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/variant_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shop/invoice_no": {
+    "entities": 3033,
+    "bare": 863
+   },
+   "shop/order_line": {
+    "entities": 78242,
+    "bare": 0
+   },
+   "sku/code": {
+    "entities": 3893,
+    "bare": 3893
+   },
+   "sku/upc": {
+    "entities": 0,
+    "bare": 0
+   },
+   "supplier/code": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/item_code": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/outbound_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/receipt_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/receipt_no": {
+    "entities": 0,
+    "bare": 0
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 0
+  },
+  "documents": {
+   "documents": 1,
+   "url": 1,
+   "issued_at": 0
+  },
+  "size": {
+   "facts": 243118,
+   "entities": 85554,
+   "transactions": 95
+  },
+  "evidence": null,
+  "shapes": null,
+  "truth": {
+   "customers": {
+    "in_file": 378,
+    "attribute": "shop/customer_id",
+    "in_store": 378,
+    "as_decimals": 0
+   },
+   "invoices": {
+    "in_file": 3033,
+    "attribute": "shop/invoice_no",
+    "in_store": 3033,
+    "adjustments_in_file": 6,
+    "adjustments_in_store": 0,
+    "cancellations_in_file": 569,
+    "cancellations_in_store": 569,
+    "naming_a_customer": 2170,
+    "pointing_at_it": 2170
+   },
+   "products": {
+    "in_file": 3889,
+    "attribute": "sku/code",
+    "in_store": 3889,
+    "spelled_two_ways": 147,
+    "split_in_store": 0,
+    "lower_case_twins": 0,
+    "codes_with_spaces": 0,
+    "not_products_in_file": 16,
+    "not_products_as_products": 0,
+    "gift_vouchers_in_file": 4,
+    "gift_vouchers_as_products": 4
+   },
+   "lines": {
+    "invoice_and_product_pairs": 76057,
+    "in_store": 78242
+   }
+  },
+  "cost_usd": 0.62,
+  "wall_minutes": 3,
+  "questions": {
+   "right": 6,
+   "asked": 6,
+   "wrong": []
+  }
+ }
+}

@@ -1,0 +1,269 @@
+{
+ "round": 5,
+ "use_case": "One mailbox in another industry, with no vocabulary package",
+ "model": "sonnet",
+ "sample": null,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 112,
+   "by_agent": {
+    "ingestion agent": [
+     "org/name",
+     "org/credit_status",
+     "org/credit_status_as_of",
+     "pipeline_notice/key",
+     "pipeline_notice/pipeline",
+     "pipeline_notice/number",
+     "pipeline_notice/type",
+     "pipeline_notice/title",
+     "pipeline_notice/dated",
+     "pipeline_notice/effective_from",
+     "pipeline_notice/effective_to",
+     "pipeline_notice/available_capacity_min_mcf_d",
+     "pipeline_notice/available_capacity_max_mcf_d",
+     "pipeline_notice/intraday_capacity_weekday_mcf_d",
+     "pipeline_notice/intraday_capacity_weekend_mcf_d",
+     "pipeline_notice/request_deadline",
+     "pipeline_notice/queue_notification_at",
+     "pipeline_notice/firm_impact_pct",
+     "pipeline_notice/interruptible_suspended",
+     "pipeline_notice/maintenance_from",
+     "pipeline_notice/maintenance_to",
+     "pipeline_notice/previous_maintenance_from",
+     "pipeline_notice/previous_maintenance_to",
+     "capacity_restriction/key",
+     "capacity_restriction/pipeline",
+     "capacity_restriction/location",
+     "capacity_restriction/capacity",
+     "capacity_restriction/unit",
+     "capacity_restriction/from",
+     "capacity_restriction/to",
+     "capacity_restriction/notice",
+     "capacity_restriction/cancelled_maintenance",
+     "capacity_offer/key",
+     "capacity_offer/pipeline",
+     "capacity_offer/notice",
+     "capacity_offer/package",
+     "capacity_offer/receipt_point",
+     "capacity_offer/delivery_point",
+     "capacity_offer/quantity_dth_d",
+     "capacity_offer/term_from",
+     "capacity_offer/term_to",
+     "capacity_offer/prearranged",
+     "capacity_offer/min_bid_usd_per_dth",
+     "capacity_offer/min_bid_volume_dth_d",
+     "capacity_offer/max_bid_volume_dth_d",
+     "capacity_offer/bid_open",
+     "capacity_offer/bid_close",
+     "capacity_offer/award_deadline",
+     "capacity_offer/evergreen",
+     "deal/sitara_number",
+     "deal/counterparty",
+     "deal/price_basis",
+     "deal/status",
+     "deal/delivery_month",
+     "location/abbreviation",
+     "location/name",
+     "location/sort_code",
+     "open_season/key",
+     "open_season/sponsor",
+     "open_season/service_start",
+     "open_season/offers_due",
+     "open_season/offers_open_until",
+     "open_season/closes",
+     "open_season/max_daily_injection_dth_d",
+     "open_season/rack_inventory_usd_per_dth_month",
+     "open_season/rack_injection_usd_per_dth_d_month",
+     "open_season/rack_withdrawal_usd_per_dth_d_month",
+     "open_season/rack_injection_commodity_usd_per_dth",
+     "open_season/rack_withdrawal_commodity_usd_per_dth",
+     "open_season/fuel_min_pct",
+     "open_season/fuel_max_pct",
+     "project/key",
+     "project/sponsor",
+     "project/capacity_mmcf_d",
+     "project/open_season_closes",
+     "project/in_service",
+     "storage_report/key",
+     "storage_report/week_ending",
+     "storage_report/net_change_bcf",
+     "storage_report/total_bcf",
+     "storage_report/pct_full",
+     "storage_report/below_last_year_bcf",
+     "docket/number",
+     "docket/pipeline",
+     "docket/technical_conference",
+     "law/key",
+     "law/signed",
+     "law/effective",
+     "law/rates_frozen_at",
+     "earnings/key",
+     "earnings/company",
+     "earnings/net_income_usd_m",
+     "earnings/eps_usd",
+     "earnings/prior_year_net_income_usd_m",
+     "earnings/prior_year_eps_usd",
+     "nomination/key",
+     "nomination/producer",
+     "nomination/month",
+     "nomination/requested_mmcf_d",
+     "solicitation/key",
+     "solicitation/buyer",
+     "solicitation/supply_month",
+     "solicitation/deadline",
+     "solicitation/max_volume_mmbtu_d",
+     "event/key",
+     "event/organiser",
+     "event/date",
+     "scheduling_issue/key",
+     "scheduling_issue/counterparty",
+     "scheduling_issue/volume_sold",
+     "scheduling_issue/volume_not_scheduled",
+     "scheduling_issue/gas_day"
+    ],
+    "ontology agent": [],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 5,
+   "transactions": 2,
+   "facts": 21
+  },
+  "ids": {},
+  "bare": {
+   "capacity_offer/key": {
+    "entities": 5,
+    "bare": 0
+   },
+   "capacity_restriction/key": {
+    "entities": 6,
+    "bare": 0
+   },
+   "deal/sitara_number": {
+    "entities": 3,
+    "bare": 0
+   },
+   "docket/number": {
+    "entities": 1,
+    "bare": 0
+   },
+   "earnings/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "event/key": {
+    "entities": 4,
+    "bare": 0
+   },
+   "law/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "location/abbreviation": {
+    "entities": 2,
+    "bare": 0
+   },
+   "nomination/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "open_season/key": {
+    "entities": 2,
+    "bare": 0
+   },
+   "org/name": {
+    "entities": 15,
+    "bare": 14
+   },
+   "pipeline_notice/key": {
+    "entities": 8,
+    "bare": 0
+   },
+   "project/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "scheduling_issue/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "shape/name": {
+    "entities": 17,
+    "bare": 0
+   },
+   "solicitation/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "storage_report/key": {
+    "entities": 2,
+    "bare": 0
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 0
+  },
+  "documents": {
+   "documents": 33,
+   "url": 33,
+   "issued_at": 33
+  },
+  "size": {
+   "facts": 1523,
+   "entities": 110,
+   "transactions": 53
+  },
+  "evidence": {
+   "transactions": 43,
+   "with_evidence": 43,
+   "with_confidence": 43
+  },
+  "shapes": 17,
+  "truth": {
+   "messages": {
+    "files": 249,
+    "distinct": 103,
+    "recorded": 33,
+    "recorded_more_than_once": 0,
+    "documents": 33
+   },
+   "people": {
+    "names_in_mailbox": 829,
+    "addresses_in_mailbox": 1084,
+    "phones_in_mailbox": 49,
+    "values_naming_a_person": 0,
+    "values_holding_an_address": 0,
+    "values_holding_a_phone": 0
+   },
+   "recorded": {
+    "document": 99,
+    "core": 86,
+    "capacity_offer": 85,
+    "pipeline_notice": 67,
+    "capacity_restriction": 43,
+    "org": 17,
+    "open_season": 16,
+    "deal": 12,
+    "storage_report": 12,
+    "event": 12,
+    "earnings": 6,
+    "location": 6,
+    "solicitation": 5,
+    "project": 5,
+    "scheduling_issue": 5,
+    "nomination": 4,
+    "law": 4,
+    "docket": 3
+   }
+  },
+  "cost_usd": 3.17,
+  "wall_minutes": 12,
+  "questions": {
+   "right": 8,
+   "asked": 8,
+   "wrong": []
+  }
+ }
+}

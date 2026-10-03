@@ -5,8 +5,8 @@ Build plan M3. A package is a namespaced attribute set, the packages it builds o
 | Package | Attributes | What |
 |---|---|---|
 | [`factstore-core`](core/manifest.json) | 14 | The Part II conventions: `core/part_of`, `core/supersedes`, `core/same_as`, `core/currency`, `core/evidence`, domain time, provenance, and `document/hash`, `document/url` and `document/issued_at`. `factstore init` installs it. |
-| [`factstore-ecom-ops`](ecom-ops/manifest.json) | 61 | The supply side of a brand that makes in China and sells online: suppliers, SKUs and their IDs in each system, purchase orders, inspections, shipments and customs entries. Depends on core. Its skill, [`ecom-ops-ingest-documents`](ecom-ops/ingest-documents/SKILL.md), reads supplier PDFs, chats and shipping emails into it. |
-| [`factstore-ecom-index`](ecom-index/manifest.json) | 15 | The identifiers and join keys of what Shopify, Amazon, the 3PL and QuickBooks own: orders, customers, lines, receipts, outbound lines, FBA shipments and vendors. The catalogue skill indexes them. Depends on core and ecom-ops. |
+| [`factstore-ecom-ops`](ecom-ops/manifest.json) | 63 | The supply side of a brand that makes in China and sells online: suppliers, SKUs and their IDs in each system, Amazon listings, purchase orders, inspections, shipments and customs entries. Depends on core. Its skill, [`ecom-ops-ingest-documents`](ecom-ops/ingest-documents/SKILL.md), reads supplier PDFs, chats and shipping emails into it. |
+| [`factstore-ecom-index`](ecom-index/manifest.json) | 16 | The identifiers and join keys of what Shopify, Amazon, the 3PL and QuickBooks own: orders, customers, lines, receipts, outbound lines, FBA shipments and vendors. The catalogue skill indexes them. Depends on core and ecom-ops. |
 | [`factstore-skills`](../factstore-skills/manifest.json) | 3 | The catalogue and ontology skills, and `shape/` for the shapes the ontology skill records ([factstore-skills](../factstore-skills/README.md)). Depends on core. |
 
 Core and ecom-ops came from the fixture's draft vocabulary. Ecom-index came from the M5 slice: the names its catalogue runs chose, fixed once. The fixture installs all three and registers nothing itself.
@@ -63,9 +63,13 @@ factstore/.venv/bin/pytest packages/tests
 They check the M3 exit:
 - each package installs on an empty store in one transaction, by its own actor;
 - installing twice changes nothing;
-- 26 near-duplicates an agent might register are refused, each naming the package attribute it duplicates. Five are names the M5 slice's catalogue runs registered before ecom-index existed.
+- 28 near-duplicates an agent might register are refused, each naming the package attribute it duplicates. Five are names the M5 slice's catalogue runs registered before ecom-index existed.
 
-They also check that a store with ecom-ops 0.1.0 upgrades to 0.2.0, that one with 0.2.1's stock attributes takes 0.3.0 without change, and that every skill has the frontmatter agents load it by.
+They also check three upgrades and the skills' frontmatter:
+- a store with ecom-ops 0.1.0 upgrades to 0.2.0;
+- one with 0.2.1's stock attributes takes 0.3.0 without change;
+- one with ecom-ops 0.3.0 and ecom-index 0.1.0 takes the listings of 0.4.0 and 0.2.0;
+- every skill has the frontmatter agents load it by.
 
 ## What the near-match check catches
 
@@ -113,4 +117,26 @@ To find out what the exit test should hold the kernel to, I tried 30 plausible a
   - **Ecom-ops: no stock attributes.** No source counts stock at a factory or on the water, and the 3PL's and Amazon's counts stay in those systems. Stock at factories and on the water is derived from POs and shipment lines (design §14). The 8 `location/` and `inventory/` attributes are gone. A store that has them from 0.2.x keeps them, empty, and 0.3.0 installs over it writing nothing.
   - **Ecom-index: the sales side's identifiers in a package.** They are the same for every Shopify or Amazon seller. Left to the catalogue, each run named them its own way: `amazon/fba_shipment_id` or `amazon/inbound_shipment_id`, `tpl/outbound_key` or `tpl/outbound_line`. Each name a run gave to one of the package's attributes is now refused as its near match (the tests list them). Slice c also recorded Shopify's and the 3PL's own spellings of our SKU code. Those are the catalogue's "each meaning" (its step 6), not identifiers, and stay out of the package. This reverses the M3 decision above.
   - **Skills.** Ingestion gives every document its issue date, and finds a PO named by the supplier's PI number (not yet run). The catalogue has a step 7, which checks its own output before reporting: bare records a join key created, duplicate rules, sources left out, and counts. On a re-run, step 7 reports and changes nothing. The catalogue also keys records that have no ID of their own.
+- **After M6's round 1: ecom-ops 0.4.0, ecom-index 0.2.0 and factstore-skills 0.2.1** ([evals/m6](../evals/m6/README.md)). Round 1 ran the catalogue on a real seller's Amazon, international-sales and stock reports.
+  - **An Amazon listing is a record of its own** (Victor's choice, 2026-10-02).
+    - Before, the seller SKU, ASIN and FNSKU sat on our SKU, one of each. Real data broke that. Amazon listed 10 ASINs under two of the seller's codes each: most are one product listed twice, but one pair is two styles. 5 seller SKUs had moved to a new ASIN.
+    - A brand that sells one product through two listings, one it fulfils and one Amazon fulfils, couldn't be held at all.
+    - Now the listing is identified by its seller SKU (`amazon/seller_sku`). It points at our SKU (`listing/sku`) and at its ASIN (`listing/asin`), and carries its FNSKU. The ASIN is a record of its own, so several listings can share one, and a listing's earlier ASIN stays in its history.
+    - Amazon's order lines and FBA inbound lines point at the listing they name (`line/listing`), not at the SKU. A listing matched to our SKU later then needs one fact, not one per line.
+  - **Catalogue.**
+    - A file whose rows can't be indexed, such as a sales report unique only by customer name, still adds what its rows name in a scheme the store holds. One run had dropped 77 products that only the international report sells.
+    - A product's code follows the pattern of the company's other codes, even when a system spells it otherwise. One run had kept the marketplace's doubled space.
+    - The first wording of this rule listed the defects it covered. It left out a dropped zero, and the fixture's regression slice then kept one: product matching fell from 1.0 to 0.98. The rule now states the principle, and lists defects only as examples.
+- **After M6's round 2: factstore-skills 0.2.2** ([evals/m6](../evals/m6/README.md#round-2-one-shops-orders-customers-and-products)). Round 2 ran the catalogue on a million order lines from a real shop, with no package for its system. Catalogue text only; no attribute changed.
+  - **A line's key is built from the IDs it names,** never from its row's position, a quantity or a price. Rows that repeat a key are one record. Two runs had numbered the shop's repeated lines by their order in the file.
+  - **An identifier holds only the system's IDs its doc names.** One run filed the shop's invoices and customers under Shopify's attributes, because they existed. A source from a system no one names gets a namespace of its own. The company's own codes and the join keys belong to no system, so the shop's stock code is still the product's `sku/code`.
+  - **A load longer than the shell's limit runs in parts,** and the agent never finishes while one is running. One run ended with a third of its lines written.
+  - **Duplicate accounts are compared on every mailbox, name and address they have used,** not only the first. A fixture slice that compared only the first lost 10 of its 157 pairs.
+- **After M6's round 5: factstore-skills 0.3.0, and the store's rules in its instructions** ([evals/m6](../evals/m6/README.md#round-5-one-mailbox-with-no-package-and-no-skill)). Round 5 had an agent ingest an Enron gas trader's mailbox, with no package for the industry.
+  - **The store's MCP instructions now state its rules** (Victor's choice). They are the only guidance an agent without a skill reads. With a one-line instruction, two runs wrote people's names, addresses and roles, and copied senders, recipients and bodies.
+    - The four rules: record identifiers, refs and the values someone will look up, not copies of text; no personal data; each document once; every fact cites its document.
+    - The transact tool's example attribute was `customer/email`, and is now `po/etd`.
+    - Under the rules, no run wrote personal data, and the fixture's slice stayed as it was.
+  - **A general ingestion skill, `factstore-ingest`** (Victor's choice). The rules settle what stays out, but what an agent recorded with no package still swung from 8 of the round's 8 questions to 2. The skill says to list every value a document states and register an attribute for each, to read mail sent to many, to record copies of a message once, and to record every document read. With it, three runs answered all eight, and the 100 facts checked by hand were all right.
+  - **Open:** ecom-ops's `supplier/contact_name` holds a person's name, against the rule. No agent has filled it.
 - **What the commercial invoices and packing lists carry beyond the package stays in the documents.** That covers invoice totals, weights, volumes, carton numbers and seal numbers: the skill records nothing the package has no attribute for, and reports the gap instead. Nothing in the ten questions needs them. Landed cost, the stretch goal, would allocate freight by volume; if it is built, the package gains a volume per shipment line.

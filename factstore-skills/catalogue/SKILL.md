@@ -57,13 +57,17 @@ Before treating a field as an identifier, check that it is unique and never blan
 
 Write a mapping table in your working directory. Each field goes to one of three places:
 - **An existing attribute.** Find it with `search_attributes`, and read its doc, not just its name.
+  - An identifier's doc names the system that issues it, and only that system's IDs go on it. An online shop isn't Shopify because Shopify's attributes exist. When you don't know which system a source comes from, give its IDs a namespace of their own and say in your report what you took the system to be.
+  - The company's own codes and the join keys belong to no system, so reuse them for any source. `sku/code` holds our code for a product whichever system it comes from, such as a shop's stock code. `order/customer` and `line/sku` join any source's records.
 - **A new identifier or join key.**
   - An identifier goes in the source system's namespace, with `unique: identity` and a doc naming the system and the record ("Shopify's ID for a customer account.").
   - A join key is a `ref` from the record to the record it names, such as `order/customer` or `line/sku`. A line of a whole is `core/part_of` the whole.
-  - A record with no ID of its own still takes part in a join when it names other records, like a row in a warehouse's outbound file naming an order and an item. Index it under a key built from the fields that make it unique in its source, such as `#18301/ACMH-10021` for the order and the item code. Check that the key is unique before you use it.
+  - A record with no ID of its own still takes part in a join when it names other records, like a row in a warehouse's outbound file naming an order and an item. Index it under a key built from the IDs it names, such as `#18301/ACMH-10021` for the order and the item code. A line number the source gives, such as a PO's line 3, is one of them.
+  - Never build a key from a row's position in the file, a quantity or a price. A re-export in another order, or a corrected quantity, would give the same line another key. Where rows repeat a key, such as an invoice that lists one product on two lines, they are one record in the index, and the lines stay in the source.
+  - A file whose rows you can't index still names records. For example, a sales report's rows may be unique only by the customer's name, which can't be part of a key (rule 3). Leave its rows in the source, but index what they name in a scheme the store already holds. A product code that only that report sells is still one of our products. A scheme the store doesn't hold, such as a price list's own codes that match none of ours, is a proposal for the person instead. Check each value as you would a join key's (Writing in bulk): a fee billed as a line, or a range of sizes, sits in a product column but names no product.
   - Check a join key's values as you would an identifier's. A blank names nothing, so write no ref for it. A field holding several keys ("PO-1 / PO-2") is several refs, on a `many` attribute. Spellings need normalizing to the form the named record uses.
   - A ref by lookup creates the named record if the store lacks it, so a malformed value creates a bogus record.
-  - Name a join key after the kind of record it is on and what it points to, such as `order/customer` or `receipt/shipment`. Reuse one across sources when the records are the same kind: a shop's and a marketplace's order lines can both use `line/sku`. Don't use a generic namespace shared by unrelated kinds of record.
+  - Name a join key after the kind of record it is on and what it points to, such as `order/customer` or `receipt/shipment`. Reuse one across sources when the records are the same kind: a shop's order lines and a warehouse's outbound lines can both use `line/sku`. Don't use a generic namespace shared by unrelated kinds of record.
 - **Left in the source.** Most fields go here.
 
 Register what is missing in one batch.
@@ -76,12 +80,18 @@ Within a source, the record's own ID is its identity. Lookups on it make re-runs
 
 Across sources, the same thing has an ID in each system. A product variant, for example, has:
 - a shop's variant ID;
-- a marketplace listing code, ASIN and FNSKU;
+- a marketplace's listings, each with its own code, ASIN and FNSKU (below);
 - the warehouse's item code;
 - the factory's item code;
 - a barcode.
 
-Put them all on one entity, the hub, so a query can go from any system's ID to any other's. For products, the hub is the entity holding our own SKU code.
+Put them on one entity, the hub, so a query can go from any system's ID to any other's. For products, the hub is the entity holding our own SKU code.
+
+A marketplace listing is the exception. On Amazon, a seller SKU is our listing of a product, and an ASIN is Amazon's catalogue product. One product can have several listings, such as one we fulfil and one Amazon fulfils, and Amazon can list several of them under one ASIN. So a listing is a record of its own, under its seller SKU (`amazon/seller_sku`):
+- it points at our SKU (`listing/sku`) and at its ASIN (`listing/asin`), and carries its FNSKU;
+- a marketplace's order line or inbound line points at the listing it names (`line/listing`), not at the SKU;
+- a seller SKU is our own code, typed for the marketplace: match it to our codes at the tiers below. One that matches none is a product our other lists lack: give it a hub under its clean spelling, and report it;
+- two of our codes listed under one ASIN may be one product listed twice, or a listing mistake. Keep both listings as Amazon has them, and list the pair for the person.
 
 A product's crosswalk also ties it to the supply side. It records which supplier makes the product and its tariff (HS) code, if the vocabulary has attributes for them. Both are usually printed only on the factory's documents, next to the factory's item code, and they are what purchasing and customs data join through.
 
@@ -98,13 +108,16 @@ Don't write a match weaker than these. List it for a human.
 How to write and check matches:
 - **One transaction per tier.** Provenance belongs to the transaction, so add `{"e": "tmp:tx", "a": "core/confidence", "v": "0.9"}` to that tier's write.
 - **One to one.** If two hubs claim the same warehouse code, one match is wrong. Find which before writing either.
-- **Writing an ID onto a hub** looks like `{"e": ["sku/code", "AH-KTL-0001-BLK"], "a": "amazon/asin", "v": "B0..."}`. If that ID already sits on another entity, the kernel refuses, because it is an identity. Find out why: it is either a duplicate to merge or a wrong match.
+- **Writing an ID onto a hub** looks like `{"e": ["sku/code", "AH-KTL-0001-BLK"], "a": "tpl/item_code", "v": "ACMH-10021"}`. If that ID already sits on another entity, the kernel refuses, because it is an identity. Find out why: it is either a duplicate to merge or a wrong match.
 - **Our own codes.** Systems may spell our code differently: case, a dropped zero, a typo, a suffix. The hub's code is the spelling the company uses most consistently. The variants are evidence for the match, not new hubs.
+  - The hub's spelling follows the pattern of the company's other codes. A spelling that breaks it is never the hub's: a dropped zero, a doubled space, a stray full stop or lowercase letter. That holds even when it is the only spelling any system uses.
+  - The marketplace's own ID keeps the marketplace's spelling: `amazon/seller_sku` holds what Amazon holds.
 - **Composite identifiers.** When a code is unique only within something else, such as a factory's item code within that factory, write it as the vocabulary's doc says, for example `NBBW:MT-2231`.
 - **Duplicates within one source,** such as one person with two customer accounts:
   - Keep both index entries.
   - Mark the newer one with `core/same_as` pointing at the account it duplicates, at the tier's confidence.
   - Do this only on strong evidence: the same mailbox once normalized, or the same full name and postal address.
+  - Compare every mailbox, name and address an account has used, such as on each of its orders, not only its first.
   - Normalizing a mailbox means lowercasing it and dropping a plus-alias: `ann+shop@` is `ann@`. Drop dots only at providers that ignore them, such as Gmail. Elsewhere `ann.lee@` and `annlee@` are two mailboxes, often two people with the same name.
   - Compare in your working files. The store gets only the `core/same_as`.
 
@@ -156,8 +169,15 @@ factstore.query('select count(*) from "shopify/order_id"').rows
 ```
 
 - Put 1,000 to 5,000 facts in each transaction. A rejected transaction writes nothing and lists every problem: fix the batch and run it again.
-- Before a script writes a join key, print its distinct values that don't look like the IDs of the record they name: blanks, several IDs in one field ("PO-1 / PO-2"), and spellings unlike the rest. Split, normalize or skip each one, as step 3 says, before writing.
+- Before a script writes an ID or a join key, print its distinct values that don't look like the IDs of the record they name:
+  - blanks;
+  - several IDs in one field ("PO-1 / PO-2");
+  - spellings unlike the rest;
+  - values that aren't IDs at all, such as a charge or a fee in a product column.
+
+  Split, normalize or skip each one, as step 3 says, before writing.
 - Run the script on a small sample first, check the result with `query`, then run it in full.
+- A full load can outlast your shell's time limit, and your session can end before a job left running in the background does. From the sample's speed, estimate the full run's time. If it is more than a few minutes, give the script a range of rows (`load.py 0 200000`) and run it in parts, each finishing within the limit. Writing a part again is safe, since every record is written by its ID. Never finish while a load is still running: the store would be left half-written.
 - Record each export file you read as a document, and point every transaction written from it at that document:
   ```json
   {"e": ["document/hash", "<sha256 of the file's bytes, hex>"], "a": "document/url", "v": "shopify/orders.jsonl"},

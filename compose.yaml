@@ -1,8 +1,11 @@
 # Development Postgres for the factstore kernel and its tests.
 # track_commit_timestamp lets the tests check that transaction IDs follow commit order.
+# shm_size: parallel queries share memory through /dev/shm, and Docker's 64 MB default fails them
+# on a store of half a million facts (evals/m6, round 1).
 services:
   postgres:
     image: postgres:17
+    shm_size: 1g
     environment:
       POSTGRES_PASSWORD: postgres
     command: ["postgres", "-c", "track_commit_timestamp=on"]

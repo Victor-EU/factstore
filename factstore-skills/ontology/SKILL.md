@@ -38,8 +38,8 @@ Call `stats` with a `limit` high enough that `omitted_signatures` is 0. In a lar
 
 ### 3. Group signatures into shapes
 
-- **Same thing, optional attributes.** Signatures that share an identity attribute and differ only by optional attributes are one shape. Products with and without marketplace IDs are one shape.
-- **Different identity, different shape.** Signatures that share most attributes but carry different identity attributes are different shapes. A shop's order line and a marketplace's order line both carry `core/part_of` and `line/sku`, but they are two shapes.
+- **Same thing, optional attributes.** Signatures that share an identity attribute and differ only by optional attributes are one shape. Products with and without a barcode are one shape.
+- **Different identity, different shape.** Signatures that share most attributes but carry different identity attributes are different shapes. A shop's order line and a warehouse's outbound line both carry `core/part_of` and `line/sku`, but they are two shapes.
 - **The shape's signature** is the attributes all of its signatures share. The rest are optional; note the share of the shape's entities that carry each.
 - **Namespaces are a hint, not the rule.** `core/` attributes cross every namespace, and a shape can carry attributes from several.
 - **Fragments are gaps, not shapes.** An entity holding only an identity attribute, because something referred to it before its own data arrived, is a fragment. Report fragments with their counts, such as "41 POs named by inspections have no other facts".

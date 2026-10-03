@@ -163,6 +163,10 @@ def sku_ref(sku):
     return ["sku/code", sku.code]
 
 
+def listing_ref(sku):
+    return ["amazon/seller_sku", sku.amazon_seller_sku]
+
+
 def _master_data(sim: Simulation) -> list[dict]:
     facts = []
     for s in sim.suppliers:
@@ -180,9 +184,10 @@ def _master_data(sim: Simulation) -> list[dict]:
                   f(e, "shopify/variant_id", str(k.shopify_variant_id))]
         if k.launched:
             facts.append(f(e, "sku/launched_on", k.launched.isoformat()))
-        if k.asin:
-            facts += [f(e, "amazon/asin", k.asin), f(e, "amazon/fnsku", k.fnsku),
-                      f(e, "amazon/seller_sku", k.amazon_seller_sku)]
+        if k.asin:  # the Amazon listing: a record of its own, pointing at the SKU and its ASIN
+            listing = listing_ref(k)
+            facts += [f(listing, "listing/sku", e), f(listing, "listing/asin", ["amazon/asin", k.asin]),
+                      f(listing, "amazon/fnsku", k.fnsku)]
     return facts
 
 
@@ -246,7 +251,8 @@ def _event_facts(event: Event) -> list[dict]:
         e = ["amazon/fba_shipment_id", s.shipment_id]
         return [fact for sku, *_ in s.lines
                 for fact in (f(["amazon/fba_line", f"{s.shipment_id}/{sku.amazon_seller_sku}"], "core/part_of", e),
-                             f(["amazon/fba_line", f"{s.shipment_id}/{sku.amazon_seller_sku}"], "line/sku", sku_ref(sku)))]
+                             f(["amazon/fba_line", f"{s.shipment_id}/{sku.amazon_seller_sku}"], "line/listing",
+                               listing_ref(sku)))]
     if kind == "inventory.snapshot":  # stock is derived from POs and shipments, or read in the 3PL (design §14)
         return []
     raise ValueError(f"no loader for {kind}")
@@ -268,5 +274,5 @@ def _order_facts(order) -> list[dict]:
     facts = []
     for line in order.lines:
         ln = ["amazon/order_line", f"{order.id}/{line.sku.amazon_seller_sku}"]
-        facts += [f(ln, "core/part_of", e), f(ln, "line/sku", sku_ref(line.sku))]
+        facts += [f(ln, "core/part_of", e), f(ln, "line/listing", listing_ref(line.sku))]
     return facts

@@ -1,7 +1,7 @@
 {
   "name": "factstore-ecom-ops",
-  "version": "0.3.0",
-  "doc": "Supply side of a brand that makes in China and sells online: suppliers, SKUs and their IDs in each system, purchase orders, inspections, shipments and customs entries. Stock at factories and on the water is derived from POs and shipment lines, not stored.",
+  "version": "0.4.0",
+  "doc": "Supply side of a brand that makes in China and sells online: suppliers, SKUs and their IDs in each system, Amazon listings, purchase orders, inspections, shipments and customs entries. Stock at factories and on the water is derived from POs and shipment lines, not stored.",
   "depends_on": ["factstore-core"],
   "skills": ["ingest-documents/SKILL.md"],
   "attributes": [
@@ -63,8 +63,10 @@
     {"ident": "customs/duty", "type": "decimal", "cardinality": "one", "doc": "Duties assessed on an entry, all tariff programmes together."},
     {"ident": "customs/fees", "type": "decimal", "cardinality": "one", "doc": "Merchandise processing and harbor maintenance fees on an entry."},
     {"ident": "shopify/variant_id", "type": "string", "cardinality": "one", "unique": "identity", "doc": "Shopify's ID for a product variant."},
-    {"ident": "amazon/asin", "type": "string", "cardinality": "one", "unique": "identity", "doc": "Amazon's catalogue ID for a product (ASIN)."},
-    {"ident": "amazon/fnsku", "type": "string", "cardinality": "one", "unique": "identity", "doc": "Amazon fulfilment network SKU on the label of our FBA stock."},
-    {"ident": "amazon/seller_sku", "type": "string", "cardinality": "one", "unique": "identity", "doc": "SKU we list a product under in Amazon Seller Central."}
+    {"ident": "amazon/asin", "type": "string", "cardinality": "one", "unique": "identity", "doc": "Amazon's catalogue ID for a product (ASIN). It identifies a record of its own, which our Amazon listings point at; several listings can share one."},
+    {"ident": "amazon/fnsku", "type": "string", "cardinality": "one", "unique": "identity", "doc": "Amazon fulfilment network SKU on the label of our FBA stock, on the listing it labels."},
+    {"ident": "amazon/seller_sku", "type": "string", "cardinality": "one", "unique": "identity", "doc": "SKU we list a product under in Amazon Seller Central, as Amazon spells it. It identifies the listing, a record of its own that points at our SKU and at its ASIN."},
+    {"ident": "listing/sku", "type": "ref", "cardinality": "one", "doc": "Our SKU a marketplace listing sells. Several listings can sell one SKU, such as one fulfilled by us and one by Amazon."},
+    {"ident": "listing/asin", "type": "ref", "cardinality": "one", "doc": "The ASIN an Amazon listing is listed under. When Amazon moves a listing to another ASIN, the old one stays in the history."}
   ]
 }

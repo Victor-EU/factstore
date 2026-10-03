@@ -1,0 +1,252 @@
+{
+ "round": 1,
+ "use_case": "One product list across the marketplaces a brand sells on",
+ "model": "sonnet",
+ "sample": 40,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 0,
+   "by_agent": {
+    "catalogue agent": [],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "ids": {
+   "Amazon order": {
+    "in_source": 19407,
+    "attribute": "amazon/order_id",
+    "in_store": 19407,
+    "found": 19407,
+    "found_ignoring_case": 19407,
+    "missing": 0,
+    "not_in_source": 0
+   },
+   "ASIN": {
+    "in_source": 278,
+    "attribute": "amazon/asin",
+    "in_store": 268,
+    "found": 268,
+    "found_ignoring_case": 268,
+    "missing": 10,
+    "not_in_source": 0
+   },
+   "Amazon seller SKU": {
+    "in_source": 288,
+    "attribute": "amazon/seller_sku",
+    "in_store": 288,
+    "found": 288,
+    "found_ignoring_case": 288,
+    "missing": 0,
+    "not_in_source": 0
+   },
+   "stock report SKU": {
+    "in_source": 273,
+    "attribute": "sku/code",
+    "in_store": 362,
+    "found": 270,
+    "found_ignoring_case": 272,
+    "missing": 3,
+    "not_in_source": 92
+   },
+   "international SKU": {
+    "in_source": 241,
+    "attribute": "sku/code",
+    "in_store": 362,
+    "found": 212,
+    "found_ignoring_case": 212,
+    "missing": 29,
+    "not_in_source": 150
+   },
+   "price list SKU": {
+    "in_source": 40,
+    "attribute": "sku/code",
+    "in_store": 362,
+    "found": 40,
+    "found_ignoring_case": 40,
+    "missing": 0,
+    "not_in_source": 322
+   }
+  },
+  "bare": {
+   "amazon/asin": {
+    "entities": 268,
+    "bare": 0
+   },
+   "amazon/fba_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/fba_shipment_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/fnsku": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/order_id": {
+    "entities": 19407,
+    "bare": 19407
+   },
+   "amazon/order_line": {
+    "entities": 19618,
+    "bare": 0
+   },
+   "amazon/seller_sku": {
+    "entities": 288,
+    "bare": 0
+   },
+   "customs/entry_no": {
+    "entities": 0,
+    "bare": 0
+   },
+   "factory/item_code": {
+    "entities": 0,
+    "bare": 0
+   },
+   "po_line/key": {
+    "entities": 0,
+    "bare": 0
+   },
+   "po/number": {
+    "entities": 0,
+    "bare": 0
+   },
+   "qc/report_no": {
+    "entities": 0,
+    "bare": 0
+   },
+   "quickbooks/vendor": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shape/name": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shipment/booking_no": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shipment/hbl": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shipment_line/key": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/customer_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/line_item_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/order_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/order_name": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/variant_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "sku/code": {
+    "entities": 362,
+    "bare": 74
+   },
+   "sku/upc": {
+    "entities": 0,
+    "bare": 0
+   },
+   "supplier/code": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/item_code": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/outbound_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/receipt_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/receipt_no": {
+    "entities": 0,
+    "bare": 0
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 0
+  },
+  "documents": {
+   "documents": 5,
+   "url": 5,
+   "issued_at": 0
+  },
+  "size": {
+   "facts": 79874,
+   "entities": 39399,
+   "transactions": 38
+  },
+  "evidence": null,
+  "shapes": null,
+  "truth": {
+   "products_in_files": 321,
+   "products_in_store": 321,
+   "sku_codes_in_store": 362,
+   "asins": {
+    "plain": 268,
+    "right": 268,
+    "on_another_code": 0,
+    "absent": 0
+   },
+   "asin_under_two_codes": {
+    "in_files": 10,
+    "both_listings_under_it": 0,
+    "codes_one_product": 0
+   },
+   "listings": {
+    "seller_skus": 288,
+    "in_store": 0,
+    "without_sku": 0
+   },
+   "spellings": {
+    "products_spelled_two_ways": 20,
+    "split_in_store": 1
+   },
+   "junk_as_codes": 0,
+   "charges_as_codes": 0,
+   "price_list": {
+    "codes": 40,
+    "in_store": 40,
+    "linked_to_other_products": 0
+   }
+  },
+  "cost_usd": 0.55,
+  "wall_minutes": 3,
+  "questions": {
+   "right": 4,
+   "asked": 6,
+   "wrong": [
+    "5",
+    "6"
+   ]
+  }
+ }
+}

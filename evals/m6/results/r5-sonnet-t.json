@@ -1,0 +1,89 @@
+{
+ "round": 5,
+ "use_case": "One mailbox in another industry, with no vocabulary package",
+ "model": "sonnet",
+ "sample": 30,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 12,
+   "by_agent": {
+    "ingestion agent": [
+     "email/subject",
+     "email/sender",
+     "email/recipient",
+     "email/cc",
+     "email/recipient_count",
+     "email/folder",
+     "email/source_file",
+     "email/body",
+     "email/summary",
+     "email/attachment",
+     "email/sitara_deal",
+     "email/mailbox_owner"
+    ],
+    "ontology agent": [],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "ids": {},
+  "bare": {
+   "shape/name": {
+    "entities": 1,
+    "bare": 0
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 7
+  },
+  "documents": {
+   "documents": 41,
+   "url": 0,
+   "issued_at": 41
+  },
+  "size": {
+   "facts": 772,
+   "entities": 48,
+   "transactions": 13
+  },
+  "evidence": {
+   "transactions": 3,
+   "with_evidence": 0,
+   "with_confidence": 0
+  },
+  "shapes": 1,
+  "truth": {
+   "messages": {
+    "files": 102,
+    "distinct": 41,
+    "recorded": 41,
+    "recorded_more_than_once": 0,
+    "documents": 41
+   },
+   "people": {
+    "names_in_mailbox": 801,
+    "addresses_in_mailbox": 995,
+    "phones_in_mailbox": 33,
+    "values_naming_a_person": 38,
+    "values_holding_an_address": 23,
+    "values_holding_a_phone": 4
+   },
+   "recorded": {
+    "email": 435,
+    "document": 82
+   }
+  },
+  "cost_usd": 1.56,
+  "wall_minutes": 7,
+  "questions": {
+   "right": 8,
+   "asked": 8,
+   "wrong": []
+  }
+ }
+}

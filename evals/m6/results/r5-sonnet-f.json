@@ -1,0 +1,314 @@
+{
+ "round": 5,
+ "use_case": "One mailbox in another industry, with no vocabulary package",
+ "model": "sonnet",
+ "sample": null,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 147,
+   "by_agent": {
+    "ingestion agent": [
+     "org/name",
+     "org/credit_status",
+     "org/credit_status_as_of",
+     "deal/number",
+     "deal/counterparty",
+     "deal/suggested_counterparty",
+     "deal/price_basis",
+     "deal/price_period_start",
+     "deal/price_period_end",
+     "deal/delivery_month",
+     "nom/key",
+     "nom/counterparty",
+     "nom/point",
+     "nom/gas_day",
+     "nom/requested_volume_mmcfd",
+     "nom/sold_volume",
+     "nom/unscheduled_volume",
+     "notice/key",
+     "notice/pipeline",
+     "notice/number",
+     "notice/type",
+     "notice/title",
+     "notice/dated",
+     "notice/effective_from",
+     "notice/effective_to",
+     "notice/refers_to",
+     "notice/it_capacity_min_mcfd",
+     "notice/it_capacity_max_mcfd",
+     "notice/intraday_capacity_weekday_mcfd",
+     "notice/intraday_capacity_weekend_mcfd",
+     "notice/request_deadline",
+     "notice/queue_position_notice_by",
+     "notice/firm_impact_pct",
+     "notice/interruptible_suspended",
+     "notice/maintenance_start",
+     "notice/maintenance_end",
+     "notice/previous_maintenance_start",
+     "notice/previous_maintenance_end",
+     "notice/cancelled_maintenance",
+     "restriction/key",
+     "restriction/notice",
+     "restriction/location",
+     "restriction/capacity",
+     "restriction/unit",
+     "restriction/from",
+     "restriction/to",
+     "fuel/key",
+     "fuel/notice",
+     "fuel/compressor",
+     "fuel/effective_from",
+     "fuel/lu_pct",
+     "fuel/fuel_pct",
+     "fuel/total_salt_lake_pct",
+     "fuel/total_las_vegas_pct",
+     "fuel/total_california_pct",
+     "btu/key",
+     "btu/notice",
+     "btu/meter_number",
+     "btu/drn",
+     "btu/receipt_point",
+     "btu/effective_from",
+     "btu/value",
+     "offer/key",
+     "offer/notice",
+     "offer/ebb_number",
+     "offer/package",
+     "offer/receipt_point",
+     "offer/delivery_point",
+     "offer/quantity_dth_d",
+     "offer/term_start",
+     "offer/term_end",
+     "offer/prearranged",
+     "offer/min_bid_per_dth",
+     "offer/bid_open",
+     "offer/bid_close",
+     "offer/award_deadline",
+     "offer/evergreen",
+     "avail/key",
+     "avail/notice",
+     "avail/package",
+     "avail/receipt_point",
+     "avail/delivery_point",
+     "avail/quantity_dth_d",
+     "avail/available",
+     "storage_report/key",
+     "storage_report/week_ending",
+     "storage_report/publisher",
+     "storage_report/net_injection_bcf",
+     "storage_report/production_region_bcf",
+     "storage_report/east_region_bcf",
+     "storage_report/west_region_bcf",
+     "storage_report/storage_level_bcf",
+     "storage_report/pct_full",
+     "storage_report/vs_last_year_bcf",
+     "open_season/key",
+     "open_season/operator",
+     "open_season/service_start",
+     "open_season/offers_due",
+     "open_season/offers_open_until",
+     "open_season/closes",
+     "open_season/preferred_term_years",
+     "open_season/rack_rate_inventory_per_dth_month",
+     "open_season/rack_rate_injection_per_dth_day",
+     "open_season/rack_rate_withdrawal_per_dth_day",
+     "open_season/rack_rate_injection_commodity_per_dth",
+     "open_season/rack_rate_withdrawal_commodity_per_dth",
+     "open_season/max_daily_injection_dth",
+     "project/key",
+     "project/sponsor",
+     "project/open_season_end",
+     "project/capacity_mmcfd",
+     "project/in_service",
+     "docket/number",
+     "docket/pipeline",
+     "docket/technical_conference",
+     "docket/protester",
+     "docket/pipeline_filing_due",
+     "docket/comments_due",
+     "docket/reply_due",
+     "location/abbreviation",
+     "location/name",
+     "location/sort_code",
+     "location/pipeline",
+     "solicitation/key",
+     "solicitation/buyer",
+     "solicitation/delivery_month",
+     "solicitation/bid_deadline",
+     "solicitation/max_volume_mmbtu_d",
+     "solicitation/pipeline",
+     "results/key",
+     "results/company",
+     "results/period_end",
+     "results/net_income_usd_m",
+     "results/eps_usd",
+     "results/prior_year_net_income_usd_m",
+     "results/prior_year_eps_usd",
+     "event/key",
+     "event/organiser",
+     "event/title",
+     "event/start",
+     "event/end",
+     "event/place",
+     "law/key",
+     "law/designation",
+     "law/signed_on",
+     "law/repeals_electric_deregulation",
+     "law/power_plant_sale_moratorium"
+    ],
+    "ontology agent": [],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "ids": {},
+  "bare": {
+   "avail/key": {
+    "entities": 64,
+    "bare": 0
+   },
+   "btu/key": {
+    "entities": 15,
+    "bare": 0
+   },
+   "deal/number": {
+    "entities": 3,
+    "bare": 0
+   },
+   "docket/number": {
+    "entities": 1,
+    "bare": 0
+   },
+   "event/key": {
+    "entities": 6,
+    "bare": 0
+   },
+   "fuel/key": {
+    "entities": 7,
+    "bare": 0
+   },
+   "law/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "location/abbreviation": {
+    "entities": 2,
+    "bare": 0
+   },
+   "nom/key": {
+    "entities": 2,
+    "bare": 0
+   },
+   "notice/key": {
+    "entities": 12,
+    "bare": 0
+   },
+   "offer/key": {
+    "entities": 5,
+    "bare": 0
+   },
+   "open_season/key": {
+    "entities": 2,
+    "bare": 0
+   },
+   "org/name": {
+    "entities": 19,
+    "bare": 18
+   },
+   "project/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "restriction/key": {
+    "entities": 6,
+    "bare": 0
+   },
+   "results/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "shape/name": {
+    "entities": 0,
+    "bare": 0
+   },
+   "solicitation/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "storage_report/key": {
+    "entities": 2,
+    "bare": 0
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 0
+  },
+  "documents": {
+   "documents": 103,
+   "url": 103,
+   "issued_at": 96
+  },
+  "size": {
+   "facts": 2856,
+   "entities": 259,
+   "transactions": 142
+  },
+  "evidence": {
+   "transactions": 133,
+   "with_evidence": 133,
+   "with_confidence": 133
+  },
+  "shapes": 19,
+  "truth": {
+   "messages": {
+    "files": 249,
+    "distinct": 103,
+    "recorded": 103,
+    "recorded_more_than_once": 0,
+    "documents": 103
+   },
+   "people": {
+    "names_in_mailbox": 829,
+    "addresses_in_mailbox": 1084,
+    "phones_in_mailbox": 49,
+    "values_naming_a_person": 0,
+    "values_holding_an_address": 0,
+    "values_holding_a_phone": 0
+   },
+   "recorded": {
+    "avail": 448,
+    "document": 302,
+    "core": 266,
+    "btu": 104,
+    "notice": 92,
+    "offer": 75,
+    "fuel": 55,
+    "restriction": 41,
+    "event": 32,
+    "org": 21,
+    "storage_report": 20,
+    "open_season": 15,
+    "deal": 11,
+    "nom": 10,
+    "location": 8,
+    "docket": 8,
+    "results": 7,
+    "law": 6,
+    "solicitation": 6,
+    "project": 5
+   }
+  },
+  "cost_usd": 2.9,
+  "wall_minutes": 12,
+  "questions": {
+   "right": 8,
+   "asked": 8,
+   "wrong": []
+  }
+ }
+}

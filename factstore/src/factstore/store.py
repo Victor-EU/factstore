@@ -275,7 +275,7 @@ class _Transaction:
                 if raw["a"] not in self.unknown:
                     self.unknown.append(raw["a"])
             else:
-                self.error(i, f"a must be an attribute name like customer/email, not {raw['a']!r}")
+                self.error(i, f"a must be an attribute name like po/etd, not {raw['a']!r}")
             return None
         if not self.writable(i, attr, assert_):
             return None
@@ -484,7 +484,7 @@ class _Transaction:
             target = self.schema.by_id.get(c.e) if isinstance(c.e, int) else None
             if target is None:
                 self.error(c.index, f"{c.a.ident} describes attributes; address one with"
-                                    " [\"fs/ident\", \"customer/email\"]")
+                                    " [\"fs/ident\", \"po/etd\"]")
                 continue
             if target.ident.startswith("fs/"):
                 self.error(c.index, f"{target.ident} is a kernel attribute and cannot change")

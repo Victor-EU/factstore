@@ -1,0 +1,328 @@
+{
+ "round": 3,
+ "use_case": "A marketplace at scale, with a second dataset joined in and duplicate customers",
+ "model": "sonnet",
+ "sample": null,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 11,
+   "by_agent": {
+    "catalogue agent": [
+     "olist/order_id",
+     "olist/customer_id",
+     "olist/seller_id",
+     "olist/product_id",
+     "olist/order_item",
+     "olist/payment",
+     "olist/review",
+     "funnel/mql_id",
+     "line/product",
+     "line/seller",
+     "seller/mql"
+    ],
+    "ontology agent": [],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "ids": {
+   "order": {
+    "in_source": 99441,
+    "attribute": "olist/order_id",
+    "in_store": 99441,
+    "found": 99441,
+    "found_ignoring_case": 99441,
+    "missing": 0,
+    "not_in_source": 0
+   },
+   "customer": {
+    "in_source": 99441,
+    "attribute": "olist/customer_id",
+    "in_store": 99441,
+    "found": 99441,
+    "found_ignoring_case": 99441,
+    "missing": 0,
+    "not_in_source": 0
+   },
+   "product": {
+    "in_source": 32951,
+    "attribute": "olist/product_id",
+    "in_store": 32951,
+    "found": 32951,
+    "found_ignoring_case": 32951,
+    "missing": 0,
+    "not_in_source": 0
+   },
+   "seller": {
+    "in_source": 3095,
+    "attribute": "olist/seller_id",
+    "in_store": 3557,
+    "found": 3095,
+    "found_ignoring_case": 3095,
+    "missing": 0,
+    "not_in_source": 462
+   },
+   "closed seller": {
+    "in_source": 842,
+    "attribute": "olist/seller_id",
+    "in_store": 3557,
+    "found": 842,
+    "found_ignoring_case": 842,
+    "missing": 0,
+    "not_in_source": 2715
+   },
+   "lead": {
+    "in_source": 8000,
+    "attribute": "funnel/mql_id",
+    "in_store": 8000,
+    "found": 8000,
+    "found_ignoring_case": 8000,
+    "missing": 0,
+    "not_in_source": 0
+   }
+  },
+  "bare": {
+   "amazon/asin": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/fba_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/fba_shipment_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/fnsku": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/order_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/order_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/seller_sku": {
+    "entities": 0,
+    "bare": 0
+   },
+   "customs/entry_no": {
+    "entities": 0,
+    "bare": 0
+   },
+   "factory/item_code": {
+    "entities": 0,
+    "bare": 0
+   },
+   "funnel/mql_id": {
+    "entities": 8000,
+    "bare": 8000
+   },
+   "olist/customer_id": {
+    "entities": 99441,
+    "bare": 96096
+   },
+   "olist/order_id": {
+    "entities": 99441,
+    "bare": 0
+   },
+   "olist/order_item": {
+    "entities": 112650,
+    "bare": 0
+   },
+   "olist/payment": {
+    "entities": 103886,
+    "bare": 0
+   },
+   "olist/product_id": {
+    "entities": 32951,
+    "bare": 32951
+   },
+   "olist/review": {
+    "entities": 99224,
+    "bare": 0
+   },
+   "olist/seller_id": {
+    "entities": 3557,
+    "bare": 2715
+   },
+   "po_line/key": {
+    "entities": 0,
+    "bare": 0
+   },
+   "po/number": {
+    "entities": 0,
+    "bare": 0
+   },
+   "qc/report_no": {
+    "entities": 0,
+    "bare": 0
+   },
+   "quickbooks/vendor": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shape/name": {
+    "entities": 9,
+    "bare": 0
+   },
+   "shipment/booking_no": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shipment/hbl": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shipment_line/key": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/customer_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/line_item_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/order_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/order_name": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/variant_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "sku/code": {
+    "entities": 0,
+    "bare": 0
+   },
+   "sku/upc": {
+    "entities": 0,
+    "bare": 0
+   },
+   "supplier/code": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/item_code": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/outbound_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/receipt_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/receipt_no": {
+    "entities": 0,
+    "bare": 0
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 0
+  },
+  "documents": {
+   "documents": 9,
+   "url": 9,
+   "issued_at": 0
+  },
+  "size": {
+   "facts": 1207015,
+   "entities": 559176,
+   "transactions": 832
+  },
+  "evidence": null,
+  "shapes": 9,
+  "truth": {
+   "customers": {
+    "in_file": 99441,
+    "attribute": "olist/customer_id",
+    "in_store": 99441
+   },
+   "orders": {
+    "in_file": 99441,
+    "attribute": "olist/order_id",
+    "in_store": 99441,
+    "pointing_at_customer": 99441
+   },
+   "products": {
+    "in_file": 32951,
+    "attribute": "olist/product_id",
+    "in_store": 32951
+   },
+   "sellers": {
+    "in_file": 3557,
+    "attribute": "olist/seller_id",
+    "in_store": 3557,
+    "only_in_the_funnel": 462
+   },
+   "leads": {
+    "in_file": 8000,
+    "attribute": "funnel/mql_id",
+    "in_store": 8000
+   },
+   "people": {
+    "with_several_ids": 2997,
+    "their_ids": 6342,
+    "attribute": null,
+    "joined": 2997,
+    "keys_joining_two_people": 0
+   },
+   "items": {
+    "in_file": 112650,
+    "order_and_product_pairs": 102425,
+    "in_store": 112650,
+    "orders_with_every_item": 98666,
+    "orders_with_items": 98666,
+    "pointing_at_seller": 112650
+   },
+   "reviews": {
+    "in_file": 99224,
+    "review_ids": 98410,
+    "review_ids_on_several_orders": 789,
+    "attribute": "olist/review",
+    "in_store": 99224,
+    "pairs_right": 99224
+   },
+   "records_pointing_at_orders": {
+    "olist/order_item": 112650,
+    "olist/payment": 103886,
+    "olist/review": 99224
+   },
+   "payments_in_file": 103886,
+   "deals": {
+    "in_file": 842,
+    "seller_linked_to_lead": 842
+   },
+   "indexed_but_not_records": {
+    "postcodes": 0,
+    "categories": 0
+   }
+  },
+  "cost_usd": 0.73,
+  "wall_minutes": 4,
+  "questions": {
+   "right": 7,
+   "asked": 7,
+   "wrong": []
+  }
+ }
+}

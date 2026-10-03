@@ -1,0 +1,296 @@
+{
+ "round": 5,
+ "use_case": "One mailbox in another industry, with no vocabulary package",
+ "model": "sonnet",
+ "sample": null,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 134,
+   "by_agent": {
+    "ingestion agent": [
+     "org/name",
+     "org/credit_status",
+     "org/balance_owed_usd",
+     "org/storage_working_gas_bcf",
+     "org/storage_max_withdrawal_mmcf_d",
+     "org/storage_max_injection_mmcf_d",
+     "notice/key",
+     "notice/number",
+     "notice/pipeline",
+     "notice/type",
+     "notice/title",
+     "notice/dated",
+     "notice/effective_from",
+     "notice/effective_to",
+     "notice/response_required",
+     "notice/capacity_min_mcf_d",
+     "notice/capacity_max_mcf_d",
+     "notice/request_deadline",
+     "notice/queue_notice_at",
+     "notice/primary_firm_impact_pct",
+     "notice/it_aos_suspended",
+     "restriction/key",
+     "restriction/pipeline",
+     "restriction/kind",
+     "restriction/location",
+     "restriction/capacity",
+     "restriction/capacity_unit",
+     "restriction/from",
+     "restriction/to",
+     "restriction/previous_from",
+     "restriction/previous_to",
+     "restriction/notice",
+     "offer/key",
+     "offer/notice",
+     "offer/package",
+     "offer/receipt_point",
+     "offer/delivery_point",
+     "offer/quantity_dth_d",
+     "offer/term_start",
+     "offer/term_end",
+     "offer/prearranged",
+     "offer/min_bid_usd_per_dth",
+     "offer/bid_opens",
+     "offer/bid_closes",
+     "offer/award_deadline",
+     "deal/sitara_number",
+     "deal/counterparty",
+     "deal/alleged_counterparty",
+     "deal/pricing_basis",
+     "deal/price_period_start",
+     "deal/price_period_end",
+     "deal/delivery_month",
+     "deal/status",
+     "open_season/key",
+     "open_season/operator",
+     "open_season/service_start",
+     "open_season/offers_due",
+     "open_season/offers_open_until",
+     "open_season/closes",
+     "open_season/max_daily_injection_dth",
+     "open_season/rack_inventory_usd_per_dth",
+     "open_season/rack_injection_usd_per_dth_day",
+     "open_season/rack_withdrawal_usd_per_dth_day",
+     "open_season/rack_injection_commodity_usd_per_dth",
+     "open_season/rack_withdrawal_commodity_usd_per_dth",
+     "open_season/fuel_pct_min",
+     "open_season/fuel_pct_max",
+     "project/key",
+     "project/sponsor",
+     "project/capacity_mmcf_d",
+     "project/in_service",
+     "project/length_miles",
+     "project/open_season_closes",
+     "proceeding/docket",
+     "proceeding/pipeline",
+     "proceeding/filing_due",
+     "proceeding/comments_due",
+     "proceeding/reply_due",
+     "bid_request/key",
+     "bid_request/buyer",
+     "bid_request/delivery_month",
+     "bid_request/deadline",
+     "bid_request/max_volume_mmbtu_d",
+     "bid_request/pipeline",
+     "nomination/key",
+     "nomination/counterparty",
+     "nomination/month",
+     "nomination/original_mcf_d",
+     "nomination/production_mcf_d",
+     "nomination/revised_mmcf_d",
+     "storage_report/key",
+     "storage_report/publisher",
+     "storage_report/week_ending",
+     "storage_report/net_injection_bcf",
+     "storage_report/production_region_bcf",
+     "storage_report/east_region_bcf",
+     "storage_report/west_region_bcf",
+     "storage_report/total_storage_bcf",
+     "storage_report/pct_full",
+     "storage_report/below_last_year_bcf",
+     "earnings/key",
+     "earnings/company",
+     "earnings/announced",
+     "earnings/net_income_usd_m",
+     "earnings/eps_usd",
+     "earnings/prior_net_income_usd_m",
+     "earnings/prior_eps_usd",
+     "earnings/capex_usd_m",
+     "earnings/prior_capex_usd_m",
+     "earnings/debt_paid_usd_m",
+     "earnings/shares_outstanding_m",
+     "earnings/dividend_usd",
+     "earnings/prior_dividend_usd",
+     "legislation/key",
+     "legislation/signed",
+     "legislation/rates_held_at",
+     "legislation/effective_immediately",
+     "meeting/key",
+     "meeting/host",
+     "meeting/date",
+     "meeting/attendance",
+     "volume_issue/key",
+     "volume_issue/counterparty",
+     "volume_issue/location",
+     "volume_issue/volume_sold",
+     "volume_issue/volume_unscheduled",
+     "location/abbreviation",
+     "location/sort_code",
+     "location/pipeline",
+     "event/key",
+     "event/organizer",
+     "event/start",
+     "event/end",
+     "event/city"
+    ],
+    "ontology agent": [],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "ids": {},
+  "bare": {
+   "bid_request/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "deal/sitara_number": {
+    "entities": 3,
+    "bare": 0
+   },
+   "earnings/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "event/key": {
+    "entities": 5,
+    "bare": 0
+   },
+   "legislation/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "location/abbreviation": {
+    "entities": 2,
+    "bare": 0
+   },
+   "meeting/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "nomination/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "notice/key": {
+    "entities": 8,
+    "bare": 0
+   },
+   "offer/key": {
+    "entities": 5,
+    "bare": 0
+   },
+   "open_season/key": {
+    "entities": 2,
+    "bare": 0
+   },
+   "org/name": {
+    "entities": 17,
+    "bare": 14
+   },
+   "proceeding/docket": {
+    "entities": 1,
+    "bare": 0
+   },
+   "project/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "restriction/key": {
+    "entities": 10,
+    "bare": 0
+   },
+   "shape/name": {
+    "entities": 18,
+    "bare": 0
+   },
+   "storage_report/key": {
+    "entities": 2,
+    "bare": 0
+   },
+   "volume_issue/key": {
+    "entities": 1,
+    "bare": 0
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 0
+  },
+  "documents": {
+   "documents": 103,
+   "url": 103,
+   "issued_at": 96
+  },
+  "size": {
+   "facts": 2299,
+   "entities": 189,
+   "transactions": 149
+  },
+  "evidence": {
+   "transactions": 139,
+   "with_evidence": 139,
+   "with_confidence": 139
+  },
+  "shapes": 18,
+  "truth": {
+   "messages": {
+    "files": 249,
+    "distinct": 103,
+    "recorded": 103,
+    "recorded_more_than_once": 0,
+    "documents": 103
+   },
+   "people": {
+    "names_in_mailbox": 829,
+    "addresses_in_mailbox": 1084,
+    "phones_in_mailbox": 49,
+    "values_naming_a_person": 0,
+    "values_holding_an_address": 0,
+    "values_holding_a_phone": 0
+   },
+   "recorded": {
+    "document": 302,
+    "core": 278,
+    "restriction": 75,
+    "notice": 69,
+    "offer": 65,
+    "org": 22,
+    "event": 21,
+    "storage_report": 20,
+    "open_season": 16,
+    "deal": 14,
+    "earnings": 13,
+    "nomination": 6,
+    "project": 6,
+    "bid_request": 6,
+    "location": 6,
+    "proceeding": 5,
+    "volume_issue": 5,
+    "legislation": 4,
+    "meeting": 4
+   }
+  },
+  "cost_usd": 2.56,
+  "wall_minutes": 13,
+  "questions": {
+   "right": 8,
+   "asked": 8,
+   "wrong": []
+  }
+ }
+}

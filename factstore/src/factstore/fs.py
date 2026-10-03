@@ -38,7 +38,7 @@ class Definition:
 
 ATTRIBUTES = [
     Definition(IDENT, "fs/ident", "string", "one", "identity",
-               "Namespaced name of an attribute, e.g. customer/email."),
+               "Namespaced name of an attribute, e.g. po/etd."),
     Definition(TYPE, "fs/type", "string", "one", "none",
                "Value type of an attribute: string, decimal, boolean, date, instant or ref. Never changes."),
     Definition(CARDINALITY, "fs/cardinality", "string", "one", "none",

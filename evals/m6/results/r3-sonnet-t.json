@@ -1,0 +1,328 @@
+{
+ "round": 3,
+ "use_case": "A marketplace at scale, with a second dataset joined in and duplicate customers",
+ "model": "sonnet",
+ "sample": 100,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 11,
+   "by_agent": {
+    "catalogue agent": [
+     "olist/customer_id",
+     "olist/order_id",
+     "olist/order_line",
+     "olist/product_id",
+     "olist/seller_id",
+     "olist/review",
+     "olist/payment",
+     "funnel/mql_id",
+     "mql/seller",
+     "line/product",
+     "line/seller"
+    ],
+    "ontology agent": [],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "ids": {
+   "order": {
+    "in_source": 803,
+    "attribute": "olist/order_id",
+    "in_store": 803,
+    "found": 803,
+    "found_ignoring_case": 803,
+    "missing": 0,
+    "not_in_source": 0
+   },
+   "customer": {
+    "in_source": 803,
+    "attribute": "olist/customer_id",
+    "in_store": 803,
+    "found": 803,
+    "found_ignoring_case": 803,
+    "missing": 0,
+    "not_in_source": 0
+   },
+   "product": {
+    "in_source": 343,
+    "attribute": "olist/product_id",
+    "in_store": 343,
+    "found": 343,
+    "found_ignoring_case": 343,
+    "missing": 0,
+    "not_in_source": 0
+   },
+   "seller": {
+    "in_source": 210,
+    "attribute": "olist/seller_id",
+    "in_store": 235,
+    "found": 210,
+    "found_ignoring_case": 210,
+    "missing": 0,
+    "not_in_source": 25
+   },
+   "closed seller": {
+    "in_source": 38,
+    "attribute": "olist/seller_id",
+    "in_store": 235,
+    "found": 38,
+    "found_ignoring_case": 38,
+    "missing": 0,
+    "not_in_source": 197
+   },
+   "lead": {
+    "in_source": 138,
+    "attribute": "funnel/mql_id",
+    "in_store": 138,
+    "found": 138,
+    "found_ignoring_case": 138,
+    "missing": 0,
+    "not_in_source": 0
+   }
+  },
+  "bare": {
+   "amazon/asin": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/fba_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/fba_shipment_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/fnsku": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/order_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/order_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "amazon/seller_sku": {
+    "entities": 0,
+    "bare": 0
+   },
+   "customs/entry_no": {
+    "entities": 0,
+    "bare": 0
+   },
+   "factory/item_code": {
+    "entities": 0,
+    "bare": 0
+   },
+   "funnel/mql_id": {
+    "entities": 138,
+    "bare": 100
+   },
+   "olist/customer_id": {
+    "entities": 803,
+    "bare": 668
+   },
+   "olist/order_id": {
+    "entities": 803,
+    "bare": 0
+   },
+   "olist/order_line": {
+    "entities": 965,
+    "bare": 0
+   },
+   "olist/payment": {
+    "entities": 859,
+    "bare": 0
+   },
+   "olist/product_id": {
+    "entities": 343,
+    "bare": 343
+   },
+   "olist/review": {
+    "entities": 812,
+    "bare": 0
+   },
+   "olist/seller_id": {
+    "entities": 235,
+    "bare": 235
+   },
+   "po_line/key": {
+    "entities": 0,
+    "bare": 0
+   },
+   "po/number": {
+    "entities": 0,
+    "bare": 0
+   },
+   "qc/report_no": {
+    "entities": 0,
+    "bare": 0
+   },
+   "quickbooks/vendor": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shape/name": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shipment/booking_no": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shipment/hbl": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shipment_line/key": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/customer_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/line_item_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/order_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/order_name": {
+    "entities": 0,
+    "bare": 0
+   },
+   "shopify/variant_id": {
+    "entities": 0,
+    "bare": 0
+   },
+   "sku/code": {
+    "entities": 0,
+    "bare": 0
+   },
+   "sku/upc": {
+    "entities": 0,
+    "bare": 0
+   },
+   "supplier/code": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/item_code": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/outbound_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/receipt_line": {
+    "entities": 0,
+    "bare": 0
+   },
+   "tpl/receipt_no": {
+    "entities": 0,
+    "bare": 0
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 0
+  },
+  "documents": {
+   "documents": 9,
+   "url": 9,
+   "issued_at": 0
+  },
+  "size": {
+   "facts": 11251,
+   "entities": 4975,
+   "transactions": 37
+  },
+  "evidence": null,
+  "shapes": 9,
+  "truth": {
+   "customers": {
+    "in_file": 803,
+    "attribute": "olist/customer_id",
+    "in_store": 803
+   },
+   "orders": {
+    "in_file": 803,
+    "attribute": "olist/order_id",
+    "in_store": 803,
+    "pointing_at_customer": 803
+   },
+   "products": {
+    "in_file": 343,
+    "attribute": "olist/product_id",
+    "in_store": 343
+   },
+   "sellers": {
+    "in_file": 235,
+    "attribute": "olist/seller_id",
+    "in_store": 235,
+    "only_in_the_funnel": 25
+   },
+   "leads": {
+    "in_file": 138,
+    "attribute": "funnel/mql_id",
+    "in_store": 138
+   },
+   "people": {
+    "with_several_ids": 109,
+    "their_ids": 244,
+    "attribute": null,
+    "joined": 109,
+    "keys_joining_two_people": 0
+   },
+   "items": {
+    "in_file": 965,
+    "order_and_product_pairs": 871,
+    "in_store": 965,
+    "orders_with_every_item": 796,
+    "orders_with_items": 796,
+    "pointing_at_seller": 965
+   },
+   "reviews": {
+    "in_file": 812,
+    "review_ids": 782,
+    "review_ids_on_several_orders": 28,
+    "attribute": "olist/review",
+    "in_store": 812,
+    "pairs_right": 812
+   },
+   "records_pointing_at_orders": {
+    "olist/order_line": 965,
+    "olist/payment": 859,
+    "olist/review": 812
+   },
+   "payments_in_file": 859,
+   "deals": {
+    "in_file": 38,
+    "seller_linked_to_lead": 38
+   },
+   "indexed_but_not_records": {
+    "postcodes": 0,
+    "categories": 0
+   }
+  },
+  "cost_usd": 0.76,
+  "wall_minutes": 3,
+  "questions": {
+   "right": 7,
+   "asked": 7,
+   "wrong": []
+  }
+ }
+}

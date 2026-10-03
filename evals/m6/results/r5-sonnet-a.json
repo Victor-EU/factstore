@@ -1,0 +1,156 @@
+{
+ "round": 5,
+ "use_case": "One mailbox in another industry, with no vocabulary package",
+ "model": "sonnet",
+ "sample": null,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 41,
+   "by_agent": {
+    "ingestion agent": [
+     "email/subject",
+     "email/from",
+     "email/to",
+     "email/cc",
+     "email/folder",
+     "email/summary",
+     "org/name",
+     "org/credit_status",
+     "person/name",
+     "person/role",
+     "person/employer",
+     "deal/sitara_number",
+     "deal/counterparty",
+     "deal/terms",
+     "deal/issue",
+     "notice/ref",
+     "notice/issuer",
+     "notice/title",
+     "notice/type",
+     "notice/detail",
+     "restriction/pipeline",
+     "restriction/point",
+     "restriction/capacity_mmcfd",
+     "restriction/reason",
+     "location/name",
+     "location/abbreviation",
+     "location/sort_code",
+     "location/description",
+     "location/requested_by",
+     "proceeding/docket",
+     "proceeding/pipeline",
+     "proceeding/point",
+     "proceeding/deadline",
+     "open_season/ref",
+     "open_season/sponsor",
+     "open_season/closes",
+     "open_season/term",
+     "nomination/counterparty",
+     "nomination/period",
+     "nomination/volume_mmcfd",
+     "nomination/note"
+    ],
+    "ontology agent": [],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "ids": {},
+  "bare": {
+   "deal/sitara_number": {
+    "entities": 3,
+    "bare": 0
+   },
+   "location/name": {
+    "entities": 2,
+    "bare": 0
+   },
+   "notice/ref": {
+    "entities": 8,
+    "bare": 0
+   },
+   "open_season/ref": {
+    "entities": 3,
+    "bare": 0
+   },
+   "org/name": {
+    "entities": 12,
+    "bare": 11
+   },
+   "person/name": {
+    "entities": 15,
+    "bare": 0
+   },
+   "proceeding/docket": {
+    "entities": 1,
+    "bare": 0
+   },
+   "shape/name": {
+    "entities": 10,
+    "bare": 0
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 18
+  },
+  "documents": {
+   "documents": 103,
+   "url": 103,
+   "issued_at": 96
+  },
+  "size": {
+   "facts": 1798,
+   "entities": 168,
+   "transactions": 41
+  },
+  "evidence": {
+   "transactions": 31,
+   "with_evidence": 25,
+   "with_confidence": 1
+  },
+  "shapes": 10,
+  "truth": {
+   "messages": {
+    "files": 249,
+    "distinct": 103,
+    "recorded": 103,
+    "recorded_more_than_once": 0,
+    "documents": 103
+   },
+   "people": {
+    "names_in_mailbox": 829,
+    "addresses_in_mailbox": 1084,
+    "phones_in_mailbox": 49,
+    "values_naming_a_person": 124,
+    "values_holding_an_address": 65,
+    "values_holding_a_phone": 0
+   },
+   "recorded": {
+    "email": 765,
+    "document": 302,
+    "core": 50,
+    "notice": 45,
+    "person": 44,
+    "restriction": 16,
+    "open_season": 16,
+    "org": 13,
+    "deal": 13,
+    "location": 10,
+    "proceeding": 10,
+    "nomination": 6
+   }
+  },
+  "cost_usd": 3.99,
+  "wall_minutes": 16,
+  "questions": {
+   "right": 8,
+   "asked": 8,
+   "wrong": []
+  }
+ }
+}

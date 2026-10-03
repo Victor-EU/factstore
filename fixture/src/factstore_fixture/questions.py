@@ -155,11 +155,14 @@ def answers(w: World) -> dict[int, list[tuple]]:
             counts[(supplier, w.one(qc, "qc/result"))] += 1
     out[5] = [(*k, n) for k, n in counts.items()]
 
-    # 6. The crosswalk for an ASIN.
-    sku = w.lookup("amazon/asin", "B0BVUGZ3AT")
-    out[6] = [(*(w.one(sku, a) for a in ("sku/code", "shopify/variant_id", "amazon/fnsku", "amazon/seller_sku",
-                                         "tpl/item_code", "factory/item_code")),
-               w.one(w.one(sku, "sku/supplier"), "supplier/code"))]
+    # 6. The crosswalk for an ASIN, through the Amazon listing under it.
+    out[6] = []
+    for listing in w.having("listing/asin", w.lookup("amazon/asin", "B0BVUGZ3AT")):
+        sku = w.one(listing, "listing/sku")
+        out[6].append((*(w.one(sku, a) for a in ("sku/code", "shopify/variant_id")),
+                       *(w.one(listing, a) for a in ("amazon/fnsku", "amazon/seller_sku")),
+                       *(w.one(sku, a) for a in ("tpl/item_code", "factory/item_code")),
+                       w.one(w.one(sku, "sku/supplier"), "supplier/code")))
 
     # 7. Open PO value per supplier.
     value = defaultdict(Decimal)
@@ -255,13 +258,15 @@ group by 1, 2""", None),
     6: ("""
 select k.v, sv.v, fn.v, ss.v, tpl.v, fac.v, sup.v
 from "amazon/asin" asin
-join "sku/code" k using (e)
-join "shopify/variant_id" sv using (e)
-join "amazon/fnsku" fn using (e)
-join "amazon/seller_sku" ss using (e)
-join "tpl/item_code" tpl using (e)
-join "factory/item_code" fac using (e)
-join "sku/supplier" ks using (e)
+join "listing/asin" la on la.v = asin.e
+join "listing/sku" ls on ls.e = la.e
+join "amazon/fnsku" fn on fn.e = la.e
+join "amazon/seller_sku" ss on ss.e = la.e
+join "sku/code" k on k.e = ls.v
+join "shopify/variant_id" sv on sv.e = k.e
+join "tpl/item_code" tpl on tpl.e = k.e
+join "factory/item_code" fac on fac.e = k.e
+join "sku/supplier" ks on ks.e = k.e
 join "supplier/code" sup on sup.e = ks.v
 where asin.v = 'B0BVUGZ3AT'""", None),
     7: ("""

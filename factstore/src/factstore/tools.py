@@ -27,7 +27,7 @@ Each fact is {"e", "a", "v"} with an optional "op": "assert" (the default) or "r
 to it elsewhere in the same call; or a lookup like ["shopify/order_id", "1234"], which addresses \
 the entity holding that value of an identity attribute and creates it if there is none. \
 "tmp:tx" is this transaction itself: use it to record evidence or confidence for the write.
-- a: a registered attribute, e.g. "customer/email". Unknown attributes are rejected: find one \
+- a: a registered attribute, e.g. "po/etd". Unknown attributes are rejected: find one \
 with search_attributes, or register it with register_attribute.
 - v: a value of the attribute's type. string; decimal as a string, e.g. "99.50", never a float; \
 boolean; date as "YYYY-MM-DD"; instant as ISO 8601 with a timezone, e.g. \
@@ -42,7 +42,7 @@ have, changes nothing and is reported as unchanged. If nothing changes, no trans
 The kernel stamps who wrote and when from your credential; you cannot set them. Provenance \
 belongs to the transaction, so facts with different evidence or confidence go in separate calls.
 
-To evolve an attribute, transact on its entity, addressed as ["fs/ident", "customer/email"]: \
+To evolve an attribute, transact on its entity, addressed as ["fs/ident", "po/etd"]: \
 fs/doc to improve its doc; fs/cardinality "many" (from one, never back); fs/unique "identity" \
 (if no two entities share a value); fs/replaced_by pointing at the attribute that replaces it.
 

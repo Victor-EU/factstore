@@ -1,6 +1,6 @@
 {
   "name": "factstore-ecom-index",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "doc": "Identifiers and join keys for the records an online brand's systems own (Shopify, Amazon, the 3PL and QuickBooks), which the catalogue indexes.",
   "depends_on": ["factstore-core", "factstore-ecom-ops"],
   "skills": [],
@@ -18,7 +18,8 @@
     {"ident": "tpl/outbound_line", "type": "string", "cardinality": "one", "unique": "identity", "doc": "One item the 3PL shipped out against a Shopify order or an FBA inbound shipment, as the order reference / item code, e.g. #18301/ACMH-10021."},
     {"ident": "quickbooks/vendor", "type": "string", "cardinality": "one", "unique": "identity", "doc": "QuickBooks's name for a vendor, unique within a QuickBooks company, on the supplier, forwarder or broker it names."},
     {"ident": "order/customer", "type": "ref", "cardinality": "one", "doc": "Customer account that placed an order.", "distinct_from": ["shopify/customer_id"]},
-    {"ident": "line/sku", "type": "ref", "cardinality": "one", "doc": "SKU on a sales, receipt, outbound or transfer line."},
+    {"ident": "line/sku", "type": "ref", "cardinality": "one", "doc": "SKU on a sales, receipt, outbound or transfer line. A marketplace's line names a listing instead (line/listing)."},
+    {"ident": "line/listing", "type": "ref", "cardinality": "one", "doc": "Marketplace listing a line names: the seller SKU on an Amazon order line or an FBA inbound line. The line's SKU is the listing's."},
     {"ident": "receipt/po", "type": "ref", "cardinality": "many", "doc": "Purchase order whose goods a warehouse receipt booked in; several when one receipt covers several POs.", "distinct_from": ["qc/po", "shipment_line/po_line"]}
   ]
 }

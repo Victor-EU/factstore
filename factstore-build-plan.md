@@ -1,6 +1,6 @@
 # factstore — Build Plan
 
-**Status:** Draft v0.2 · 2026-10-02 · for [design v0.5](factstore-design.md)
+**Status:** Draft v0.3 · 2026-10-02 · for [design v0.6](factstore-design.md)
 
 ## Goal
 
@@ -36,8 +36,9 @@ OQ1–OQ5 are the open questions in design §15.
 | M3 | Vocabulary packages | 1 week, alongside M2 | M1 registration |
 | M4 | Skills | 2–3 weeks | M2, M3 |
 | M5 | Slice run and report | 1–2 weeks | M4, partner data |
+| M6 | One use case at a time, on public data | 5–6 weeks | M5 |
 
-About ten weeks end to end. The partner track runs from M0 and is the likeliest source of delay.
+About ten weeks end to end. The partner track runs from M0 and is the likeliest source of delay. M6 was added after M5, while no partner has data.
 
 ### M0 — Spec and decisions
 
@@ -198,10 +199,79 @@ Runs alongside M2 once M1's registration works.
 
     The last slice ran with both fixes. One gap it found is fixed but not yet run: suppliers name orders by their PI number.
 - **Next: go.** Run the slice on a partner's exports, at least twice, with the partner's operator writing the ten questions and the list of kinds. Partner data is the only thing blocking.
+- **Parked until a pilot (Victor, 2026-10-02).** No company's data is available yet. Meanwhile M6 tests one use case at a time on public data.
 - **Against the risk table.**
   - Trigram search never let a synonym of a package attribute through: everything registered was outside the packages.
   - The chats were readable, apart from voice notes.
   - Partner data was late, and M5 ran on the fixture.
+
+### M6 — One use case at a time, on public data
+
+A partner may use factstore for part of their data, not all of it: one channel's product list, or one inbox. So, until a pilot brings real data, each round tests one use case on one public dataset from a real company ([evals/m6](evals/m6/README.md)).
+
+| Round | Use case | Dataset |
+|---|---|---|
+| 0 | The harness for public data | — |
+| 1 | One product list across the marketplaces a brand sells on | An Indian clothing seller's reports (Kaggle) |
+| 2 | One shop's orders, customers and products, with real junk in its ID columns | Online Retail II, a UK gift retailer |
+| 3 | A marketplace at scale, with a second dataset joined in and duplicate customers | Olist and its sales funnel |
+| 4 | Read supplier invoices and orders | DocILE's labelled business documents |
+| 5 | One mailbox in another industry, with no vocabulary package | Enron, one person's mailbox |
+
+- **One round at a time, in order.** A round's fixes change the shared skills, so the next round tests them.
+- **Each round's pieces are written before it runs:** questions about what the store holds, their answers computed from the raw files, and a pass mark.
+- **Each round runs three times:** a trial on a sample, a run, and a run that confirms the fixes.
+- **After each round's fixes, the fixture's slice runs again**, and has to stay as it was.
+- **Exports run in full.** Documents and emails grow in samples, since the agent reads each one.
+- **The data and the transcripts stay out of git.** Results hold counts, scores and costs.
+- **Licences:**
+  - Round 1's terms are unstated, so it is used for internal testing only.
+  - Olist's licence is non-commercial, which fits: factstore is MIT-licensed and not sold (Victor, 2026-10-02).
+
+**Exit:** each round's use case passes its own mark, the fixture's slice is unchanged, and design v0.7 is written from what broke.
+
+**Status, 2026-10-03:** rounds 0 to 3 and 5 are done ([evals/m6](evals/m6/README.md)).
+- **Round 1:** one product list across a real seller's Amazon, international-sales and stock reports. Run d passed every part of the mark:
+  - all six questions;
+  - every ASIN on its own product, and both listings under each ASIN Amazon lists twice;
+  - no junk code, charge or price-list code taken for a product;
+  - no customer name in the store, and a re-run that writes nothing.
+- **Its changes:**
+  - Amazon listings became records of their own (ecom-ops 0.4.0, ecom-index 0.2.0; Victor's choice).
+  - Three catalogue fixes (factstore-skills 0.2.1).
+  - compose.yaml gives Postgres 1 GB of shared memory.
+- **The fixture's slice stayed as it was, at slice k:** product matching 1.0, all 18 kinds, 10 of 10 questions, and a re-run that writes nothing.
+- **Round 2:** a million order lines from a real shop, with no package for its system. Run d passed every part of the mark:
+  - all six questions;
+  - every customer, invoice and product, none split by its spelling;
+  - one line per invoice and product;
+  - no postage, fee or test code taken for a product;
+  - no ID on another system's attributes, and a re-run that writes nothing.
+- **Its changes:** four catalogue fixes (factstore-skills 0.2.2). They cover:
+  - lines keyed by the IDs they name, not their row's position;
+  - an identifier holding only its own system's IDs;
+  - long loads run in parts;
+  - duplicates compared on every address an account has used.
+- **The fixture's slice stayed as it was, at slice n.** Slice l, on the first fix alone, missed two questions: one on duplicates, fixed by the fourth change, and one from WeChat ingestion's known variance.
+- **Round 3:** a marketplace and its sales funnel, at 100,000 orders, with no package. The trial and both runs passed every part of the mark with no change to the skills:
+  - all seven questions;
+  - each person's customer IDs joined, and no two people joined;
+  - every item the source numbers kept;
+  - every review on each of its orders;
+  - every closed seller linked to its lead;
+  - no review comment in the store.
+
+  The ontology named the kinds a person would.
+- **Round 5** (run before round 4; Victor, 2026-10-03): an Enron gas trader's mailbox, ingested with no package for the industry. Run f passed every part of the mark:
+  - all eight questions;
+  - each of 103 messages recorded once, though the mail client kept them as 249 files;
+  - every fact citing its message, and all 50 checked by hand right;
+  - no personal data, and a re-run that writes nothing.
+- **Its changes:**
+  - The store's MCP instructions state its rules: values, not copies of text; no personal data; each document once; every fact cites its document. With one line of instructions, agents had put people in the store.
+  - A general ingestion skill, `factstore-ingest` (factstore-skills 0.3.0). Under the rules alone, what an agent recorded swung from 8 of 8 questions to 2.
+  - The fixture's slice stayed as it was under the new instructions (slice o).
+- **Round 4 waits on DocILE's download token.**
 
 ## Partner track
 

@@ -1,0 +1,1623 @@
+{
+ "model": "sonnet",
+ "store": "fs_m5_k",
+ "stages": {
+  "catalogue": {
+   "turns": 29,
+   "tool_calls": 27,
+   "cost_usd": 0.7272724,
+   "wall_seconds": 234,
+   "skill_used": [
+    "factstore-catalogue"
+   ],
+   "subtype": "success",
+   "final": "The catalogue is written, and the step-7 checks found nothing to fix. I registered no new attributes, because the installed vocabulary already had everything I needed.\n\n## Indexed\nAll counts equal the distinct IDs in the sources.\n\n| Source | Records | Count |\n|---|---|---|\n| Shopify | variants (SKU hubs) | 49 |\n| | orders | 26,546 |\n| | order lines | 37,773 |\n| | customer accounts | 21,129 |\n| Amazon | listings (seller SKUs) | 25 |\n| | ASINs | 25 |\n| | orders | 38,264 |\n| | order lines | 43,513 |\n| | FBA inbound shipments | 49 |\n| 3PL | item codes | 49 |\n| | receipts | 29 |\n| | receipt lines | 146 |\n| | outbound lines | 37,331 |\n| QuickBooks | vendors | 11 |\n\nThe 3PL outbound lines are keyed by order reference and item code, as in `#18301/ACMH-10021`. The 11 QuickBooks vendors are 8 suppliers, a forwarder, a broker and the 3PL.\n\n## Crosswalk\nAll 49 hubs carry a 3PL item code and a factory item code, a supplier and an HS code. Each hub is matched one to one.\n\n- **Shopify to hub.** 43 variants match exactly (confidence 1). 6 have malformed SKUs and take the clean spelling at 0.9: `AH-CTB-16-LRG`, `AHUTN0017NAT`, `AH-TRY-18-NAT`, `ah-btl-0020-blk`, `AH-JAR-22-STL` and `AH-TPT-23-CLR`.\n- **3PL.** All 49 matched by UPC, exact (1). The 3PL's hand-typed client SKUs (`BKL`, `WTH`, `SVL`, `HFL`, `BMA`, and some blanks) were not used.\n- **Amazon.** 25 listings, each pointing at a hub and an ASIN. Of these, 13 match exactly (1) and 12 match at 0.9 after dropping the `-FBA` suffix. Every Amazon listing found its hub, so none is unmatched.\n- **Factory and tariff data.** Item codes, supplier and HS code come from the 8 suppliers' commercial invoices, matched by description (0.7). The factory item codes are not shared with any other system.\n- **Quickbooks vendors to suppliers.** The 8 supplier vendors are tied to their supplier codes by the email domain on the vendor list.\n\n## Duplicates marked\nThere are 154 `core/same_as` marks.\n\n| Rule | Marks | Confidence |\n|---|---|---|\n| Same mailbox after lowercasing and dropping a `+alias` | 84 | 0.9 |\n| Same full name and same shipping address | 70 | 0.7 |\n\nThe newer account points at the oldest. No account has more than three others pointing at it. I read about 25 of the name-and-address pairs, and all looked like one person. I did not read ten pairs from the mailbox rule.\n\n## Checks\n- **Bare records created by a join key:** 26 POs, named by the 3PL receipts. They hold only their number, and the ingestion skill will fill them. No blank, list-style or malformed values were written, and 33 receipt lines with a blank PO reference got no ref.\n- **Counts:** all match the sources.\n- **Sources not indexed:**\n  - `quickbooks/transaction_list_by_vendor.csv` is the general ledger.\n  - The `wechat/` chats and `email/ops_inbox.mbox` are for the ingestion skill.\n  - The proforma invoices and other supplier documents (PI, LCI, QS) were not read. Only the commercial invoices were, for the crosswalk.\n\n## Terms the sources disagree on\n- **\"SKU\".** Amazon adds `-FBA` to some of our codes, the 3PL's client SKU is hand-typed with typos or blank, and Shopify has six malformed codes. I kept each system's own ID and joined them on the hub.\n- **\"On hand\".** The 3PL splits On Hand, Allocated, Available and Damaged. Shopify's quantity equals the 3PL's Available, and Amazon has its own sellable and unsellable counts. I stored no quantities, so there is nothing to reconcile in the store.\n\n## For you to decide\n- Whether the 0.7 name-and-address matches should stay as they are.\n- Whether to correct the six malformed Shopify SKUs, and the 3PL's client-SKU typos, in the source systems.\n- Whether the 3PL FBA outbound lines should also link to Amazon listings. The 3PL file names only an item code, so I left them linked to the hub.\n- The ASIN check turned up no pairs of our codes sharing one ASIN.",
+   "session_id": "7bb8d2dd-1649-4db9-8cfc-0b3a10160240",
+   "wrote": {
+    "new_entities": 204966,
+    "new_attributes": [],
+    "transactions": 165,
+    "facts": 496866
+   },
+   "files_skipped": [
+    "w/pairs.json (7 KB)"
+   ],
+   "crosswalk": {
+    "systems": {
+     "upc": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "shopify_variant_id": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "amazon_seller_sku": {
+      "truth": 25,
+      "stored": 25,
+      "correct": 25,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "asin": {
+      "truth": 25,
+      "stored": 25,
+      "correct": 25,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "fnsku": {
+      "truth": 25,
+      "stored": 25,
+      "correct": 25,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "tpl_item_code": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "factory_code": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "hs_code": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "supplier": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     }
+    },
+    "precision": 1.0,
+    "recall": 1.0,
+    "skus_in_truth": 49,
+    "hubs": 49,
+    "hubs_with_true_code": 49,
+    "factory_prefix_exact": 49
+   },
+   "duplicates": {
+    "truth_pairs": 283,
+    "visible_pairs": 171,
+    "marked_pairs": 157,
+    "correct": 157,
+    "precision": 1.0,
+    "recall": 0.918
+   },
+   "personal_data": {
+    "personal_values": 0,
+    "examples": [],
+    "values_with_at_sign": []
+   },
+   "indexed": {
+    "amazon/asin": 25,
+    "amazon/fba_shipment_id": 49,
+    "amazon/fnsku": 25,
+    "amazon/order_id": 38264,
+    "amazon/order_line": 43513,
+    "amazon/seller_sku": 25,
+    "document/hash": 50,
+    "factory/item_code": 49,
+    "po/number": 26,
+    "quickbooks/vendor": 11,
+    "shopify/customer_id": 21129,
+    "shopify/line_item_id": 37773,
+    "shopify/order_id": 26546,
+    "shopify/order_name": 26546,
+    "shopify/variant_id": 49,
+    "sku/code": 49,
+    "sku/upc": 49,
+    "supplier/code": 8,
+    "tpl/item_code": 49,
+    "tpl/outbound_line": 37331,
+    "tpl/receipt_line": 146,
+    "tpl/receipt_no": 29
+   }
+  },
+  "ingest": {
+   "turns": 55,
+   "tool_calls": 53,
+   "cost_usd": 2.1552132000000004,
+   "wall_seconds": 496,
+   "skill_used": [
+    "ecom-ops-ingest-documents"
+   ],
+   "subtype": "success",
+   "final": "I read all three sources into the fact store: 403 transactions, written in issue-date order, with no errors.\n\n**Documents read**\n- **Supplier PDFs (135):**\n  - 48 proforma invoices.\n  - 41 commercial invoice/packing lists. The catalogue had only read these for item and HS codes, so I read them in full and gave them issue dates.\n  - 46 inspection reports.\n- **WeChat (8 chats, 811 messages):** only the messages that carry facts were turned into documents. Timestamps were read as New York time, with daylight saving applied.\n- **Emails (163):** 32 booking confirmations, 31 pre-alerts, 30 arrival notices, 7 ETA updates, 4 rolled-booking replies, 29 warehouse receipts and 30 customs entry summaries.\n- **Skipped as already read:** none.\n\n**Entities in the store now**\n\n| Entity | Count |\n|---|---|\n| POs with a proforma and lines | 48 |\n| PO lines | 196 |\n| Shipments | 32, of which 31 have a house bill |\n| Shipment lines | 166 |\n| Inspections | 46 |\n| Customs entries | 30 |\n| Shipments delivered | 29 |\n\nPO status: 37 received, 4 shipped, 5 in production, 1 ready, 1 confirmed.\n\n**Merging and checks**\n- Every pre-alert and commercial invoice merged into its booking, so there are no duplicate shipments. The one shipment without a house bill is PO-2026-0023, which is booked and hasn't sailed.\n- No HS code differed from the catalogue and no item code was unresolved.\n- No invoice quantities disagreed with the pre-alerts.\n\n**Facts below confidence 1**\n- **0.8\u20130.9, ETD slips from chat (21):** these are dates written without a year (\"3/25\", \"4\u670815\u53f7\"). I took the next occurrence after the message.\n  - 0.8 where the supplier named its own PI number, such as \"HT-PI-2025-001\". I matched it to our PO through the proforma.\n  - 0.9 where our PO number was named.\n- **0.8\u20130.9, `in_production` status (39):** a supplier acknowledged a deposit message. The acknowledgement doesn't name the PO.\n  - 0.9 where the deposit message named the PO.\n  - 0.8 where I matched the PO by deposit amount against the PI total and payment terms.\n\n**Unresolved**\n- **Deposit acknowledgements:** these POs have no `in_production` status:\n  - PO-2025-0153, PO-2026-0001, PO-2026-0003, PO-2026-0013 and PO-2026-0029 have a deposit but no text acknowledgement. The replies may be among the 21 voice messages, which I can't read. PO-2026-0029's deposit is also very recent.\n  - Tianyi's four POs have no deposit under their payment terms.\n- **Chat container messages:** I didn't write the 11 \"container loaded\" chat messages. They name no PO, and the invoices and pre-alerts already give those container numbers with certainty. They all matched a shipment in the store.\n- **Warehouse discrepancies:** the vocabulary has no attribute for these.\n  - 74 lines across 21 receipts report damaged units.\n  - 2 lines were short: ACMH-10259 on GSF-RCV-000003 (1,680 expected, 1,656 received) and ACMH-10294 on GSF-RCV-000008 (576 expected, 552 received).\n\n**Gaps in the vocabulary**\n- Price changes: Qisheng +4%, Hetai \u22122%, Mingjia +3%, Lanxin +5%.\n- Holiday closures: 8 Chinese New Year notices and 8 National Day notices.\n- Payments: deposit and balance amounts.\n- Sample couriers: 15 DHL notices.\n- Rework durations and QC failure reasons.\n- Defect lists and warehouse receipt numbers.\n\nThe chat parsing and status rules are in a script in the session scratchpad if you want to re-run them.",
+   "session_id": "cf5d2f90-c160-4bb6-be91-21b316ffc703",
+   "wrote": {
+    "new_entities": 893,
+    "new_attributes": [],
+    "transactions": 403,
+    "facts": 6532
+   },
+   "files_skipped": [
+    "scratchpad/pdfidx.json (12 KB)",
+    "scratchpad/txs.json (678 KB)",
+    "scratchpad/emails.json (192 KB)",
+    "scratchpad/txt/LCI-260923-046.txt (0 KB)",
+    "scratchpad/txt/CI-PL_RF-PI25002_PBLHB2500007.txt (1 KB)",
+    "scratchpad/txt/CI-PL_MT251122-02_TGHU8545365.txt (1 KB)",
+    "scratchpad/txt/LCI-251130-009.txt (1 KB)",
+    "scratchpad/txt/MJ2026005.txt (1 KB)",
+    "scratchpad/txt/QS260907.txt (1 KB)",
+    "scratchpad/txt/LCI-260416-026.txt (0 KB)",
+    "scratchpad/txt/MJ2026004.txt (1 KB)",
+    "scratchpad/txt/LCI-251221-011.txt (0 KB)",
+    "scratchpad/txt/CI-PL_LX26004_TCLU1241736.txt (1 KB)",
+    "scratchpad/txt/HT-PI-2025-002.txt (1 KB)",
+    "scratchpad/txt/LCI-251125-007.txt (0 KB)",
+    "scratchpad/txt/HT-PI-2025-001.txt (1 KB)",
+    "scratchpad/txt/LCI-251112-001.txt (0 KB)",
+    "scratchpad/txt/MT251009-01.txt (1 KB)",
+    "scratchpad/txt/LCI-251125-006.txt (0 KB)",
+    "scratchpad/txt/LCI-260821-042.txt (0 KB)",
+    "scratchpad/txt/LCI-251230-013.txt (0 KB)",
+    "scratchpad/txt/MJ2026003.txt (1 KB)",
+    "scratchpad/txt/CI-PL_HT-PI-2025-001_TCLU7231714.txt (1 KB)",
+    "scratchpad/txt/LCI-260407-025.txt (0 KB)",
+    "scratchpad/txt/CI-PL_LX25003_SEGU6638096.txt (1 KB)",
+    "scratchpad/txt/LCI-260806-040.txt (0 KB)",
+    "scratchpad/txt/CI-PL_RF-PI26005_SEGU5548249.txt (1 KB)",
+    "scratchpad/txt/CI-PL_MJ2026004_PBLHB2600024.txt (1 KB)",
+    "scratchpad/txt/CI-PL_HT-PI-2025-002_PBLHB2600009.txt (1 KB)",
+    "scratchpad/txt/CI-PL_QS260103_SEGU6638096.txt (1 KB)",
+    "scratchpad/txt/CI-PL_MJ2025001_PBLHB2500005.txt (1 KB)",
+    "scratchpad/txt/MT260905-07.txt (1 KB)",
+    "scratchpad/txt/CI-PL_LX26006_MSKU6442561.txt (1 KB)",
+    "scratchpad/txt/CI-PL_LX26005_CMAU6677333.txt (1 KB)",
+    "scratchpad/txt/QS251102.txt (1 KB)",
+    "scratchpad/txt/LCI-251124-005.txt (0 KB)",
+    "scratchpad/txt/CI-PL_QS260505_TCLU6366952.txt (1 KB)",
+    "scratchpad/txt/CI-PL_MT260717-06_TCLU9553807.txt (1 KB)",
+    "scratchpad/txt/LCI-251229-012.txt (0 KB)",
+    "scratchpad/txt/LX25002.txt (1 KB)",
+    "scratchpad/txt/LX25003.txt (1 KB)",
+    "scratchpad/txt/CI-PL_YD-26-003_PBLHB2600017.txt (1 KB)",
+    "scratchpad/txt/RF-PI26006.txt (1 KB)",
+    "scratchpad/txt/LCI-260715-039.txt (0 KB)",
+    "scratchpad/txt/CI-PL_TY-260717_MSKU6442561.txt (1 KB)",
+    "scratchpad/txt/CI-PL_TY-260327_TCLU1241736.txt (1 KB)",
+    "scratchpad/txt/CI-PL_YD-26-004_PBLHB2600027.txt (1 KB)",
+    "scratchpad/txt/RF-PI26004.txt (1 KB)",
+    "scratchpad/txt/LCI-260331-024.txt (0 KB)",
+    "scratchpad/txt/HT-PI-2026-003.txt (1 KB)",
+    "scratchpad/txt/LCI-260513-029.txt (0 KB)",
+    "scratchpad/txt/LX25001.txt (1 KB)",
+    "scratchpad/txt/LCI-260906-045.txt (0 KB)",
+    "scratchpad/txt/TY-260717.txt (1 KB)",
+    "scratchpad/txt/CI-PL_MJ2025002_PBLHB2600010.txt (1 KB)",
+    "scratchpad/txt/RF-PI26005.txt (1 KB)",
+    "scratchpad/txt/CI-PL_MT260105-03_TCLU6108006.txt (2 KB)",
+    "scratchpad/txt/HT-PI-2026-006.txt (1 KB)",
+    "scratchpad/txt/LCI-260104-014.txt (0 KB)",
+    "scratchpad/txt/CI-PL_QS260706_MSKU6442561.txt (1 KB)",
+    "scratchpad/txt/CI-PL_MT260508-05_CMAU6677333.txt (1 KB)",
+    "scratchpad/txt/LCI-260317-022.txt (1 KB)",
+    "scratchpad/txt/CI-PL_QS260304_TCLU1241736.txt (1 KB)",
+    "scratchpad/txt/LCI-260507-027.txt (0 KB)",
+    "scratchpad/txt/CI-PL_LX25002_TGHU7372239.txt (1 KB)",
+    "scratchpad/txt/HT-PI-2026-005.txt (1 KB)",
+    "scratchpad/txt/LCI-260823-043.txt (0 KB)",
+    "scratchpad/txt/CI-PL_MT251009-01_SEGU1045204.txt (2 KB)",
+    "scratchpad/txt/CI-PL_LX25001_TCLU6622680.txt (1 KB)",
+    "scratchpad/txt/LCI-260306-019.txt (0 KB)",
+    "scratchpad/txt/CI-PL_TY-251206_OOLU5620341.txt (1 KB)",
+    "scratchpad/txt/QS251001.txt (1 KB)",
+    "scratchpad/txt/HT-PI-2026-004.txt (1 KB)",
+    "scratchpad/txt/CI-PL_HT-PI-2026-004_PBLHB2600022.txt (1 KB)",
+    "scratchpad/txt/RF-PI26003.txt (1 KB)",
+    "scratchpad/txt/YD-26-004.txt (1 KB)",
+    "scratchpad/txt/LCI-260111-016.txt (0 KB)",
+    "scratchpad/txt/MJ2025002.txt (1 KB)",
+    "scratchpad/txt/LCI-260628-036.txt (0 KB)",
+    "scratchpad/txt/LCI-260524-030.txt (0 KB)",
+    "scratchpad/txt/CI-PL_HT-PI-2026-003_PBLHB2600020.txt (1 KB)",
+    "scratchpad/txt/YD-26-005.txt (1 KB)",
+    "scratchpad/txt/TY-260327.txt (1 KB)",
+    "scratchpad/txt/LCI-251209-010.txt (1 KB)",
+    "scratchpad/txt/LCI-260507-028.txt (0 KB)",
+    "scratchpad/txt/CI-PL_YD-25-001_PBLHB2500002.txt (1 KB)",
+    "scratchpad/txt/LCI-260111-015.txt (0 KB)",
+    "scratchpad/txt/MJ2025001.txt (1 KB)",
+    "scratchpad/txt/LCI-260819-041.txt (0 KB)",
+    "scratchpad/txt/LCI-260708-038.txt (0 KB)",
+    "scratchpad/txt/CI-PL_QS251102_TGHU7372239.txt (1 KB)",
+    "scratchpad/txt/CI-PL_MJ2026005_PBLHB2600029.txt (1 KB)",
+    "scratchpad/txt/YD-26-006.txt (1 KB)",
+    "scratchpad/txt/LCI-260616-034.txt (0 KB)",
+    "scratchpad/txt/LCI-260705-037.txt (0 KB)",
+    "scratchpad/txt/LCI-260826-044.txt (0 KB)",
+    "scratchpad/txt/LCI-251126-008.txt (0 KB)",
+    "scratchpad/txt/MT251122-02.txt (1 KB)",
+    "scratchpad/txt/MT260105-03.txt (1 KB)",
+    "scratchpad/txt/YD-26-003.txt (1 KB)",
+    "scratchpad/txt/CI-PL_QS251001_TCLU6622680.txt (1 KB)",
+    "scratchpad/txt/LCI-260525-031.txt (0 KB)",
+    "scratchpad/txt/CI-PL_RF-PI26003_PBLHB2600015.txt (1 KB)",
+    "scratchpad/txt/MT260508-05.txt (1 KB)",
+    "scratchpad/txt/LCI-251116-002.txt (0 KB)",
+    "scratchpad/txt/TY-251011.txt (1 KB)",
+    "scratchpad/txt/LX26005.txt (1 KB)",
+    "scratchpad/txt/CI-PL_MJ2026003_PBLHB2600018.txt (1 KB)",
+    "scratchpad/txt/MT260328-04.txt (1 KB)",
+    "scratchpad/txt/LX26004.txt (1 KB)",
+    "scratchpad/txt/CI-PL_MT260328-04_TCLU7262401.txt (1 KB)",
+    "scratchpad/txt/TY-251206.txt (1 KB)",
+    "scratchpad/txt/LCI-251121-004.txt (0 KB)",
+    "scratchpad/txt/QS260304.txt (1 KB)",
+    "scratchpad/txt/LCI-260308-020.txt (0 KB)",
+    "scratchpad/txt/RF-PI25001.txt (1 KB)",
+    "scratchpad/txt/LCI-260615-032.txt (0 KB)",
+    "scratchpad/txt/CI-PL_HT-PI-2026-005_SEGU5548249.txt (1 KB)",
+    "scratchpad/txt/LCI-251120-003.txt (0 KB)",
+    "scratchpad/txt/LX26006.txt (1 KB)",
+    "scratchpad/txt/CI-PL_RF-PI26004_PBLHB2600019.txt (1 KB)",
+    "scratchpad/txt/LX26007.txt (1 KB)",
+    "scratchpad/txt/LCI-260615-033.txt (0 KB)",
+    "scratchpad/txt/LCI-260112-017.txt (0 KB)",
+    "scratchpad/txt/CI-PL_YD-25-002_PBLHB2600011.txt (1 KB)",
+    "scratchpad/txt/LCI-260121-018.txt (0 KB)",
+    "scratchpad/txt/RF-PI25002.txt (1 KB)",
+    "scratchpad/txt/QS260505.txt (1 KB)",
+    "scratchpad/txt/LCI-260623-035.txt (0 KB)",
+    "scratchpad/txt/YD-25-001.txt (1 KB)",
+    "scratchpad/txt/LCI-260326-023.txt (0 KB)",
+    "scratchpad/txt/QS260706.txt (1 KB)",
+    "scratchpad/txt/CI-PL_RF-PI25001_PBLHB2500001.txt (1 KB)",
+    "scratchpad/txt/LCI-260309-021.txt (0 KB)",
+    "scratchpad/txt/YD-25-002.txt (1 KB)",
+    "scratchpad/txt/MT260717-06.txt (1 KB)",
+    "scratchpad/txt/CI-PL_TY-251011_TCLU6622680.txt (1 KB)",
+    "scratchpad/txt/QS260103.txt (1 KB)"
+   ],
+   "evidence": {
+    "transactions": 403,
+    "with_evidence": 403,
+    "with_confidence": 403,
+    "without_evidence": []
+   },
+   "documents": {
+    "files": 135,
+    "recorded": 135,
+    "url_names_file": 135,
+    "other_documents": 316
+   },
+   "issue_dates": {
+    "pdf": {
+     "in_export": 135,
+     "recorded": 135,
+     "dated": 135,
+     "right": 135,
+     "wrong": []
+    },
+    "chat message": {
+     "in_export": 811,
+     "recorded": 144,
+     "dated": 144,
+     "right": 144,
+     "wrong": []
+    },
+    "email": {
+     "in_export": 163,
+     "recorded": 163,
+     "dated": 163,
+     "right": 163,
+     "wrong": []
+    }
+   },
+   "pdf_statements": {
+    "fields": {
+     "pi_number": {
+      "truth": 48,
+      "on_entity": 48,
+      "with_evidence": 48
+     },
+     "etd": {
+      "truth": 48,
+      "on_entity": 48,
+      "with_evidence": 48
+     },
+     "unit_price": {
+      "truth": 196,
+      "on_entity": 196,
+      "with_evidence": 196
+     },
+     "qc_result": {
+      "truth": 46,
+      "on_entity": 46,
+      "with_evidence": 46
+     },
+     "shipped": {
+      "truth": 166,
+      "on_entity": 166,
+      "with_evidence": 166
+     }
+    },
+    "truth": 504,
+    "on_entity": 504,
+    "with_evidence": 504,
+    "recall": 1.0,
+    "misses": {}
+   },
+   "message_statements": {
+    "fields": {
+     "email duty_total": {
+      "truth": 30,
+      "on_entity": 30,
+      "with_evidence": 30
+     },
+     "email eta": {
+      "truth": 70,
+      "on_entity": 70,
+      "with_evidence": 39
+     },
+     "email etd": {
+      "truth": 36,
+      "on_entity": 36,
+      "with_evidence": 36
+     },
+     "wechat container_no": {
+      "truth": 15,
+      "on_entity": 15,
+      "with_evidence": 0
+     },
+     "wechat etd": {
+      "truth": 70,
+      "on_entity": 66,
+      "with_evidence": 18
+     }
+    },
+    "truth": 221,
+    "on_entity": 217,
+    "with_evidence": 123,
+    "recall": 0.557,
+    "no_attribute_in_package": {
+     "wechat sample_awb": 15,
+     "email damaged": 74,
+     "wechat closed": 16,
+     "wechat price_change": 4
+    },
+    "misses": {
+     "wechat etd": [
+      {
+       "source": "wechat",
+       "ref": "wechat/NBBW_Lily.txt#5",
+       "at": "2025-10-09T15:25:00+08:00",
+       "subject": "PO-2025-0143",
+       "field": "etd",
+       "value": "2025-12-05",
+       "found": [
+        "2025-12-05",
+        "2025-12-19"
+       ]
+      },
+      {
+       "source": "wechat",
+       "ref": "wechat/FSMJ_Grace.txt#5",
+       "at": "2025-10-09T15:27:00+08:00",
+       "subject": "PO-2025-0147",
+       "field": "etd",
+       "value": "2025-12-02",
+       "found": [
+        "2025-12-02",
+        "2025-12-09"
+       ]
+      },
+      {
+       "source": "wechat",
+       "ref": "wechat/SZHT_Kevin.txt#6",
+       "at": "2025-10-09T17:24:00+08:00",
+       "subject": "PO-2025-0144",
+       "field": "etd",
+       "value": "2025-11-26",
+       "found": [
+        "2025-11-26",
+        "2025-12-02",
+        "2025-12-03"
+       ]
+      },
+      {
+       "source": "wechat",
+       "ref": "wechat/YWLX_Amy.txt#6",
+       "at": "2025-10-09T18:02:00+08:00",
+       "subject": "PO-2025-0145",
+       "field": "etd",
+       "value": "2025-11-20",
+       "found": [
+        "2025-11-20",
+        "2025-11-24",
+        "2025-12-05"
+       ]
+      },
+      {
+       "source": "wechat",
+       "ref": "wechat/XMYD_Eric.txt#5",
+       "at": "2025-10-09T18:11:00+08:00",
+       "subject": "PO-2025-0148",
+       "field": "etd",
+       "value": "2025-11-26",
+       "found": [
+        "2025-11-26",
+        "2025-12-03",
+        "2025-12-02"
+       ]
+      }
+     ],
+     "email eta": [
+      {
+       "source": "email",
+       "ref": "email/ops_inbox.mbox <20251127110000.2@pacificbridge.example>",
+       "at": "2025-11-26T21:00:00+08:00",
+       "subject": "PBLYTN2511001",
+       "field": "eta",
+       "value": "2025-12-28",
+       "found": [
+        "2025-12-28 2025-12-28 2025-12-28",
+        "2026-01-03 2026-01-03 2026-01-03"
+       ]
+      },
+      {
+       "source": "email",
+       "ref": "email/ops_inbox.mbox <20251203130000.6@pacificbridge.example>",
+       "at": "2025-12-02T23:00:00+08:00",
+       "subject": "PBLXMN2512002",
+       "field": "eta",
+       "value": "2026-01-03",
+       "found": [
+        "2026-01-03 2026-01-03 2026-01-03",
+        "2026-01-12 2026-01-12 2026-01-12"
+       ]
+      },
+      {
+       "source": "email",
+       "ref": "email/ops_inbox.mbox <20251204110000.7@pacificbridge.example>",
+       "at": "2025-12-03T21:00:00+08:00",
+       "subject": "PBLYTN2512003",
+       "field": "eta",
+       "value": "2026-01-03",
+       "found": [
+        "2026-01-03 2026-01-03 2026-01-03"
+       ]
+      },
+      {
+       "source": "email",
+       "ref": "email/ops_inbox.mbox <20251206120000.9@pacificbridge.example>",
+       "at": "2025-12-05T22:00:00+08:00",
+       "subject": "PBLNGB2512004",
+       "field": "eta",
+       "value": "2026-01-09",
+       "found": [
+        "2026-01-09 2026-01-09 2026-01-09"
+       ]
+      },
+      {
+       "source": "email",
+       "ref": "email/ops_inbox.mbox <20251210130000.10@pacificbridge.example>",
+       "at": "2025-12-09T23:00:00+08:00",
+       "subject": "PBLNSA2512005",
+       "field": "eta",
+       "value": "2025-12-26",
+       "found": [
+        "2025-12-26 2025-12-26 2025-12-26"
+       ]
+      }
+     ],
+     "wechat container_no": [
+      {
+       "source": "wechat",
+       "ref": "wechat/SZHT_Kevin.txt#21",
+       "at": "2025-12-01T21:00:00+08:00",
+       "subject": "PBLYTN2512003",
+       "field": "container_no",
+       "value": "TCLU7231714",
+       "found": [
+        "TCLU7231714"
+       ]
+      },
+      {
+       "source": "wechat",
+       "ref": "wechat/NBQS_Sunny.txt#24",
+       "at": "2025-12-01T22:00:00+08:00",
+       "subject": "PBLNGB2512004",
+       "field": "container_no",
+       "value": "TCLU6622680",
+       "found": [
+        "TCLU6622680"
+       ]
+      },
+      {
+       "source": "wechat",
+       "ref": "wechat/NBBW_Lily.txt#30",
+       "at": "2025-12-15T19:00:00+08:00",
+       "subject": "PBLNGB2512006",
+       "field": "container_no",
+       "value": "SEGU1045204",
+       "found": [
+        "SEGU1045204"
+       ]
+      },
+      {
+       "source": "wechat",
+       "ref": "wechat/NBQS_Sunny.txt#42",
+       "at": "2026-01-07T18:00:00+08:00",
+       "subject": "PBLNGB2601008",
+       "field": "container_no",
+       "value": "TGHU7372239",
+       "found": [
+        "TGHU7372239"
+       ]
+      },
+      {
+       "source": "wechat",
+       "ref": "wechat/NBBW_Lily.txt#45",
+       "at": "2026-01-23T18:00:00+08:00",
+       "subject": "PBLNGB2601012",
+       "field": "container_no",
+       "value": "TGHU8545365",
+       "found": [
+        "TGHU8545365"
+       ]
+      }
+     ]
+    }
+   },
+   "store_questions": {
+    "agree": 9,
+    "asked": 9,
+    "questions": {
+     "1": {
+      "agree": true,
+      "rows": 1,
+      "missing": [],
+      "extra": []
+     },
+     "2": {
+      "agree": true,
+      "rows": 6,
+      "missing": [],
+      "extra": []
+     },
+     "4": {
+      "agree": true,
+      "rows": 1,
+      "missing": [],
+      "extra": []
+     },
+     "5": {
+      "agree": true,
+      "rows": 10,
+      "missing": [],
+      "extra": []
+     },
+     "6": {
+      "agree": true,
+      "rows": 1,
+      "missing": [],
+      "extra": []
+     },
+     "7": {
+      "agree": true,
+      "rows": 6,
+      "missing": [],
+      "extra": []
+     },
+     "8": {
+      "agree": true,
+      "rows": 1,
+      "missing": [],
+      "extra": []
+     },
+     "10": {
+      "agree": true,
+      "rows": 2,
+      "missing": [],
+      "extra": []
+     },
+     "3": {
+      "agree": true,
+      "rows": 5,
+      "missing": [],
+      "extra": []
+     }
+    }
+   },
+   "entities": {
+    "po/number": {
+     "entities": 48,
+     "bare": 0
+    },
+    "po_line/key": {
+     "entities": 196,
+     "bare": 0
+    },
+    "shipment/booking_no": {
+     "entities": 32,
+     "bare": 0
+    },
+    "shipment/hbl": {
+     "entities": 31,
+     "bare": 0
+    },
+    "shipment_line/key": {
+     "entities": 166,
+     "bare": 0
+    },
+    "qc/report_no": {
+     "entities": 46,
+     "bare": 0
+    },
+    "customs/entry_no": {
+     "entities": 30,
+     "bare": 0
+    },
+    "document/hash": {
+     "entities": 451,
+     "bare": 0
+    },
+    "shipments_without_booking": 0,
+    "shipments_without_hbl": 1
+   },
+   "unfilled": {
+    "factstore-ecom-ops": [
+     "supplier/contact_name",
+     "sku/title",
+     "sku/family",
+     "sku/retail_price",
+     "sku/launched_on",
+     "shipment/freight_cost"
+    ],
+    "factstore-ecom-index": [
+     "amazon/fba_line"
+    ]
+   }
+  },
+  "rerun": {
+   "turns": 11,
+   "tool_calls": 9,
+   "cost_usd": 0.24519839999999998,
+   "wall_seconds": 51,
+   "skill_used": [
+    "factstore-catalogue"
+   ],
+   "subtype": "success",
+   "final": "The catalogue was already complete, so this re-run found nothing new and I wrote nothing. Every count matches the sources, and I changed nothing in the store.\n\n## Sources and counts (source distinct IDs = store)\n| Source | Kind of record | Count |\n|---|---|---|\n| Shopify `orders.jsonl` | orders / line items / customers | 26,546 / 37,773 / 21,129 |\n| Shopify `products.jsonl` | variants, which are the SKU hubs | 49 |\n| Amazon `all_orders.txt` | orders / order lines | 38,264 / 43,513 |\n| Amazon `fba_inventory.txt` | listings (seller SKU, ASIN, FNSKU) | 25 |\n| Amazon `fba_inbound_shipments.csv` | FBA shipment IDs | 49 |\n| 3PL `outbound.csv` | outbound lines | 37,331 |\n| 3PL `receipts.csv` | receipts / receipt lines | 29 / 146 |\n| 3PL `inventory_snapshot.csv` | item codes, already on the hubs | 49 |\n| QuickBooks `vendors.csv` | vendors | 11 |\n\n- **Gone from a source:** nothing.\n- **Left out on purpose:**\n  - `transaction_list_by_vendor.csv` is general ledger, so it is never indexed.\n  - WeChat chats, the ops inbox mbox and the `supplier_docs` PDFs belong to the ingestion skill.\n  - Their crosswalk fields (factory item codes, HS codes, supplier links) are already on the 49 hubs.\n- **Attributes registered:** none. Authoritative-source records are already in place.\n\n## Step 7 checks\n- **Bare records from join keys:**\n  - 10 receipts (GSF-RCV-000007, 08, 13, 15, 18, 19, 20, 25, 27 and 29) hold only their receipt number.\n  - Their `Reference` column is blank in the export, so there is no PO to link. This is expected, not a bad key.\n  - The bare Shopify customers, ASINs and FBA shipment IDs are IDs that other records point at. The three bare QuickBooks vendors are the logistics, customs-broker and fulfilment companies, which no supplier record uses.\n  - No PO numbers are bare.\n- **Duplicates:** 154 `core/same_as` links, in two groups.\n  - **Normalized mailbox (84):** same mailbox after dropping a plus-alias. The first ten I read mostly look right, but some have different addresses, for example Katie Perez and Chris Okafor.\n  - **Same name and address, different mailbox (64):** the ten I read look right.\n  - **Other (6):** these match neither rule.\n    - Examples are Michael Ali, Chris Martinez, Emily Ramirez, Katie Hall, Liam Perez and Diego Johnson.\n    - They share a name and the mailbox name at a different provider, but have different addresses.\n    - These look like two different people.\n  - No account has more than three others pointing at it.\n- **Counts and unindexed files:** every kind of record matches its source's distinct IDs, and every file is either indexed or named above.\n\n## For you to decide\n1. The 6 \"other\" pairs above: I suggest retracting their `core/same_as`.\n2. The normalized-mailbox pairs with different addresses: say whether you accept the plus-alias rule alone as evidence.\n3. The 10 receipts with a blank PO reference could be linked to POs from the chats or emails.",
+   "session_id": "30b3e0dc-c680-4eaa-9eb8-a0f0556f978e",
+   "wrote": {
+    "new_entities": 0,
+    "new_attributes": [],
+    "transactions": 0,
+    "facts": 0
+   },
+   "files_skipped": [],
+   "crosswalk": {
+    "systems": {
+     "upc": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "shopify_variant_id": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "amazon_seller_sku": {
+      "truth": 25,
+      "stored": 25,
+      "correct": 25,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "asin": {
+      "truth": 25,
+      "stored": 25,
+      "correct": 25,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "fnsku": {
+      "truth": 25,
+      "stored": 25,
+      "correct": 25,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "tpl_item_code": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "factory_code": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "hs_code": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "supplier": {
+      "truth": 49,
+      "stored": 49,
+      "correct": 49,
+      "precision": 1.0,
+      "recall": 1.0
+     }
+    },
+    "precision": 1.0,
+    "recall": 1.0,
+    "skus_in_truth": 49,
+    "hubs": 49,
+    "hubs_with_true_code": 49,
+    "factory_prefix_exact": 49
+   },
+   "duplicates": {
+    "truth_pairs": 283,
+    "visible_pairs": 171,
+    "marked_pairs": 157,
+    "correct": 157,
+    "precision": 1.0,
+    "recall": 0.918
+   },
+   "personal_data": {
+    "personal_values": 0,
+    "examples": [],
+    "values_with_at_sign": [
+     "mid:20251121170000.1@pacificbridge.example",
+     "mid:20251127110000.2@pacificbridge.example",
+     "mid:20251127170000.3@pacificbridge.example",
+     "mid:20251128170000.4@pacificbridge.example",
+     "mid:20251130170000.5@pacificbridge.example",
+     "mid:20251203130000.6@pacificbridge.example",
+     "mid:20251204110000.7@pacificbridge.example",
+     "mid:20251204170000.8@pacificbridge.example",
+     "mid:20251206120000.9@pacificbridge.example",
+     "mid:20251210130000.10@pacificbridge.example"
+    ]
+   },
+   "indexed": {
+    "amazon/asin": 25,
+    "amazon/fba_shipment_id": 49,
+    "amazon/fnsku": 25,
+    "amazon/order_id": 38264,
+    "amazon/order_line": 43513,
+    "amazon/seller_sku": 25,
+    "customs/entry_no": 30,
+    "document/hash": 451,
+    "factory/item_code": 49,
+    "po_line/key": 196,
+    "po/number": 48,
+    "qc/report_no": 46,
+    "quickbooks/vendor": 11,
+    "shipment/booking_no": 32,
+    "shipment/hbl": 31,
+    "shipment_line/key": 166,
+    "shopify/customer_id": 21129,
+    "shopify/line_item_id": 37773,
+    "shopify/order_id": 26546,
+    "shopify/order_name": 26546,
+    "shopify/variant_id": 49,
+    "sku/code": 49,
+    "sku/upc": 49,
+    "supplier/code": 8,
+    "tpl/item_code": 49,
+    "tpl/outbound_line": 37331,
+    "tpl/receipt_line": 146,
+    "tpl/receipt_no": 29
+   }
+  },
+  "ontology": {
+   "propose": {
+    "turns": 5,
+    "tool_calls": 3,
+    "cost_usd": 0.0958774,
+    "wall_seconds": 31,
+    "skill_used": [
+     "factstore-ontology"
+    ],
+    "subtype": "success",
+    "final": "record nothing until you answer.**\n\n## Proposed shapes\n\n| Proposed name | Count | Signature (all carry) | Optional (share) | Relationships |\n|---|---|---|---|---|\n| **Supplier** | 8 | `supplier/code`, `name`, `name_cn`, `address`, `currency`, `incoterm`, `payment_terms`, `port`, `quickbooks/vendor` | none | SKUs and POs point at it |\n| **SKU** | 49 | `sku/code`, `sku/hs_code`, `sku/upc`, `sku/supplier`, `factory/item_code`, `tpl/item_code`, `shopify/variant_id` | none | `sku/supplier` \u2192 Supplier |\n| **Purchase order** | 48 | `po/number`, `po/pi_number`, `po/placed_on`, `po/etd`, `po/status`, `po/supplier`, `core/currency` | none | `po/supplier` \u2192 Supplier |\n| **Purchase order line** | 196 | `core/part_of`, `po_line/key`, `po_line/quantity`, `po_line/unit_price`, `po_line/sku` | none | part_of \u2192 Purchase order; `po_line/sku` \u2192 SKU |\n| **Shipment** | 32 | `shipment/booking_no`, `origin`, `destination`, `etd`, `eta`, `mode`, `status`, `vessel` | `hbl` (97%), `delivered_at` (91%), `container_no` (47%) | Shipment lines and Customs entries point at it |\n| **Shipment line** | 166 | `core/part_of`, `shipment_line/key`, `cartons`, `quantity`, `po_line` | none | part_of \u2192 Shipment; `shipment_line/po_line` \u2192 Purchase order line |\n| **Customs entry** | 30 | `customs/entry_no`, `filed_on`, `entered_value`, `duty`, `fees`, `shipment`, `core/currency` | none | `customs/shipment` \u2192 Shipment |\n| **QC report** | 46 | `qc/report_no`, `inspected_on`, `inspector`, `result`, `sample_size`, `qc/po` | none | `qc/po` \u2192 Purchase order |\n| **Warehouse receipt** | 29 | `tpl/receipt_no` | `receipt/po` (66%) | `receipt/po` \u2192 Purchase order (many) |\n| **Warehouse receipt line** | 146 | `core/part_of`, `tpl/receipt_line`, `line/sku` | none | part_of \u2192 Warehouse receipt; `line/sku` \u2192 SKU |\n| **Shopify customer** | 21,129 | `shopify/customer_id` | `core/same_as` (0.7%, 154) | `core/same_as` \u2192 another customer (a duplicate merged into it) |\n| **Shopify order** | 26,546 | `shopify/order_id`, `order_name`, `order/customer` | none | `order/customer` \u2192 Shopify customer |\n| **Shopify order line** | 37,773 | `core/part_of`, `shopify/line_item_id`, `line/sku` | none | part_of \u2192 Shopify order; `line/sku` \u2192 SKU |\n| **Warehouse outbound line** | 37,331 | `core/part_of`, `tpl/outbound_line`, `line/sku` | none | part_of \u2192 Shopify order (37,144) or Amazon FBA shipment (187); `line/sku` \u2192 SKU |\n| **Amazon order** | 38,264 | `amazon/order_id` | none | Amazon order lines point at it |\n| **Amazon order line** | 43,513 | `core/part_of`, `amazon/order_line`, `line/listing` | none | part_of \u2192 Amazon order; `line/listing` \u2192 Amazon listing |\n| **Amazon listing** | 25 | `amazon/seller_sku`, `amazon/fnsku`, `listing/asin`, `listing/sku` | none | `listing/asin` \u2192 Amazon ASIN; `listing/sku` \u2192 SKU |\n| **Amazon ASIN** | 25 | `amazon/asin` | none | index entry that listings point at |\n| **Amazon FBA shipment** | 49 | `amazon/fba_shipment_id` | none | index entry that outbound lines point at |\n| **Document** | 451 | `document/hash`, `document/url` | `document/issued_at` (98%) | provenance records point at it via `core/evidence` |\n\n## Gaps and things I left out\n- **3 fragments:** entities that carry only `quickbooks/vendor`. No shape points at them and they have no Supplier data. They may be vendors in QuickBooks with no matching supplier.\n- **Not proposed (store bookkeeping):** 567 transaction records (`core/confidence`, `core/evidence`, `fs/actor`, `fs/at`) and 17 attribute definitions (`fs/*`).\n\n## Questions\n1. Are the names OK? I used \"Warehouse\" for the `tpl/` entities, since 3PL is the third-party logistics provider. Would you rather call it \"3PL\"?\n2. Should the 6 Amazon ASIN and FBA shipment index shapes stay as shapes? They hold only an ID, but other shapes point at them in a regular way.\n3. Should I merge Shopify and Amazon orders into one \"Customer order\"? I kept them separate because they have different identity attributes.\n\nConfirm, rename or drop each name, and I'll record them.",
+    "session_id": "e7841e9a-2b79-4fbb-ab8a-a283f4b58016",
+    "wrote": {
+     "new_entities": 0,
+     "new_attributes": [],
+     "transactions": 0,
+     "facts": 0
+    },
+    "files_skipped": [],
+    "shape_names_before_confirming": 0
+   },
+   "record": {
+    "turns": 3,
+    "tool_calls": 2,
+    "cost_usd": 0.22879,
+    "wall_seconds": 38,
+    "skill_used": [],
+    "subtype": "success",
+    "final": "I recorded all 20 shapes in one transaction (tx 207544). Each has its name, a one-line doc and its signature, exactly as proposed.\n\n- **`core/on_behalf_of` left out:** none of the actors in the store is you, so the transaction doesn't record who confirmed the names. If you have an actor, tell me and I can add it.\n- **Gaps not recorded:** the 3 fragments that carry only `quickbooks/vendor` have no shape. The store bookkeeping (transaction records and attribute definitions) has none either.\n- **Optional attributes:** I didn't record these, because a shape's signature holds only what every entity carries. The shares I gave you were Shipment's `hbl`, `delivered_at` and `container_no`, Warehouse receipt's `receipt/po`, Shopify customer's `core/same_as`, and Document's `issued_at`.",
+    "session_id": "e7841e9a-2b79-4fbb-ab8a-a283f4b58016",
+    "wrote": {
+     "new_entities": 20,
+     "new_attributes": [],
+     "transactions": 1,
+     "facts": 122
+    },
+    "files_skipped": []
+   },
+   "shapes": {
+    "operator_list": 18,
+    "in_store": 18,
+    "exact": 18,
+    "close": 18,
+    "recorded": 20,
+    "recorded_beyond_list": [
+     "Document",
+     "Warehouse receipt line"
+    ],
+    "kinds": {
+     "Supplier": {
+      "in_store": true,
+      "identity": "supplier/code",
+      "ids_in_world": 8,
+      "ids_in_store": 8,
+      "recorded_as": "Supplier",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "SKU": {
+      "in_store": true,
+      "identity": "sku/code",
+      "ids_in_world": 49,
+      "ids_in_store": 49,
+      "recorded_as": "SKU",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "Amazon listing": {
+      "in_store": true,
+      "identity": "amazon/seller_sku",
+      "ids_in_world": 25,
+      "ids_in_store": 25,
+      "recorded_as": "Amazon listing",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "ASIN": {
+      "in_store": true,
+      "identity": "amazon/asin",
+      "ids_in_world": 25,
+      "ids_in_store": 25,
+      "recorded_as": "Amazon ASIN",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "Purchase order": {
+      "in_store": true,
+      "identity": "po/number",
+      "ids_in_world": 48,
+      "ids_in_store": 48,
+      "recorded_as": "Purchase order",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "Purchase order line": {
+      "in_store": true,
+      "identity": "po_line/key",
+      "ids_in_world": 196,
+      "ids_in_store": 196,
+      "recorded_as": "Purchase order line",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "QC inspection": {
+      "in_store": true,
+      "identity": "qc/report_no",
+      "ids_in_world": 46,
+      "ids_in_store": 46,
+      "recorded_as": "QC report",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "Shipment": {
+      "in_store": true,
+      "identity": "shipment/booking_no",
+      "ids_in_world": 32,
+      "ids_in_store": 32,
+      "recorded_as": "Shipment",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "Shipment line": {
+      "in_store": true,
+      "identity": "shipment_line/key",
+      "ids_in_world": 170,
+      "ids_in_store": 166,
+      "recorded_as": "Shipment line",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "Customs entry": {
+      "in_store": true,
+      "identity": "customs/entry_no",
+      "ids_in_world": 30,
+      "ids_in_store": 30,
+      "recorded_as": "Customs entry",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "Warehouse receipt": {
+      "in_store": true,
+      "identity": "tpl/receipt_no",
+      "ids_in_world": 29,
+      "ids_in_store": 29,
+      "recorded_as": "Warehouse receipt",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "Shopify customer": {
+      "in_store": true,
+      "identity": "shopify/customer_id",
+      "ids_in_world": 21240,
+      "ids_in_store": 21129,
+      "recorded_as": "Shopify customer",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "Shopify order": {
+      "in_store": true,
+      "identity": "shopify/order_id",
+      "ids_in_world": 26546,
+      "ids_in_store": 26546,
+      "recorded_as": "Shopify order",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "Shopify order line": {
+      "in_store": true,
+      "identity": "shopify/line_item_id",
+      "ids_in_world": 37773,
+      "ids_in_store": 37773,
+      "recorded_as": "Shopify order line",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "Amazon order": {
+      "in_store": true,
+      "identity": "amazon/order_id",
+      "ids_in_world": 38264,
+      "ids_in_store": 38264,
+      "recorded_as": "Amazon order",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "Amazon order line": {
+      "in_store": true,
+      "identity": "amazon/order_line",
+      "ids_in_world": 43513,
+      "ids_in_store": 43513,
+      "recorded_as": "Amazon order line",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "FBA inbound shipment": {
+      "in_store": true,
+      "identity": "amazon/fba_shipment_id",
+      "ids_in_world": 49,
+      "ids_in_store": 49,
+      "recorded_as": "Amazon FBA shipment",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     },
+     "FBA inbound line": {
+      "in_store": true,
+      "identity": "tpl/outbound_line",
+      "ids_in_world": 221,
+      "ids_in_store": 37331,
+      "recorded_as": "Warehouse outbound line",
+      "jaccard": 1.0,
+      "missing": [],
+      "extra": []
+     }
+    }
+   }
+  },
+  "questions": {
+   "turns": 18,
+   "tool_calls": 17,
+   "cost_usd": 0.1487644,
+   "wall_seconds": 46,
+   "skill_used": [],
+   "subtype": "success",
+   "final": "Nine questions are answered and one (question 3) is only partly reliable. The store has no transaction before 2 October 2026, so `as_of` can't be used for question 3. I rebuilt the 1 July position from the history, using each value's source-document issue date. Question 3's list may omit shipments that were already departed or arrived on 1 July but whose ETA had no document issued before then.\n\n1. One shipment is in transit for AH-KTL-0001-BLK: PBLNGB2609031, departed, ETA 2026-10-23, 2,892 units.\n2. Six NBBW POs now have a later ETD than when first recorded. Each ETD had been pushed back at least once.\n3. Five shipments were departed or arrived as of 1 July. All five were departed, with ETAs between 2026-07-03 and 2026-07-31.\n4. Eight customs entries were filed in Q2 2026: entered value 210,772.93, duty 69,713.56, fees 993.58.\n5. Of the 2026 inspections, two failed: one at HZTY and one at YWLX. All the rest passed.\n6. ASIN B0BVUGZ3AT is AH-MIT-0009-NAT, made by YWLX.\n7. YWLX's open PO value is in CNY. Every other supplier's is in USD.\n8. The person behind Shopify customer 8995877069469 has 3 accounts, linked through core/same_as, with 6 orders in total (2, 3 and 1).\n9. PO-2026-0023's current ETD was recorded by the \"ingestion agent\" in transaction 207502 at 2026-10-02T21:01:54Z.\n10. For AH-TWL-0007-NAT, only YWLX has units at its factory: 1,560 on PO-2026-0028, which is in production with nothing shipped. On the water are 2,520 units, on an arrived shipment of PO-2026-0019.\n\n```json\n{\"answers\": [\n{\"question\": 1, \"rows\": [[\"PBLNGB2609031\", \"departed\", \"2026-10-23T04:00:00+00:00\", \"2892\"]]},\n{\"question\": 2, \"rows\": [[\"PO-2025-0143\", \"2025-12-05\", \"2025-12-19\"], [\"PO-2025-0151\", \"2026-01-22\", \"2026-01-25\"], [\"PO-2025-0159\", \"2026-03-21\", \"2026-03-27\"], [\"PO-2026-0007\", \"2026-06-01\", \"2026-06-05\"], [\"PO-2026-0012\", \"2026-07-07\", \"2026-07-10\"], [\"PO-2026-0020\", \"2026-09-12\", \"2026-09-18\"]]},\n{\"question\": 3, \"rows\": [[\"PBLNGB2605021\", \"departed\", \"2026-07-03T04:00:00+00:00\"], [\"PBLNGB2606023\", \"departed\", \"2026-07-09T04:00:00+00:00\"], [\"PBLNGB2606025\", \"departed\", \"2026-07-31T04:00:00+00:00\"], [\"PBLNSA2606024\", \"departed\", \"2026-07-29T04:00:00+00:00\"], [\"PBLYTN2606022\", \"departed\", \"2026-07-05T04:00:00+00:00\"]]},\n{\"question\": 4, \"rows\": [[\"8\", \"210772.93\", \"69713.56\", \"993.58\"]]},\n{\"question\": 5, \"rows\": [[\"DGRF\", \"PASS\", \"3\"], [\"FSMJ\", \"PASS\", \"4\"], [\"HZTY\", \"FAIL\", \"1\"], [\"HZTY\", \"PASS\", \"3\"], [\"NBBW\", \"PASS\", \"5\"], [\"NBQS\", \"PASS\", \"4\"], [\"SZHT\", \"PASS\", \"4\"], [\"XMYD\", \"PASS\", \"4\"], [\"YWLX\", \"FAIL\", \"1\"], [\"YWLX\", \"PASS\", \"4\"]]},\n{\"question\": 6, \"rows\": [[\"AH-MIT-0009-NAT\", \"44120708296354\", \"X009X2DSQB\", \"AH-MIT-0009-NAT\", \"ACMH-10161\", \"YWLX:106\", \"YWLX\"]]},\n{\"question\": 7, \"rows\": [[\"DGRF\", \"USD\", \"17800.80\"], [\"NBBW\", \"USD\", \"50301.60\"], [\"NBQS\", \"USD\", \"38312.08\"], [\"SZHT\", \"USD\", \"21566.88\"], [\"XMYD\", \"USD\", \"26875.20\"], [\"YWLX\", \"CNY\", \"93063.20\"]]},\n{\"question\": 8, \"rows\": [[\"3\", \"6\"]]},\n{\"question\": 9, \"rows\": [[\"ingestion agent\", \"207502\", \"2026-10-02T21:01:54.161306+00:00\"]]},\n{\"question\": 10, \"rows\": [[\"YWLX\", \"1560\"], [\"on the water\", \"2520\"]]}\n]}\n```",
+   "session_id": "66ab12e0-499d-4fe0-8915-dfc8958230e3",
+   "wrote": {
+    "new_entities": 0,
+    "new_attributes": [],
+    "transactions": 0,
+    "facts": 0
+   },
+   "files_skipped": [],
+   "answers": {
+    "right": 10,
+    "answerable": 10,
+    "wrong": [],
+    "questions": {
+     "1": {
+      "scored": true,
+      "right": true,
+      "given": [
+       [
+        "PBLNGB2609031",
+        "departed",
+        "2026-10-23T04:00:00+00:00",
+        "2892"
+       ]
+      ],
+      "expected": [
+       [
+        "PBLNGB2609031",
+        "departed",
+        "2026-10-23 09:00:00+00:00",
+        "2892"
+       ]
+      ]
+     },
+     "2": {
+      "scored": true,
+      "right": true,
+      "given": [
+       [
+        "PO-2025-0143",
+        "2025-12-05",
+        "2025-12-19"
+       ],
+       [
+        "PO-2025-0151",
+        "2026-01-22",
+        "2026-01-25"
+       ],
+       [
+        "PO-2025-0159",
+        "2026-03-21",
+        "2026-03-27"
+       ],
+       [
+        "PO-2026-0007",
+        "2026-06-01",
+        "2026-06-05"
+       ],
+       [
+        "PO-2026-0012",
+        "2026-07-07",
+        "2026-07-10"
+       ],
+       [
+        "PO-2026-0020",
+        "2026-09-12",
+        "2026-09-18"
+       ]
+      ],
+      "expected": [
+       [
+        "PO-2025-0143",
+        "2025-12-05",
+        "2025-12-19"
+       ],
+       [
+        "PO-2025-0151",
+        "2026-01-22",
+        "2026-01-25"
+       ],
+       [
+        "PO-2025-0159",
+        "2026-03-21",
+        "2026-03-27"
+       ],
+       [
+        "PO-2026-0007",
+        "2026-06-01",
+        "2026-06-05"
+       ],
+       [
+        "PO-2026-0012",
+        "2026-07-07",
+        "2026-07-10"
+       ],
+       [
+        "PO-2026-0020",
+        "2026-09-12",
+        "2026-09-18"
+       ]
+      ]
+     },
+     "3": {
+      "scored": true,
+      "right": true,
+      "given": [
+       [
+        "PBLNGB2605021",
+        "departed",
+        "2026-07-03T04:00:00+00:00"
+       ],
+       [
+        "PBLNGB2606023",
+        "departed",
+        "2026-07-09T04:00:00+00:00"
+       ],
+       [
+        "PBLNGB2606025",
+        "departed",
+        "2026-07-31T04:00:00+00:00"
+       ],
+       [
+        "PBLNSA2606024",
+        "departed",
+        "2026-07-29T04:00:00+00:00"
+       ],
+       [
+        "PBLYTN2606022",
+        "departed",
+        "2026-07-05T04:00:00+00:00"
+       ]
+      ],
+      "expected": [
+       [
+        "PBLNGB2605021",
+        "departed",
+        "2026-07-03 09:00:00+00:00"
+       ],
+       [
+        "PBLYTN2606022",
+        "departed",
+        "2026-07-05 13:00:00+00:00"
+       ],
+       [
+        "PBLNGB2606023",
+        "departed",
+        "2026-07-09 14:00:00+00:00"
+       ],
+       [
+        "PBLNSA2606024",
+        "departed",
+        "2026-07-29 10:00:00+00:00"
+       ],
+       [
+        "PBLNGB2606025",
+        "departed",
+        "2026-07-31 10:00:00+00:00"
+       ]
+      ]
+     },
+     "4": {
+      "scored": true,
+      "right": true,
+      "given": [
+       [
+        "8",
+        "210772.93",
+        "69713.56",
+        "993.58"
+       ]
+      ],
+      "expected": [
+       [
+        8,
+        "210772.93",
+        "69713.56",
+        "993.58"
+       ]
+      ]
+     },
+     "5": {
+      "scored": true,
+      "right": true,
+      "given": [
+       [
+        "DGRF",
+        "PASS",
+        "3"
+       ],
+       [
+        "FSMJ",
+        "PASS",
+        "4"
+       ],
+       [
+        "HZTY",
+        "FAIL",
+        "1"
+       ],
+       [
+        "HZTY",
+        "PASS",
+        "3"
+       ],
+       [
+        "NBBW",
+        "PASS",
+        "5"
+       ],
+       [
+        "NBQS",
+        "PASS",
+        "4"
+       ],
+       [
+        "SZHT",
+        "PASS",
+        "4"
+       ],
+       [
+        "XMYD",
+        "PASS",
+        "4"
+       ],
+       [
+        "YWLX",
+        "FAIL",
+        "1"
+       ],
+       [
+        "YWLX",
+        "PASS",
+        "4"
+       ]
+      ],
+      "expected": [
+       [
+        "SZHT",
+        "PASS",
+        4
+       ],
+       [
+        "NBBW",
+        "PASS",
+        5
+       ],
+       [
+        "FSMJ",
+        "PASS",
+        4
+       ],
+       [
+        "XMYD",
+        "PASS",
+        4
+       ],
+       [
+        "HZTY",
+        "PASS",
+        3
+       ],
+       [
+        "YWLX",
+        "PASS",
+        4
+       ],
+       [
+        "NBQS",
+        "PASS",
+        4
+       ],
+       [
+        "DGRF",
+        "PASS",
+        3
+       ],
+       [
+        "YWLX",
+        "FAIL",
+        1
+       ],
+       [
+        "HZTY",
+        "FAIL",
+        1
+       ]
+      ]
+     },
+     "6": {
+      "scored": true,
+      "right": true,
+      "given": [
+       [
+        "AH-MIT-0009-NAT",
+        "44120708296354",
+        "X009X2DSQB",
+        "AH-MIT-0009-NAT",
+        "ACMH-10161",
+        "YWLX:106",
+        "YWLX"
+       ]
+      ],
+      "expected": [
+       [
+        "AH-MIT-0009-NAT",
+        "44120708296354",
+        "X009X2DSQB",
+        "AH-MIT-0009-NAT",
+        "ACMH-10161",
+        "YWLX:106",
+        "YWLX"
+       ]
+      ]
+     },
+     "7": {
+      "scored": true,
+      "right": true,
+      "given": [
+       [
+        "DGRF",
+        "USD",
+        "17800.80"
+       ],
+       [
+        "NBBW",
+        "USD",
+        "50301.60"
+       ],
+       [
+        "NBQS",
+        "USD",
+        "38312.08"
+       ],
+       [
+        "SZHT",
+        "USD",
+        "21566.88"
+       ],
+       [
+        "XMYD",
+        "USD",
+        "26875.20"
+       ],
+       [
+        "YWLX",
+        "CNY",
+        "93063.20"
+       ]
+      ],
+      "expected": [
+       [
+        "XMYD",
+        "USD",
+        "26875.20"
+       ],
+       [
+        "NBBW",
+        "USD",
+        "50301.60"
+       ],
+       [
+        "DGRF",
+        "USD",
+        "17800.80"
+       ],
+       [
+        "NBQS",
+        "USD",
+        "38312.08"
+       ],
+       [
+        "SZHT",
+        "USD",
+        "21566.88"
+       ],
+       [
+        "YWLX",
+        "CNY",
+        "93063.20"
+       ]
+      ]
+     },
+     "8": {
+      "scored": true,
+      "right": true,
+      "given": [
+       [
+        "3",
+        "6"
+       ]
+      ],
+      "expected": [
+       [
+        3,
+        6
+       ]
+      ]
+     },
+     "9": {
+      "scored": true,
+      "right": true,
+      "given": [
+       [
+        "ingestion agent",
+        "207502",
+        "2026-10-02T21:01:54.161306+00:00"
+       ]
+      ],
+      "expected": [
+       [
+        "ingestion agent",
+        207502,
+        "2026-10-02 21:01:54.161306+00:00"
+       ]
+      ]
+     },
+     "10": {
+      "scored": true,
+      "right": true,
+      "given": [
+       [
+        "YWLX",
+        "1560"
+       ],
+       [
+        "on the water",
+        "2520"
+       ]
+      ],
+      "expected": [
+       [
+        "YWLX",
+        "1560"
+       ],
+       [
+        "on the water",
+        "2520"
+       ]
+      ]
+     }
+    }
+   },
+   "q9_provenance": {
+    "rows": [
+     [
+      "ingestion agent",
+      207502,
+      "2026-10-02 21:01:54.161306+00:00"
+     ]
+    ],
+    "evidence": [
+     "wechat/XMYD_Eric.txt#80"
+    ],
+    "last_statement": {
+     "source": "wechat",
+     "ref": "wechat/XMYD_Eric.txt#80",
+     "at": "2026-09-11T17:04:00+08:00",
+     "subject": "PO-2026-0023",
+     "field": "etd",
+     "value": "2026-10-01"
+    }
+   }
+  }
+ },
+ "measures": {
+  "crosswalk": {
+   "precision": 1.0,
+   "recall": 1.0
+  },
+  "shapes": {
+   "operator_list": 18,
+   "in_store": 18,
+   "exact": 18,
+   "close": 18,
+   "recorded": 20
+  },
+  "registered_beyond_packages": {
+   "total": 0,
+   "by_agent": {
+    "catalogue agent": [],
+    "ingestion agent": [],
+    "ontology agent": [],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "unfilled_package_attributes": {
+   "factstore-ecom-ops": [
+    "supplier/contact_name",
+    "sku/title",
+    "sku/family",
+    "sku/retail_price",
+    "sku/launched_on",
+    "shipment/freight_cost"
+   ],
+   "factstore-ecom-index": [
+    "amazon/fba_line"
+   ]
+  },
+  "issue_dates": {
+   "pdf": {
+    "recorded": 135,
+    "dated": 135,
+    "right": 135
+   },
+   "chat message": {
+    "recorded": 144,
+    "dated": 144,
+    "right": 144
+   },
+   "email": {
+    "recorded": 163,
+    "dated": 163,
+    "right": 163
+   }
+  },
+  "store_questions": {
+   "agree": 9,
+   "asked": 9
+  },
+  "questions": {
+   "right": 10,
+   "answerable": 10,
+   "wrong": []
+  },
+  "wechat": {
+   "wechat container_no": {
+    "truth": 15,
+    "on_entity": 15,
+    "with_evidence": 0
+   },
+   "wechat etd": {
+    "truth": 70,
+    "on_entity": 66,
+    "with_evidence": 18
+   }
+  },
+  "cost_usd": 3.6,
+  "wall_minutes": 15
+ }
+}

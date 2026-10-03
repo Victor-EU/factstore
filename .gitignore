@@ -9,3 +9,4 @@ bench/fs_*.json
 spike/oq1/cache/
 spike/oq1/store.json
 evals/m2/*.log
+/data/

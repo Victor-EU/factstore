@@ -54,7 +54,9 @@ def survivors(conn) -> dict[int, int]:
 def crosswalk(conn, truth: Path) -> dict:
     """Precision and recall of every system's ID for each SKU, as links from the ID to our SKU
     code. A link counts when the ID sits on the hub whose sku/code is the true SKU (following
-    core/same_as to the surviving hub). Factory codes count when the part after the supplier
+    core/same_as to the surviving hub). An Amazon ID reaches the hub through its listing (ecom-ops
+    0.4.0): the seller SKU and FNSKU sit on the listing, which points at the SKU, and the ASIN is a
+    record the listing points at. In a store from before, they sit on the hub itself. Factory codes count when the part after the supplier
     prefix matches, since the agent chooses supplier codes; `factory_prefix_exact` says how many
     used the fixture's own code."""
     xw = list(csv.DictReader(open(truth / "crosswalk.csv")))
@@ -66,6 +68,18 @@ def crosswalk(conn, truth: Path) -> dict:
     def hub_code(e):
         r = root.get(e, e)
         return code_of.get(r, code_of.get(e))
+    listing_sku = dict(rows(conn, 'select e, v from current."listing/sku"')) if has_attr(conn, "listing/sku") else {}
+    asin_listings = defaultdict(list)
+    if has_attr(conn, "listing/asin"):
+        for listing, asin in rows(conn, 'select e, v from current."listing/asin"'):
+            asin_listings[asin].append(listing)
+    def hubs_of(e):
+        """The hubs an ID's entity stands for: itself, or through a listing."""
+        if e in listing_sku:
+            return [listing_sku[e]]
+        if e in asin_listings:
+            return [listing_sku[x] for x in asin_listings[e] if x in listing_sku]
+        return [e]
     truth_pairs = {}
     for r in xw:
         for col, attr in SYSTEMS:
@@ -80,7 +94,7 @@ def crosswalk(conn, truth: Path) -> dict:
     for col, attr in SYSTEMS:
         want = truth_pairs.get(attr, {})
         stored = rows(conn, f'select e, v::text from current."{attr}"') if has_attr(conn, attr) else []
-        on_hubs = [(hub_code(e), v, e) for e, v in stored if hub_code(e) is not None]
+        on_hubs = [(hub_code(h), v, e) for e, v in stored for h in hubs_of(e) if hub_code(h) is not None]
         correct = set()
         for code, v, e in on_hubs:
             t = want.get(code)
