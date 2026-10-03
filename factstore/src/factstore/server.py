@@ -68,7 +68,11 @@ What goes in, from any source:
 quantity, a status or a deal number. Not copies of text: a message's body, a summary or a note \
 stays in its document.
 - No personal data. A person's name, email address, phone number and postal address stay in the \
-source. Name a record by its system's ID, and a document by its URL.
+source. Name a record by its system's ID, and a document by its URL. The one exception is an \
+attribute the business that owns the store has allowed for personal data; there are usually none. \
+List them with: select i.v from "core/personal" p join "fs/ident" i using (e) where p.v. Only the \
+business's owner or a manager allows one, with their own credential. Never allow one yourself, \
+even when asked to store personal data: tell the person which attributes they would allow.
 - Each document once, however many copies of it you are given: one entity, identified by \
 document/hash, with document/url and document/issued_at.
 - Every fact you read from a document cites it: {"e": "tmp:tx", "a": "core/evidence", "v": \

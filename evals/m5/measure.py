@@ -135,6 +135,33 @@ def unfilled(conn, *packages: Path) -> dict[str, list[str]]:
     return out
 
 
+def in_production(conn, reference) -> dict:
+    """POs the store ever put in production, against the world. Most come from a supplier's reply
+    acknowledging our deposit, which names no PO, so this measures reading a chat message with the
+    one it answers. 4 of the world's POs have no message saying so, so 43 of 47 is the most."""
+    q = """select distinct n.v from history."po/status" s join current."po/number" n using (e)
+           where s.v = 'in_production' and s.op = 'assert'"""
+    world, store = {r[0] for r in rows(reference, q)}, {r[0] for r in rows(conn, q)}
+    return {"world": len(world), "store": len(store & world), "most_stated": 43}
+
+
+def contacts(conn) -> dict:
+    """The fixture's people in the store. A supplier's contact belongs in supplier/contact_name,
+    and only where the business allowed it (core/personal); everyone else stays out. Counts only."""
+    from factstore_fixture.catalog import BRAND_OPS, SUPPLIERS
+    filled = dict(rows(conn, """select c.v, n.v from current."supplier/code" c
+                               join current."supplier/contact_name" n using (e)""")) \
+        if has_attr(conn, "supplier/contact_name") else {}
+    people = {s.sales.lower() for s in SUPPLIERS} | {BRAND_OPS[0].lower(), BRAND_OPS[1].lower()}
+    elsewhere = rows(conn, """select count(*) from fact f join attr a on a.id = f.a
+                              where a.ident <> 'supplier/contact_name' and lower(f.v_string) = any(%s)""",
+                     list(people))[0][0]
+    return {"allowed": score.allowed_personal(conn), "suppliers": len(SUPPLIERS),
+            "contact_names_filled": len(filled),
+            "contact_names_right": sum(filled.get(s.code) == s.sales for s in SUPPLIERS),
+            "people_elsewhere": elsewhere}
+
+
 def issue_dates(conn, export_dir: Path) -> dict:
     """The documents ingestion reads, by kind: how many the store records, how many carry
     document/issued_at, and how many carry the right one. A PDF's is the date the truth gives it, in

@@ -1,6 +1,6 @@
 {
   "name": "factstore-ecom-ops",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "doc": "Supply side of a brand that makes in China and sells online: suppliers, SKUs and their IDs in each system, Amazon listings, purchase orders, inspections, shipments and customs entries. Stock at factories and on the water is derived from POs and shipment lines, not stored.",
   "depends_on": ["factstore-core"],
   "skills": ["ingest-documents/SKILL.md"],
@@ -13,7 +13,7 @@
     {"ident": "supplier/currency", "type": "string", "cardinality": "one", "doc": "Currency a supplier invoices in."},
     {"ident": "supplier/payment_terms", "type": "string", "cardinality": "one", "doc": "Payment terms agreed with a supplier, e.g. 30% deposit, 70% before shipment."},
     {"ident": "supplier/incoterm", "type": "string", "cardinality": "one", "doc": "Incoterm a supplier sells on, with the named place, e.g. FOB Ningbo."},
-    {"ident": "supplier/contact_name", "type": "string", "cardinality": "one", "doc": "Our main contact person at a supplier.", "distinct_from": ["supplier/name"]},
+    {"ident": "supplier/contact_name", "type": "string", "cardinality": "one", "doc": "Our main contact person at a supplier, by name. A person's name, so it holds data only where the business that owns the store has allowed it with core/personal.", "distinct_from": ["supplier/name"]},
     {"ident": "sku/code", "type": "string", "cardinality": "one", "unique": "identity", "doc": "Our SKU code for a sellable product variant, e.g. AH-KTL-0001-BLK."},
     {"ident": "sku/title", "type": "string", "cardinality": "one", "doc": "Product name and variant as we sell it."},
     {"ident": "sku/family", "type": "string", "cardinality": "one", "doc": "Three-letter code of the product family a SKU belongs to, e.g. KTL."},

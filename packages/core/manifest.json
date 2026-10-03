@@ -1,6 +1,6 @@
 {
   "name": "factstore-core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "doc": "The Part II conventions: composition, supersession, merges, money, documents, domain time and provenance.",
   "depends_on": [],
   "skills": [],
@@ -8,6 +8,7 @@
     {"ident": "core/part_of", "type": "ref", "cardinality": "many", "doc": "The whole this entity is part of or belongs to: a line's order, a shipment line's shipment."},
     {"ident": "core/supersedes", "type": "ref", "cardinality": "one", "doc": "The earlier entity this one replaces in the world, e.g. a reissued invoice."},
     {"ident": "core/same_as", "type": "ref", "cardinality": "one", "doc": "The surviving entity this duplicate stands for; follow it when reading."},
+    {"ident": "core/personal", "type": "boolean", "cardinality": "one", "doc": "True on an attribute's own entity when the business that owns the store allows that attribute to hold personal data, such as a contact's name. Written by the business's owner or a manager with their own credential, never by an agent."},
     {"ident": "core/authoritative_source", "type": "string", "cardinality": "one", "doc": "System authoritative for an attribute, e.g. shopify; asserted on the attribute's own entity."},
     {"ident": "core/currency", "type": "string", "cardinality": "one", "doc": "ISO 4217 code of the currency every amount on this entity is in, such as an order's or a purchase order's."},
     {"ident": "core/evidence", "type": "ref", "cardinality": "many", "doc": "Document backing a transaction's facts, asserted on the transaction. The document's issue date says when the facts were known."},

@@ -9,7 +9,7 @@ import re
 import pytest
 
 from conftest import ADMIN_DSN, PACKAGES, new_store, owner
-from factstore import RegistrationRefused, admin, connect, packages
+from factstore import RegistrationRefused, admin, connect, packages, server
 
 CORE = packages.load(PACKAGES / "core")
 ECOM_OPS = packages.load(PACKAGES / "ecom-ops")
@@ -219,3 +219,54 @@ def test_skills_are_agent_skills(package):
         assert front, f"{skill} has no name and description frontmatter"
         assert len(front[1]) <= 64 and 0 < len(front[2]) <= 1024
         assert front[1].startswith(("factstore-", package.name.removeprefix("factstore-")))
+
+
+def test_core_0_3_0_adds_personal_to_a_store_of_0_2_0(tmp_path):
+    """core/personal came after M6's round 5 (design open question 7): a store with core 0.2.0
+    takes 0.3.0, registering only it."""
+    v2 = tmp_path / "core"
+    v2.mkdir()
+    raw = json.loads((PACKAGES / "core" / "manifest.json").read_text())
+    raw.update(version="0.2.0", attributes=[a for a in raw["attributes"] if a["ident"] != "core/personal"])
+    (v2 / "manifest.json").write_text(json.dumps(raw))
+    name = new_store(core=False)
+    try:
+        admin.install(ADMIN_DSN, name, [packages.load(v2)])
+        [result] = admin.install(ADMIN_DSN, name, [CORE])
+        assert (result.registered, result.evolved) == (["core/personal"], [])
+    finally:
+        admin.drop_store(ADMIN_DSN, name)
+
+
+def test_the_business_allows_an_attribute_for_personal_data_and_withdraws_it():
+    """The steps in packages/README.md. The owner allows an attribute with their own credential, so
+    the log says who; agents find it with the query in the server's instructions; withdrawing
+    retracts the allowance and excises every value, history included."""
+    listed = re.search(r'List them with: (select .+? where p\.v)\.', " ".join(server.INSTRUCTIONS.split()))[1]
+    name = new_store()
+    try:
+        admin.install(ADMIN_DSN, name, [ECOM_OPS])
+        agent = connect(admin.create_actor(ADMIN_DSN, name, "agent").dsn)
+        assert agent.query(listed).rows == []
+
+        boss = admin.create_actor(ADMIN_DSN, name, "owner")
+        owner_ = connect(boss.dsn)
+        allowance = {"e": ["fs/ident", "supplier/contact_name"], "a": "core/personal", "v": True}
+        owner_.transact([allowance])
+        assert agent.query(listed).rows == [["supplier/contact_name"]]
+        by = agent.query('select n.v from "core/personal" p join "fs/actor" a on a.e = p.tx'
+                         ' join "fs/name" n on n.e = a.v').rows
+        assert by == [["owner"]]
+
+        agent.transact([{"e": ["supplier/code", "NBBW"], "a": "supplier/contact_name", "v": "Lily Example"}])
+        agent.transact([{"e": ["supplier/code", "NBBW"], "a": "supplier/contact_name", "v": "Lily Example-Wu"}])
+
+        owner_.transact([{**allowance, "op": "retract"}])
+        exciser = connect(admin.create_credential(ADMIN_DSN, name, boss.actor, excise=True).dsn)
+        while held := exciser.query('select distinct e from history."supplier/contact_name"').rows:
+            for (e,) in held:
+                exciser.excise(e, ["supplier/contact_name"])
+        assert agent.query(listed).rows == []
+        assert agent.query('select count(*) from history."supplier/contact_name"').rows == [[0]]
+    finally:
+        admin.drop_store(ADMIN_DSN, name)

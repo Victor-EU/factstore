@@ -1,6 +1,6 @@
 # factstore — Build Plan
 
-**Status:** Draft v0.3 · 2026-10-02 · for [design v0.6](factstore-design.md)
+**Status:** Draft v0.3 · 2026-10-03 · for [design v0.7](factstore-design.md)
 
 ## Goal
 
@@ -272,6 +272,12 @@ A partner may use factstore for part of their data, not all of it: one channel's
   - A general ingestion skill, `factstore-ingest` (factstore-skills 0.3.0). Under the rules alone, what an agent recorded swung from 8 of 8 questions to 2.
   - The fixture's slice stayed as it was under the new instructions (slice o).
 - **Round 4 waits on DocILE's download token.**
+- **Design v0.7 is drafted** from rounds 1, 2, 3 and 5. It adds two open questions. One is personal data where the store is the source, which the business that owns the store decides; the default is none. The other is a vocabulary with no package. Round 4's findings go into it when the round runs.
+- **Question 7 is built** (core 0.3.0, ecom-ops 0.4.1, factstore-skills 0.3.1). The business's owner or a manager allows an attribute with `core/personal`, using their own credential, and the server's rule names the exception. It needed no kernel code.
+  - With nothing allowed, round 5 (run g) passed every part of its mark, and the fixture's slice (p) wrote no personal data.
+  - With the contact's name allowed (slice q), ingestion filled it for all 8 suppliers, each right, and put no other person in the store.
+  - Slice p answered 9 of 10 questions. It skipped a WeChat reply ingestion has skipped before (slice l), and the change didn't touch that.
+- **Chat replies are read with the message they answer** (ecom-ops 0.4.2). A new measure found p's miss was wider: slices l to q recorded 30 to 43 of the 43 production starts the chats state, and the questions caught it in two. Slices r, s and t, on the new skill text, each recorded 43 and answered 10 of 10, against 3 of the 6 before it.
 
 ## Partner track
 

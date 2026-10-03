@@ -113,7 +113,8 @@ The supplier confirms our PO. The PO is the one named "Your PO".
 - **On the supplier,** as printed: `supplier/name_cn`, `supplier/address`, `supplier/incoterm`, `supplier/payment_terms`. Also:
   - `supplier/name`: the English legal name, capitalised as in the bank details ("Shenzhen Hetai Electric Appliance Co., Ltd."), not the letterhead's capitals;
   - `supplier/currency`: the PI's currency;
-  - `supplier/port`: the UN/LOCODE of the price term's port (FOB Yantian is CNYTN).
+  - `supplier/port`: the UN/LOCODE of the price term's port (FOB Yantian is CNYTN);
+  - `supplier/contact_name`: the name the PI is signed with, only if the business has allowed this attribute for personal data. The store's instructions show how to check. Otherwise leave it out.
 
 ### Commercial invoice and packing list (CI/PL)
 
@@ -151,8 +152,11 @@ Most messages carry no facts. These do:
   - The export's timestamps are in the exporter's time zone; the export header or the user tells you which.
   - These are interpreted values, so give them confidence below 1.
 - **A container number for a shipment:** `shipment/container_no`, on the shipment of the PO the message names. Use confidence 0.9 if the PO is named loosely.
+- **The supplier acknowledging our deposit, or saying production has started:** `po/status` "in_production" (see PO status). It belongs to the PO our deposit message names. If that message names none, it belongs to the PO whose deposit matches the amount: the PI's total times its deposit share. The reply names the PO only through the message it answers, so use confidence 0.9.
 
-Price changes, holiday closures, payments and sample couriers have no attributes in the package. List them in your report.
+**Read each message with the ones before it.** A reply often names nothing: "Got it, thanks" or "已收到" after our deposit message acknowledges that deposit. A script's patterns cover only the phrasings you have seen, in the languages you saw them in. So after each message from us about a PO or a payment, read the supplier's replies yourself, up to our next message. Check each against what your script made of it.
+
+Price changes, holiday closures, payment amounts and sample couriers have no attributes in the package. List them in your report. A supplier's acknowledgement of a payment still moves its PO's status.
 
 ### Forwarder email
 

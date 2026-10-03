@@ -54,6 +54,14 @@ def empty_store(store: str) -> None:
     admin.install(ADMIN, store, [packages.load(ECOM_OPS), packages.load(ECOM_INDEX),
                                  packages.load(REPO / "factstore-skills")])
 
+def allow_personal(store: str, attributes) -> None:
+    """The business's owner allows these attributes to hold personal data, with a credential of
+    their own, as packages/README.md says. No slice but one testing it allows any."""
+    if attributes:
+        owner = connect(admin.create_actor(ADMIN, store, "owner").dsn)
+        owner.transact([{"e": ["fs/ident", a], "a": "core/personal", "v": True} for a in attributes])
+
+
 INGEST_PROMPT = """\
 Today is 1 October 2026. Our systems are already catalogued in the fact store. Ingest the supplier \
 documents in ./exports/supplier_docs, our WeChat chats with suppliers in ./exports/wechat and the \
@@ -112,13 +120,14 @@ class Slice:
     """One slice on store fs_m5_<tag>. Each stage saves the results so far, so a later stage can be
     run again on the store the earlier ones left (`--stages`)."""
 
-    def __init__(self, model: str, budget: float, root: Path, tag: str, fresh: bool):
+    def __init__(self, model: str, budget: float, root: Path, tag: str, fresh: bool, allow: list[str] = ()):
         self.model, self.budget, self.root, self.tag = model, budget, root, tag
         self.store = f"fs_m5_{tag}"
         self.out = RESULTS / f"{model}-{tag}.json"
         if fresh:
             empty_store(self.store)
-        self.result = {"model": model, "store": self.store, "stages": {}}
+            allow_personal(self.store, allow)
+        self.result = {"model": model, "store": self.store, "stages": {}, "allowed": list(allow)}
         if not fresh and self.out.exists():
             self.result = json.loads(self.out.read_text())
         self.export_dir = root / "export"
@@ -175,7 +184,9 @@ class Slice:
                      message_statements=score.message_statements(conn, self.export_dir),
                      store_questions=measure.store_questions(conn, reference, world),
                      entities=measure.entity_counts(conn),
-                     unfilled=measure.unfilled(conn, ECOM_OPS, ECOM_INDEX))
+                     unfilled=measure.unfilled(conn, ECOM_OPS, ECOM_INDEX),
+                     contacts=measure.contacts(conn),
+                     in_production=measure.in_production(conn, reference))
         return r
 
     def rescore(self) -> dict:
@@ -183,7 +194,9 @@ class Slice:
         s = self.result["stages"]
         with m4.owner(self.store) as conn, m4.owner(REFERENCE) as reference:
             s["ingest"].update(entities=measure.entity_counts(conn),
-                               unfilled=measure.unfilled(conn, ECOM_OPS, ECOM_INDEX))
+                               unfilled=measure.unfilled(conn, ECOM_OPS, ECOM_INDEX),
+                               contacts=measure.contacts(conn),
+                               in_production=measure.in_production(conn, reference))
             s["ontology"]["shapes"] = measure.operator_shapes(conn, reference, self.export_dir / "truth")
         self.result["measures"] = self.measures()
         self.save()
@@ -267,6 +280,8 @@ if __name__ == "__main__":
     ap.add_argument("--stages", help=f"comma-separated, from {','.join(STAGES)}; a list not starting with "
                                      "catalogue continues on the store the earlier stages left")
     ap.add_argument("--rescore", action="store_true", help="score the slice's store again, running no agent")
+    ap.add_argument("--allow", action="append", default=[], help="an attribute the business's owner allows to "
+                                                                  "hold personal data, before any agent runs")
     args = ap.parse_args()
     RESULTS.mkdir(exist_ok=True)
     if args.reference:
@@ -282,7 +297,8 @@ if __name__ == "__main__":
         stages = args.stages.split(",") if args.stages else STAGES
         tmp = Path(tempfile.mkdtemp(prefix=f"m5-{args.tag}-"))
         try:
-            result = Slice(args.model, args.budget, tmp, args.tag, fresh=stages[0] == "catalogue").run(stages)
+            result = Slice(args.model, args.budget, tmp, args.tag, fresh=stages[0] == "catalogue",
+                           allow=args.allow).run(stages)
         finally:
             m4.remove(tmp)
         print(json.dumps(result.get("measures", {k: v.get("cost_usd") for k, v in result["stages"].items()}),

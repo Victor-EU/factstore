@@ -208,6 +208,9 @@ class Run:
         """Score the store again, after a scorer changes, running no agent."""
         last = next(k for k in ("rerun", "catalogue", "ingest") if k in self.record["stages"])
         self.record["stages"][last].update(self.store_checks())
+        if "evidence" in self.record["stages"][last]:
+            with m4.owner(self.store) as conn:
+                self.record["stages"][last]["evidence"] = score.evidence(conn, self.actor(AGENTS["ingest"]).actor)
         if answers := self.record["stages"].get("questions", {}).get("answers"):  # the given answers, judged again
             expected, same = self.round.answers(self.exports), self.round.judge or measure.same
             for q, a in answers.items():

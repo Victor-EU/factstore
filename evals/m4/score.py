@@ -171,6 +171,17 @@ def duplicates(conn, truth: Path, exports: Path) -> dict:
             "recall": round(len(hit & visible) / len(visible), 3) if visible else None}
 
 
+def allowed_personal(conn) -> list[list[str]]:
+    """Attributes the business allowed for personal data (core/personal), each with who allowed it.
+    The runs' stores should have none: no agent may allow one."""
+    if not has_attr(conn, "core/personal"):
+        return []
+    return [list(r) for r in rows(conn, """
+        select i.v, n.v from current."core/personal" p join current."fs/ident" i using (e)
+        join current."fs/actor" a on a.e = p.tx join current."fs/name" n on n.e = a.v
+        where p.v order by 1""")]
+
+
 def personal_data(conn, exports: Path) -> dict:
     """String values in the store that are a Shopify customer's email, name, phone or street address."""
     pii = set()
@@ -186,7 +197,8 @@ def personal_data(conn, exports: Path) -> dict:
              if v.lower() in pii]
     emails = [v for (v,) in rows(conn, "select distinct v_string from fact where v_string like '%%@%%'")
               if re.fullmatch(r"[^@\s]+@[^@\s]+\.[a-z]+", v)]
-    return {"personal_values": len(found), "examples": found[:5], "values_with_at_sign": emails[:10]}
+    return {"personal_values": len(found), "examples": found[:5], "values_with_at_sign": emails[:10],
+            "allowed": allowed_personal(conn)}
 
 
 def index_counts(conn) -> dict:
@@ -232,10 +244,13 @@ def sha256(path: Path) -> str:
 
 def evidence(conn, actor: int) -> dict:
     """Of the transactions the agent wrote, how many carry core/evidence pointing at a document, and
-    core/confidence. Registrations (transactions asserting fs/ident) are left out."""
+    core/confidence. Registrations (transactions asserting fs/ident) are left out, and so are other
+    changes to the schema, such as a doc improved, which write only fs/ facts."""
     txs = [r[0] for r in rows(conn, """
         select id from tx where actor = %s
-        and id not in (select tx from fact where a = 1)""", actor)]
+        and id not in (select tx from fact where a = 1)
+        and exists (select 1 from fact f join attr a on a.id = f.a
+                    where f.tx = tx.id and not starts_with(a.ident, 'fs/'))""", actor)]
     with_evidence = {r[0] for r in rows(conn, """
         select ev.e from current."core/evidence" ev join current."document/hash" h on h.e = ev.v""")}
     with_confidence = {r[0] for r in rows(conn, 'select e from current."core/confidence"')}

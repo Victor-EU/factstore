@@ -4,10 +4,10 @@ Build plan M3. A package is a namespaced attribute set, the packages it builds o
 
 | Package | Attributes | What |
 |---|---|---|
-| [`factstore-core`](core/manifest.json) | 14 | The Part II conventions: `core/part_of`, `core/supersedes`, `core/same_as`, `core/currency`, `core/evidence`, domain time, provenance, and `document/hash`, `document/url` and `document/issued_at`. `factstore init` installs it. |
+| [`factstore-core`](core/manifest.json) | 15 | The Part II conventions: `core/part_of`, `core/supersedes`, `core/same_as`, `core/currency`, `core/evidence`, domain time, provenance, `core/personal` for the attributes a business allows to hold personal data, and `document/hash`, `document/url` and `document/issued_at`. `factstore init` installs it. |
 | [`factstore-ecom-ops`](ecom-ops/manifest.json) | 63 | The supply side of a brand that makes in China and sells online: suppliers, SKUs and their IDs in each system, Amazon listings, purchase orders, inspections, shipments and customs entries. Depends on core. Its skill, [`ecom-ops-ingest-documents`](ecom-ops/ingest-documents/SKILL.md), reads supplier PDFs, chats and shipping emails into it. |
 | [`factstore-ecom-index`](ecom-index/manifest.json) | 16 | The identifiers and join keys of what Shopify, Amazon, the 3PL and QuickBooks own: orders, customers, lines, receipts, outbound lines, FBA shipments and vendors. The catalogue skill indexes them. Depends on core and ecom-ops. |
-| [`factstore-skills`](../factstore-skills/manifest.json) | 3 | The catalogue and ontology skills, and `shape/` for the shapes the ontology skill records ([factstore-skills](../factstore-skills/README.md)). Depends on core. |
+| [`factstore-skills`](../factstore-skills/manifest.json) | 3 | The catalogue, ontology and ingestion skills, and `shape/` for the shapes the ontology skill records ([factstore-skills](../factstore-skills/README.md)). Depends on core. |
 
 Core and ecom-ops came from the fixture's draft vocabulary. Ecom-index came from the M5 slice: the names its catalogue runs chose, fixed once. The fixture installs all three and registers nothing itself.
 
@@ -53,6 +53,35 @@ factstore install demo packages/ecom-ops  # dependencies must be installed or gi
 - **The kernel learns no names.** The installer is generic code in [`factstore/packages.py`](../factstore/src/factstore/packages.py) and `admin.install`.
   - The kernel's tests run on bare stores without core (`init_store(..., core=False)`), so a change to core can't break them.
   - The wheel bundles core so `init` can install it; a source checkout reads `packages/core`.
+
+## Allowing personal data
+
+A store holds no personal data until the business that owns it decides otherwise (design open question 7). Its owner or a manager allows one attribute at a time, with a credential of their own, so the log says who allowed what, and when. Agents list what is allowed and never allow anything themselves.
+
+```bash
+factstore actor shop owner    # once: prints the owner's actor and credential
+```
+
+```python
+import factstore
+owner = factstore.connect("<the owner's credential>")
+owner.transact([{"e": ["fs/ident", "supplier/contact_name"], "a": "core/personal", "v": True}])
+```
+
+To withdraw it, retract the allowance and excise every value it let in. Excising needs the owner's excision credential (`factstore credential shop <actor> --excise`):
+
+```python
+owner.transact([{"e": ["fs/ident", "supplier/contact_name"], "a": "core/personal", "v": True, "op": "retract"}])
+exciser = factstore.connect("<the owner's excision credential>")
+while held := exciser.query('select distinct e from history."supplier/contact_name"').rows:
+    for (e,) in held:
+        exciser.excise(e, ["supplier/contact_name"])
+```
+
+- **Nothing enforces an allowance yet.** The server's instructions give agents the rule and the query that lists allowed attributes. A policy that refuses a write waits for the management layer (design §9).
+- **A package may offer an attribute for personal data,** such as ecom-ops's `supplier/contact_name`. It holds nothing until the business allows it, and the package's skill fills it only then.
+- **The kernel learns no name.** These are ordinary writes and excisions; only the server's instructions name `core/personal`.
+- `test_the_business_allows_an_attribute_for_personal_data_and_withdraws_it` runs these steps.
 
 ## Tests
 
@@ -138,5 +167,16 @@ To find out what the exit test should hold the kernel to, I tried 30 plausible a
     - The transact tool's example attribute was `customer/email`, and is now `po/etd`.
     - Under the rules, no run wrote personal data, and the fixture's slice stayed as it was.
   - **A general ingestion skill, `factstore-ingest`** (Victor's choice). The rules settle what stays out, but what an agent recorded with no package still swung from 8 of the round's 8 questions to 2. The skill says to list every value a document states and register an attribute for each, to read mail sent to many, to record copies of a message once, and to record every document read. With it, three runs answered all eight, and the 100 facts checked by hand were all right.
-  - **Open:** ecom-ops's `supplier/contact_name` holds a person's name, against the rule. No agent has filled it.
+  - ecom-ops's `supplier/contact_name` holds a person's name, against the rule. No agent has filled it. Resolved by the next entry.
+- **After design v0.7: core 0.3.0, ecom-ops 0.4.1 and factstore-skills 0.3.1.** Whether a store holds personal data is for the business that owns it to decide, through its owner or a manager (Victor, 2026-10-03). The business is the data controller, and a rule built into the server had taken the decision from it.
+  - **Core: `core/personal`,** true on an attribute the business allows to hold personal data. The owner or a manager writes it with their own credential, so the log says who allowed it ([Allowing personal data](#allowing-personal-data)). Until they do, a store holds none.
+  - **The server's rule** keeps the default, names the exception, and gives the query that lists allowed attributes. It tells an agent never to allow one itself, even when asked to store personal data.
+  - **Ecom-ops: `supplier/contact_name` stays,** offered for the business to allow. Its doc says so, and the ingestion skill fills it only once it is allowed.
+  - **Skills:** `factstore-ingest` fills an allowed attribute only as a document states it, and its check looks for personal data outside the allowed ones.
+  - **The eval measures** list each allowed attribute and who allowed it. In the runs' stores there should be none.
+  - **Runs** ([evals/m6](../evals/m6/README.md#after-design-v07-personal-data-the-business-allows)): with nothing allowed, round 5 and the fixture's slice wrote no personal data. With `supplier/contact_name` allowed, ingestion filled it for all 8 suppliers, each right, and nothing else personal.
+- **Ecom-ops 0.4.2: a supplier's reply is read with the message it answers.** Most POs go into production on a reply that names nothing, such as "Received, thank you" after our deposit message. Ingestion writes a script that classifies messages one by one, and its patterns cover only the phrasings it has seen.
+  - Across slices l to q, ingestion recorded 30, 40, 43, 43, 30 and 43 of the 43 production starts the chats state. The ten questions caught it only in l and p ([evals/m6](../evals/m6/README.md#after-design-v07-personal-data-the-business-allows)).
+  - The skill now says what an acknowledgement moves, how to find its PO (the deposit message, or else the deposit amount), and that the agent reads the replies after each of our messages itself and checks its script against them. Its examples are phrasings the fixture doesn't use.
+  - Slices r, s and t, on it, each recorded 43 of 43 and answered 10 of 10. Three of the six slices before it did as well. At that rate, three in a row would happen one time in eight, so the change likely holds.
 - **What the commercial invoices and packing lists carry beyond the package stays in the documents.** That covers invoice totals, weights, volumes, carton numbers and seal numbers: the skill records nothing the package has no attribute for, and reports the gap instead. Nothing in the ten questions needs them. Landed cost, the stretch goal, would allocate freight by volume; if it is built, the package gains a volume per shipment line.

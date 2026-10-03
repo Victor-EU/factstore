@@ -15,6 +15,8 @@ You need the factstore MCP tools, and a shell with Python for hashing, parsing m
 
 1. **Record what a document states, as values.** Identifiers, dates, quantities, prices, statuses and decisions, and the refs between records. Not copies of text: a body, a subject line, a summary or a note stays in the document.
 2. **No personal data.** A person's name, email address, phone number and postal address stay in the document, and so do the sender and recipients. A person is never a record, a key or a value. Organisations are records: a company, a counterparty, a supplier, an agency.
+   - The one exception is an attribute the business that owns the store has allowed for personal data. The store's instructions show how to list them, and there are usually none. Fill one only as a document states it.
+   - Never allow an attribute yourself.
 3. **Every fact cites the document that states it.** Put the document in each transaction:
    ```json
    {"e": "tmp:tx", "a": "core/evidence", "v": ["document/hash", "<sha256 hex>"]}
@@ -69,7 +71,7 @@ Each document is an entity with `document/hash`, `document/url` and `document/is
 
 - **Documents.** The store holds one document for each distinct message or file, and each has an issue date unless you reported why not.
 - **Evidence.** Every transaction you wrote carries `core/evidence`.
-- **No personal data.** List the string values you wrote, and look for names, email addresses and phone numbers.
+- **No personal data.** List the string values you wrote, and look for names, email addresses and phone numbers outside the attributes the business allowed.
 - **Ten facts against their documents.** Draw ten facts, read each one's document, and check that it states them. If any doesn't, find what wrote it and fix the rule.
 
 ## Finish with a report

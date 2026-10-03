@@ -269,6 +269,7 @@ Their answers were read from the messages by hand.
 | d | + `factstore-ingest` | 8 of 8 | 134 | all, with a confidence | 0, 0 | nothing | 50 right | $2.56 |
 | e | the same | 8 of 8 | 112 | all, with a confidence | 0, 0 | **21 facts** | — | $3.17 |
 | f | + every document recorded | 8 of 8 | 147, the notices' attachments read too | all, with a confidence | 0, 0 | nothing | 50 right | $2.90 |
+| g | + personal data only where the business allows it (none here) | 8 of 8 | 107 | all, with a confidence | 0, 0 | nothing | — | $2.27 |
 
 Every run:
 - recorded each message once, whichever folders hold it;
@@ -311,6 +312,33 @@ Every run:
 
 Round 5 cost $18.50 in its runs, and $3.41 in the fixture's slice. The ingestion skill is separate from the e-commerce skills the fixture uses, so the slice didn't run again for it.
 
+## After design v0.7: personal data the business allows
+
+Design v0.7's open question 7 found that the server's rule kept personal data out of every store, including where the store is the source, such as a supplier's contact. Whether a store holds personal data is the decision of the business that owns it (Victor, 2026-10-03). [packages](../../packages/README.md#allowing-personal-data) has what changed: `core/personal` in core 0.3.0, the server's rule, ecom-ops 0.4.1 and factstore-skills 0.3.1. The default is still none.
+
+| Run | What it tests | Result | Cost |
+|---|---|---|---|
+| Round 5, run g | The new rule, on the round that tests it most | Passed every part of the mark: 8 of 8 questions, each message once, every fact citing its message, no personal data, no allowance written, and a re-run that wrote nothing | $2.27 |
+| Fixture slice p | The fixture's slice, with nothing allowed | No personal value and no allowance. Product matching 1.0, 157 duplicate pairs, all 18 kinds (17 exact), nothing registered beyond the packages, and a re-run that wrote nothing. **9 of 10 questions** | $4.15 |
+| Fixture slice q | The owner allows `supplier/contact_name`; then the catalogue and ingestion run | Ingestion filled the contact's name for all 8 suppliers, each right. No other person's name or address anywhere, and no customer's | $2.99 |
+| Fixture slices r, s and t | Ecom-ops 0.4.2, below, with nothing allowed | Each: **10 of 10 questions**, and 43 of 43 POs in production. Product matching 1.0, 157 duplicate pairs, all 18 kinds exact, nothing registered beyond the packages, every transaction citing its document, no personal data, and a re-run that wrote nothing | $3.78, $4.09, $4.00 |
+
+- **Slice p's miss was not the change, but it was larger than one question.**
+  - Question 10 needs PO-2026-0028 in production. That comes from the supplier's WeChat reply "Received, thank you", which acknowledges the deposit only when read after the message before it.
+  - Ingestion's script matched only `收到，谢谢`, so it skipped the reply. Slice l, before any of this, did the same. Ingestion's only change for p was one bullet on contact names, in its proforma invoice section.
+  - A new measure counts the POs a store ever put in production. The chats state 43 of the world's 47; the other 4 have no message saying so:
+
+    | Slice | l | m | n | o | p | q | r | s | t |
+    |---|---|---|---|---|---|---|---|---|---|
+    | In production, of 43 | 30 | 40 | 43 | 43 | 30 | 43 | 43 | 43 | 43 |
+    | Chat messages recorded | 96 | 106 | 124 | 124 | 111 | 124 | 124 | 124 | 124 |
+
+  - Half the slices missed some, and the questions caught it only in l and p. Slices a to k's stores are gone, so they can't be measured.
+- **The fix, ecom-ops 0.4.2.** Its skill says what an acknowledgement moves, how to find its PO, and to read the replies after each of our messages and check the script against them. Its examples are phrasings the fixture doesn't use ([packages](../../packages/README.md#decisions)).
+  - Slices r, s and t ran on it, and each reached 43 of 43. Before it, 3 of l to q's 6 did. At that rate, three in a row would happen one time in eight, so three runs make the fix likely, not certain.
+  - Each report shows the agent reading replies in context. r gave 8 replies 0.8 instead of 0.9, because other messages sat between our deposit message and the reply. s listed the three phrasings it took as acknowledgements, in Chinese and English. t weighed two plain "OK" replies against the acknowledgements that followed them.
+- **Round 5's evidence count** had counted a transaction that only improved two attributes' docs. A schema change cites no document, so the measure now leaves such transactions out, and rescoring recomputes it.
+
 ## Status
 
-Rounds 0, 1, 2, 3 and 5 are done. Round 4, DocILE, waits on its download token. Then design v0.7.
+Rounds 0, 1, 2, 3 and 5 are done. Round 4, DocILE, waits on its download token. [Design v0.7](../../factstore-design.md) is drafted from the rounds done, and round 4's findings go into it when it runs.

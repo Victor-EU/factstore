@@ -10,7 +10,7 @@ import csv
 import re
 from pathlib import Path
 
-from score import has_attr, rows
+from score import allowed_personal, has_attr, rows
 
 csv.field_size_limit(1 << 24)
 
@@ -74,7 +74,8 @@ def personal(conn, folder: Path, columns) -> dict:
         values |= {v.lower() for v in column_values(folder, pattern, column) if len(v) > 4}
     stored = [v for (v,) in rows(conn, "select distinct v_string from fact where v_string is not null")]
     return {"personal_values": sum(v.lower() in values for v in stored),
-            "email_shaped": sum(bool(re.fullmatch(r"[^@\s:<>]+@[^@\s]+\.[a-z]+", v)) for v in stored)}
+            "email_shaped": sum(bool(re.fullmatch(r"[^@\s:<>]+@[^@\s]+\.[a-z]+", v)) for v in stored),
+            "allowed": allowed_personal(conn)}
 
 
 def documents(conn) -> dict:
