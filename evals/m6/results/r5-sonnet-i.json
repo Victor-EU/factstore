@@ -1,0 +1,326 @@
+{
+ "round": 5,
+ "use_case": "One mailbox in another industry, with no vocabulary package",
+ "model": "sonnet",
+ "sample": null,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 148,
+   "by_agent": {
+    "ingestion agent": [
+     "org/name",
+     "org/credit_watch_status",
+     "notice/id",
+     "notice/pipeline",
+     "notice/type",
+     "notice/posted_on",
+     "notice/effective_from",
+     "notice/effective_to",
+     "restriction/id",
+     "restriction/notice",
+     "restriction/location",
+     "restriction/capacity",
+     "restriction/capacity_unit",
+     "restriction/from",
+     "restriction/to",
+     "restriction/until_further_notice",
+     "restriction/firm_impact_pct",
+     "maintenance/id",
+     "maintenance/notice",
+     "maintenance/location",
+     "maintenance/from",
+     "maintenance/to",
+     "maintenance/status",
+     "maintenance/hours_per_day",
+     "maintenance/previous_from",
+     "maintenance/previous_to",
+     "fuelrow/id",
+     "fuelrow/point",
+     "fuelrow/lu_pct",
+     "fuelrow/fuel_pct",
+     "fuelrow/total_salt_lake_pct",
+     "fuelrow/total_las_vegas_pct",
+     "fuelrow/total_california_pct",
+     "fuelrow/effective_from",
+     "btu/id",
+     "btu/point",
+     "btu/meter",
+     "btu/drn",
+     "btu/value",
+     "btu/effective_from",
+     "offer/id",
+     "offer/notice",
+     "offer/package",
+     "offer/receipt_point",
+     "offer/delivery_point",
+     "offer/quantity_dth_d",
+     "offer/available_from",
+     "offer/term_from",
+     "offer/term_to",
+     "offer/prearranged",
+     "offer/min_bid_per_dth",
+     "offer/min_bid_vol_dth_d",
+     "offer/max_bid_vol_dth_d",
+     "offer/bid_open",
+     "offer/bid_close",
+     "offer/award_deadline",
+     "offer/evergreen",
+     "deal/id",
+     "deal/counterparty",
+     "deal/counterparty_queried",
+     "deal/price_basis",
+     "deal/price_adjustment",
+     "deal/period_from",
+     "deal/period_to",
+     "deal/status",
+     "deal/month",
+     "baseload_trade/id",
+     "baseload_trade/counterparty",
+     "baseload_trade/trade_date",
+     "baseload_trade/trade_time",
+     "baseload_trade/flow_date",
+     "baseload_trade/location",
+     "baseload_trade/daily_qty",
+     "baseload_trade/total_qty",
+     "baseload_trade/fixed_price",
+     "baseload_trade/volume",
+     "baseload_trade/total_usd",
+     "storage_report/id",
+     "storage_report/week_ending",
+     "storage_report/net_change_bcf",
+     "storage_report/production_change_bcf",
+     "storage_report/east_change_bcf",
+     "storage_report/west_change_bcf",
+     "storage_report/total_bcf",
+     "storage_report/pct_full",
+     "storage_report/vs_last_year_bcf",
+     "storage_hist/id",
+     "storage_hist/year",
+     "storage_hist/week_ending",
+     "storage_hist/net_change_bcf",
+     "storage_hist/level_bcf",
+     "open_season/id",
+     "open_season/operator",
+     "open_season/service_start",
+     "open_season/offers_due",
+     "open_season/offers_open_until",
+     "open_season/closes_on",
+     "open_season/capacity_mmcfd",
+     "open_season/rack_rate_injection",
+     "open_season/rack_rate_inventory",
+     "open_season/rack_rate_withdrawal",
+     "open_season/term_years",
+     "proceeding/id",
+     "proceeding/pipeline",
+     "proceeding/conference_date",
+     "proceeding/protester",
+     "solicitation/id",
+     "solicitation/buyer",
+     "solicitation/deadline",
+     "solicitation/month",
+     "solicitation/max_volume_mmbtu_d",
+     "results/id",
+     "results/company",
+     "results/net_income_usd_m",
+     "results/eps_usd",
+     "results/prior_net_income_usd_m",
+     "results/prior_eps_usd",
+     "results/capex_usd_m",
+     "results/prior_capex_usd_m",
+     "nom/id",
+     "nom/month",
+     "nom/requested_mmcfd",
+     "location/id",
+     "location/sort_code",
+     "location/requested_on",
+     "event/id",
+     "event/organiser",
+     "event/date",
+     "event/kind",
+     "sale/id",
+     "sale/counterparty",
+     "sale/point",
+     "sale/gas_day",
+     "sale/volume_sold",
+     "sale/volume_unscheduled",
+     "offer/available_min_mcfd",
+     "offer/available_max_mcfd",
+     "offer/request_deadline",
+     "offer/queue_notice_at",
+     "offer/intraday_weekday_mcfd",
+     "offer/intraday_weekend_mcfd",
+     "org/e_rating",
+     "storage_hist/for_week",
+     "baseload_wacog/id",
+     "baseload_wacog/location",
+     "baseload_wacog/price",
+     "baseload_wacog/volume",
+     "baseload_wacog/total_usd"
+    ],
+    "ontology agent": [],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "ids": {},
+  "bare": {
+   "baseload_trade/id": {
+    "entities": 411,
+    "bare": 0
+   },
+   "baseload_wacog/id": {
+    "entities": 26,
+    "bare": 0
+   },
+   "btu/id": {
+    "entities": 15,
+    "bare": 0
+   },
+   "deal/id": {
+    "entities": 3,
+    "bare": 0
+   },
+   "event/id": {
+    "entities": 3,
+    "bare": 0
+   },
+   "fuelrow/id": {
+    "entities": 7,
+    "bare": 0
+   },
+   "location/id": {
+    "entities": 2,
+    "bare": 0
+   },
+   "maintenance/id": {
+    "entities": 6,
+    "bare": 0
+   },
+   "nom/id": {
+    "entities": 1,
+    "bare": 0
+   },
+   "notice/id": {
+    "entities": 11,
+    "bare": 0
+   },
+   "offer/id": {
+    "entities": 46,
+    "bare": 0
+   },
+   "open_season/id": {
+    "entities": 3,
+    "bare": 0
+   },
+   "org/name": {
+    "entities": 360,
+    "bare": 61
+   },
+   "proceeding/id": {
+    "entities": 1,
+    "bare": 0
+   },
+   "restriction/id": {
+    "entities": 8,
+    "bare": 0
+   },
+   "results/id": {
+    "entities": 1,
+    "bare": 0
+   },
+   "sale/id": {
+    "entities": 1,
+    "bare": 0
+   },
+   "shape/name": {
+    "entities": 0,
+    "bare": 0
+   },
+   "solicitation/id": {
+    "entities": 1,
+    "bare": 0
+   },
+   "storage_hist/id": {
+    "entities": 34,
+    "bare": 0
+   },
+   "storage_report/id": {
+    "entities": 2,
+    "bare": 0
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 0,
+   "allowed": []
+  },
+  "documents": {
+   "documents": 103,
+   "url": 103,
+   "issued_at": 96
+  },
+  "size": {
+   "facts": 8235,
+   "entities": 1051,
+   "transactions": 128
+  },
+  "evidence": {
+   "transactions": 117,
+   "with_evidence": 52,
+   "with_confidence": 52
+  },
+  "shapes": 21,
+  "truth": {
+   "messages": {
+    "files": 249,
+    "distinct": 103,
+    "recorded": 103,
+    "recorded_more_than_once": 0,
+    "documents": 103
+   },
+   "people": {
+    "names_in_mailbox": 829,
+    "addresses_in_mailbox": 1084,
+    "phones_in_mailbox": 49,
+    "values_naming_a_person": 0,
+    "values_holding_an_address": 0,
+    "values_holding_a_phone": 0
+   },
+   "recorded": {
+    "baseload_trade": 4521,
+    "org": 954,
+    "offer": 371,
+    "document": 302,
+    "core": 161,
+    "storage_hist": 136,
+    "baseload_wacog": 130,
+    "btu": 90,
+    "notice": 50,
+    "restriction": 49,
+    "fuelrow": 48,
+    "maintenance": 37,
+    "storage_report": 18,
+    "deal": 15,
+    "open_season": 15,
+    "event": 12,
+    "results": 8,
+    "sale": 6,
+    "location": 6,
+    "solicitation": 5,
+    "proceeding": 5,
+    "nom": 3
+   }
+  },
+  "cost_usd": 2.64,
+  "wall_minutes": 10,
+  "questions": {
+   "right": 8,
+   "asked": 8,
+   "wrong": []
+  }
+ }
+}

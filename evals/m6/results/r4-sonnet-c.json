@@ -1,0 +1,223 @@
+{
+ "round": 4,
+ "use_case": "Read a supplier's orders and invoices, in layouts the skill hasn't seen",
+ "model": "sonnet",
+ "sample": 100,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 62,
+   "by_agent": {
+    "ingestion agent": [
+     "org/name",
+     "org/market",
+     "order/key",
+     "order/number",
+     "order/doc_type",
+     "order/station",
+     "order/advertiser",
+     "order/agency",
+     "order/revision",
+     "order/flight_start",
+     "order/flight_end",
+     "order/total_spots",
+     "order/total_gross",
+     "order/net_total",
+     "order/agency_commission",
+     "order/estimate",
+     "order/alt_number",
+     "order/product",
+     "order/market",
+     "order/date_entered",
+     "order_line/key",
+     "order_line/line_number",
+     "order_line/start_date",
+     "order_line/end_date",
+     "order_line/description",
+     "order_line/days",
+     "order_line/length_seconds",
+     "order_line/spots",
+     "order_line/rate",
+     "order_line/amount",
+     "invoice/key",
+     "invoice/number",
+     "invoice/order_number",
+     "invoice/station",
+     "invoice/advertiser",
+     "invoice/agency",
+     "invoice/date",
+     "invoice/period_start",
+     "invoice/period_end",
+     "invoice/flight_start",
+     "invoice/flight_end",
+     "invoice/estimate",
+     "invoice/spots_aired",
+     "invoice/gross_total",
+     "invoice/agency_commission",
+     "invoice/net_amount",
+     "invoice/payment_terms",
+     "invoice_line/key",
+     "invoice_line/air_date",
+     "invoice_line/air_time",
+     "invoice_line/length_seconds",
+     "invoice_line/rate",
+     "invoice_line/ad_id",
+     "invoice_line/program",
+     "order/election_date",
+     "order/office_sought",
+     "order/election_type",
+     "order/disposition",
+     "order/payment_applied",
+     "order/payment_date",
+     "invoice/due_date",
+     "order/tax_amount"
+    ],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "ids": {},
+  "bare": {
+   "invoice/key": {
+    "entities": 38,
+    "bare": 0
+   },
+   "invoice_line/key": {
+    "entities": 576,
+    "bare": 0
+   },
+   "order/key": {
+    "entities": 57,
+    "bare": 0
+   },
+   "order_line/key": {
+    "entities": 1000,
+    "bare": 0
+   },
+   "org/name": {
+    "entities": 216,
+    "bare": 208
+   },
+   "shape/name": {
+    "entities": 0,
+    "bare": 0
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 0,
+   "allowed": []
+  },
+  "documents": {
+   "documents": 100,
+   "url": 100,
+   "issued_at": 93
+  },
+  "size": {
+   "facts": 17650,
+   "entities": 2120,
+   "transactions": 129
+  },
+  "evidence": {
+   "transactions": 118,
+   "with_evidence": 118,
+   "with_confidence": 118
+  },
+  "shapes": null,
+  "truth": {
+   "forms": {
+    "given": 100,
+    "recorded": 100,
+    "recorded_more_than_once": 0,
+    "dated": 93,
+    "scans": 5,
+    "scans_recorded": 5
+   },
+   "fields": {
+    "contract_num": {
+     "labelled": 97,
+     "found": 97,
+     "found_by_ref": 0
+    },
+    "advertiser": {
+     "labelled": 98,
+     "found": 76,
+     "found_by_ref": 9,
+     "names_a_candidate": 20,
+     "names_a_candidate_recorded": 18
+    },
+    "gross_amount": {
+     "labelled": 98,
+     "found": 97,
+     "found_by_ref": 0
+    },
+    "agency": {
+     "labelled": 52,
+     "found": 52,
+     "found_by_ref": 15
+    },
+    "product": {
+     "labelled": 95,
+     "found": 28,
+     "found_by_ref": 0,
+     "unusable": 1
+    },
+    "flight_from": {
+     "labelled": 78,
+     "found": 66,
+     "found_by_ref": 0,
+     "unusable": 12
+    },
+    "flight_to": {
+     "labelled": 78,
+     "found": 61,
+     "found_by_ref": 0,
+     "unusable": 17
+    },
+    "tv_address": {
+     "labelled": 82,
+     "found": 6,
+     "found_by_ref": 2
+    },
+    "property": {
+     "labelled": 96,
+     "found": 91,
+     "found_by_ref": 1
+    }
+   },
+   "lines": {
+    "labelled": 1552,
+    "found": 1180,
+    "found_with_description": 515,
+    "unusable": 33
+   },
+   "people": {
+    "emails_on_forms": 5,
+    "phones_on_forms": 58,
+    "values_holding_an_email": 0,
+    "values_holding_a_phone": 0,
+    "attributes_naming_a_role": 0
+   },
+   "marked": {
+    "contract_num": 1.0,
+    "property": 0.948,
+    "advertiser": 0.974,
+    "gross_amount": 0.99,
+    "lines": 0.777
+   }
+  },
+  "cost_usd": 12.06,
+  "wall_minutes": 27,
+  "questions": {
+   "right": 4,
+   "asked": 6,
+   "wrong": [
+    4,
+    6
+   ]
+  }
+ }
+}

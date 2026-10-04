@@ -245,7 +245,7 @@ Round 3 cost $2.21. Nothing changed, so the fixture's slice didn't run again.
 
 ## Round 4: a supplier's orders and invoices, in layouts the skill hasn't seen
 
-**In progress: run b, on 100 forms.** DocILE had nothing under its download token, so VRDU's ad-buy forms stand in (Victor, 2026-10-03; [round4.py](round4.py)).
+**Stopped short of its mark.** Three runs on the same 100 forms passed every field and fell short on line items. A fourth doesn't fit the $35 Victor set for the evals left (2026-10-04). DocILE had nothing under its download token, so VRDU's ad-buy forms stand in (Victor, 2026-10-03; [round4.py](round4.py)).
 - 641 TV stations' orders, contracts and invoices for political airtime, from the FCC's public files for 2012 and 2020.
 - Over 300 stations, dozens of layouts, and 12 line items to a form at the median.
 - 35 scans, and some text layers so garbled that only the page image reads.
@@ -258,14 +258,23 @@ No package covers airtime, so ingestion runs on the general skill, `factstore-in
 | t2 | 20 | 5 of 6 | 100% | 95% | 85% | 100% | 81% | $1.79 |
 | t3 | 20 | 6 of 6 | 95% | 100% | 100% | 100% | 97% | $1.92 |
 | a | 100 | 5 of 6 | 99% | 98% | 92% | 100% | 36% | $7.05 |
+| b | the same | 6 of 6 | 99% | 95% | 96% | 98% | 86% | $12.20 |
+| c | the same | 4 of 6 | 100% | 95% | 97% | 99% | 78% | $12.06 |
 
-The pass mark asks 90% of each. Every run recorded each form once with its issue date, scans included, wrote no email address, phone number or salesperson's name, and wrote nothing on its re-run. t and t2 were scored before the scorer's last fixes, below.
+The pass mark asks 90% of each. Every run wrote no email address, phone number or salesperson's name, and wrote nothing on its re-run. Each recorded every form once with its issue date, scans included, except run b, which left out one scan, and run c, which left five scans and two forms undated (below). t and t2 were scored before the scorer's last fixes, below.
 
-**What broke, and the fixes** (factstore-skills 0.3.2):
+**What broke, and the fixes** (factstore-skills 0.3.2, then 0.3.3 after run b):
 - **Line items (t).** The skill, written from a mailbox, said nothing about tables. The agent kept each order's totals and left its lines out. The skill now makes a table's rows records of their own, keyed by their record and row number, and checks that they add up to the printed total.
 - **Garbled text layers (t2).** The agent read a form's garbled text layer instead of its page images, which read cleanly, and lost its schedule. The skill now reads such a PDF from its images, as it does a scan.
 - **Scale (a).** At 20 forms the agent read each one. At 100 it wrote parsers for the layouts it knew and left 69 forms with their headers only, which its report said. The skill now works in batches of about 20, finishing each, lines included, before the next. A document a script can't parse, the agent reads itself.
 - **Withdrawing a value (a).** Correcting its first reads of the scans, the agent retracted the earlier transactions' evidence too, so the log lost why those values were written. The skill now retracts the value alone, citing the document read again.
+- **A row's dates (b).** Batches worked: every form but one has its lines. But on 24 invoices that list each spot as it aired, the agent kept when it aired and left out the dates the line was ordered for, which the row also prints. That is 168 of the 219 lines missed. The skill now keeps every value a row prints.
+- **Tidying names (b).** The agent merged 13 spellings of agencies' names into one each, and retracted the variants with no document cited, which its report said. The skill now settles spellings before writing; a variant found later stays, and points at the record it duplicates with `core/same_as`, citing a document.
+- **One scan (b).** Asked for one page of a PDF, the reader failed (`pdftoppm` isn't installed), so the agent took page images to be out of reach and wrote its own decoders. They read three scans; a fourth, in JBIG2, stayed unread and unrecorded, as its report said. Opening the whole PDF works. The skill now says to, when asking for pages fails.
+- **Run c, on 0.3.3.** Every form was in the store, every transaction cited its form, and agencies' names stayed as printed. Three things fell short:
+  - **Line dates.** The row fix didn't take. The same 24 invoices again kept when each spot aired and not the dates its line was ordered for, 168 lines as in run b; the report calls them "one per aired spot". A few garbled forms' order lines lost their dates too.
+  - **It doubted its own reading.** It read the five scans whole, as 0.3.3 says, and recorded them. When one scan's lines didn't add up to its total, it concluded that all five reads "came back empty", retracted every value and left those forms with their file alone. It dropped lines from four garbled forms on the same doubt. The same reads gave right values in runs t3 and a, question 6's included. Run c lost question 6 and 52 lines this way.
+  - **Question 4** asks for an order's net amount, which the form prints and run c didn't record.
 
 **Advertisers a station labels by their candidate,** such as "POL/Ben Salango/Governor/WV/Dem", are a person's name. They are 139 of the 635 labelled forms.
 - t2 kept them out, as the store's rule says. It didn't borrow the committee's name from other forms either, since no form it was citing states it.
@@ -278,13 +287,20 @@ The pass mark asks 90% of each. Every run recorded each form once with its issue
 - **Call signs.** "WSB" matches "WSB-TV".
 - **Local offices** count as a candidate's label, such as a magistrate.
 
+**Where it stands.**
+- In all three runs on 100 forms: contract number, station, advertiser and gross at 92% or more, each form once, no person's email, phone or role, and a re-run that wrote nothing.
+- Short: line items, at 36%, 86% and 78%. Each run also missed one other part of the mark: lines left for later (a), uncited retractions and a scan (b), withdrawn scans (c).
+- Next, with more budget: a rule that names a line's ordered dates beside when it aired, and reading a PDF's pages without second-guessing them. Then one more run on these 100 forms, about $12.
+
+Round 4 cost $36.55 in its runs. Its changes are to `factstore-ingest`, which the fixture's slice doesn't use, so round 5 ran again instead (below).
+
 **Misses checked by hand:**
 - Run t3's one contract-number miss is real. The form's flattened text puts its "External #" before "Contract #", and the agent took the wrong one.
 - Its station misses were the call-sign match, fixed above.
 
 ## Round 5: one mailbox, with no package and no skill
 
-**Done, on run f.** Round 5 ran before round 4, since DocILE needs a download token (Victor, 2026-10-03). One gas trader's mailbox from Enron's West desk: custodian south-s, a 10.9 MB PST, read with libpst's `readpst`.
+**Done, on run f; not yet confirmed on the skill round 4 changed.** Runs h to j re-ran it after round 4's changes to `factstore-ingest`, the last two at $2 a session to fit the evals' $35 (Victor, 2026-10-04). Run j met every part of the mark but the questions, at 6 of 8, and its ingestion stopped short, below. Round 5 ran before round 4, since DocILE needs a download token (Victor, 2026-10-03). One gas trader's mailbox from Enron's West desk: custodian south-s, a 10.9 MB PST, read with libpst's `readpst`.
 - 103 messages, from June 2000 to April 2001.
 - The mail client kept most of them in two to four folders, so they arrive as 249 files.
 - Pipeline notices, deal and invoice queries, nominations, a credit watch list, storage reports, and personal mail.
@@ -310,11 +326,14 @@ Their answers were read from the messages by hand.
 | e | the same | 8 of 8 | 112 | all, with a confidence | 0, 0 | **21 facts** | — | $3.17 |
 | f | + every document recorded | 8 of 8 | 147, the notices' attachments read too | all, with a confidence | 0, 0 | nothing | 50 right | $2.90 |
 | g | + personal data only where the business allows it (none here) | 8 of 8 | 107 | all, with a confidence | 0, 0 | nothing | — | $2.27 |
+| h | `factstore-ingest` 0.3.2, after round 4: tables' rows, batches | 8 of 8 | 126 | all, with a confidence | 0, 0 | **685 facts** | — | $3.27 |
+| i | 0.3.4: + nothing skimmed | 8 of 8 | 148 | every value; **65 messages that state nothing, uncited** | 0, 0 | nothing | — | $2.64 |
+| j | 0.3.5: + a message created alone cites itself; **$2 a session** | 6 of 8 | 171 | all, with a confidence | 0, 0 | nothing | — | $2.93 |
 
 Every run:
 - recorded each message once, whichever folders hold it;
 - dated every message but the 7 drafts. The export dates those 30 November 2002, since they were never sent, and every run left them undated;
-- wrote nothing on its re-run.
+- wrote nothing on its re-run, until run h.
 
 **What broke, and what changed:**
 1. **People went into the store** (the trial and run a). Run a made records of people: names, roles, employers. Both runs copied each message's sender and recipients, and run a's notes name people too.
@@ -342,15 +361,18 @@ Every run:
 
    Runs d, e and f answered all eight questions, and every fact cited its message with a confidence. Run d's and run f's 50 facts are all right.
 5. **Run e recorded a document only with its first fact** (the skill said so then). Its re-run found two messages no document stood for, read them, and wrote 21 facts the first run had judged not worth recording. The skill now records every document it reads, even one that states nothing. A re-run reads only the documents the store lacks. Run f's re-run wrote nothing.
-6. **The answer key.** Question 8's notice is "2001042" in the email and "2001-042" in its attachment. Runs d and e gave the attachment's spelling, which is as right. The judge now accepts an identifier with or without its separators.
-7. **The harness.**
+6. **The answer key.** Question 8's notice is "2001042" in the email and "2001-042" in its attachment. Runs d and e gave the attachment's spelling, which is as right. The judge now accepts an identifier with or without its separators. Run h gave the notice's key, `kern-river/2001-042`, and the judge now also accepts an identifier that ends a key. No other run's score changed.
+7. **A skimmed attachment (h).** Round 4 taught the skill to record a table's rows. A Northwest Pipeline notice prints 69 rows of capacity for sale, and run h's first pass "only skimmed" that attachment, as its report said. Its re-run read it and recorded the rows. The skill now counts a document it could open but only skimmed as unfinished (factstore-skills 0.3.4).
+8. **A message created alone, uncited (i).** Runs f and g cited a message that states nothing in the transaction creating it. Run i didn't, for 65 of its 72, and the skill had never said to. It does now (0.3.5).
+9. **Run j ran out of budget.** Its ingestion reported that it stopped before its final checks "because of the $2 budget", and left some attachments unread. It read the credit watch spreadsheet, so 101 companies are on No Trades, and the question asks which one the list's message placed there. Southwest Gas's bid solicitation wasn't recorded. Earlier ingestion sessions cost $1.06 to $1.99, so a fair run needs a higher cap.
+10. **The harness.**
    - A question's judge now accepts an answer in any common form: "2,220 MMcf/d", "4/26", "NUI Utilities, Inc.".
    - Rescoring judges the stored answers again.
    - A message counts as recorded when any value on its document names it, URL-encoded or not.
 
 **The fixture's slice under the new rules (slice o)** stayed as slice n: product matching 1.0, 157 duplicate pairs, all 18 kinds, 10 of 10 questions, no personal value, and a re-run that writes nothing ($3.41).
 
-Round 5 cost $18.50 in its runs, and $3.41 in the fixture's slice. The ingestion skill is separate from the e-commerce skills the fixture uses, so the slice didn't run again for it.
+Round 5 cost $18.50 in runs t to f, and $3.41 in the fixture's slice. Runs h to j, after round 4, cost $8.84. The ingestion skill is separate from the e-commerce skills the fixture uses, so the slice didn't run again for it.
 
 ## After design v0.7: personal data the business allows
 
@@ -381,4 +403,4 @@ Design v0.7's open question 7 found that the server's rule kept personal data ou
 
 ## Status
 
-Rounds 0, 1, 2, 3 and 5 are done. Round 4 runs on VRDU's ad-buy forms, since DocILE's download had nothing under its token. Its trial passed on 20 forms; run b is on 100, after run a's fix. [Design v0.7](../../factstore-design.md) is drafted from the rounds done, and round 4's findings go into it when it runs.
+Every round has run. Rounds 0, 1, 2, 3 and 5 passed their marks. Round 4, on VRDU's ad-buy forms, passed every field on 100 forms and fell short on line items. Round 5 hasn't passed again on the skill text round 4 left, since its last run was held to $2. The evals stopped at the $35 Victor set (2026-10-04), having spent $33.10 of it. [Design v0.7](../../factstore-design.md) has every round's findings.

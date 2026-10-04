@@ -1,0 +1,362 @@
+{
+ "round": 5,
+ "use_case": "One mailbox in another industry, with no vocabulary package",
+ "model": "sonnet",
+ "sample": null,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 171,
+   "by_agent": {
+    "ingestion agent": [
+     "org/name",
+     "org/credit_e_rating",
+     "org/credit_status",
+     "org/amount_owed_to_enron_usd",
+     "notice/id",
+     "notice/issuer",
+     "notice/number",
+     "notice/type",
+     "notice/title",
+     "notice/dated",
+     "notice/effective_from",
+     "notice/effective_to",
+     "notice/response_required",
+     "notice/criticality",
+     "notice/it_aos_suspended",
+     "notice/firm_impact_pct",
+     "notice/request_deadline",
+     "notice/queue_notice_at",
+     "notice/it_aos_low_mcfd",
+     "notice/it_aos_high_mcfd",
+     "notice/intraday_weekday_mcfd",
+     "notice/intraday_weekend_mcfd",
+     "notice/prearranged_offer_deadline",
+     "notice/amends",
+     "kern_fuel/row",
+     "kern_fuel/point",
+     "kern_fuel/lu_pct",
+     "kern_fuel/fuel_pct",
+     "kern_fuel/total_salt_lake_pct",
+     "kern_fuel/total_las_vegas_pct",
+     "kern_fuel/total_california_pct",
+     "btu/row",
+     "btu/meter",
+     "btu/drn",
+     "btu/receipt_name",
+     "btu/factor",
+     "restriction/id",
+     "restriction/imposed_by",
+     "restriction/site",
+     "restriction/capacity",
+     "restriction/capacity_unit",
+     "restriction/first_day",
+     "restriction/last_day",
+     "restriction/until_further_notice",
+     "maintenance/id",
+     "maintenance/performed_by",
+     "maintenance/site",
+     "maintenance/begins",
+     "maintenance/ends",
+     "maintenance/status",
+     "maintenance/hours_per_day",
+     "maintenance/was_begin",
+     "maintenance/was_end",
+     "capacity_offer/id",
+     "capacity_offer/package",
+     "capacity_offer/origin",
+     "capacity_offer/destination",
+     "capacity_offer/dth_d",
+     "capacity_offer/availability",
+     "capacity_offer/available_from",
+     "capacity_offer/ebb_number",
+     "capacity_offer/term_start",
+     "capacity_offer/term_end",
+     "capacity_offer/prearranged",
+     "capacity_offer/min_bid_usd_dth",
+     "capacity_offer/min_vol_dth_d",
+     "capacity_offer/max_vol_dth_d",
+     "capacity_offer/bid_open",
+     "capacity_offer/bid_close",
+     "capacity_offer/award_by",
+     "capacity_offer/evergreen",
+     "deal/number",
+     "deal/counterparty",
+     "deal/counterparty_query",
+     "deal/type",
+     "deal/delivery_month",
+     "deal/price_basis",
+     "deal/price_basis_from",
+     "deal/price_basis_to",
+     "deal/price_changed_in_sitara",
+     "deal_report/id",
+     "physical_deal/row",
+     "physical_deal/cpty",
+     "physical_deal/trade_date",
+     "physical_deal/trade_time",
+     "physical_deal/flow_date",
+     "physical_deal/point",
+     "physical_deal/daily_qty",
+     "physical_deal/total_qty",
+     "physical_deal/fixed_price",
+     "physical_deal/total_usd",
+     "physical_wacog/row",
+     "physical_wacog/block",
+     "physical_wacog/wacog",
+     "physical_wacog/total_qty",
+     "physical_wacog/total_usd",
+     "storage_report/id",
+     "storage_report/week_ending",
+     "storage_report/net_injection_bcf",
+     "storage_report/producing_bcf",
+     "storage_report/east_bcf",
+     "storage_report/west_bcf",
+     "storage_report/total_level_bcf",
+     "storage_report/pct_full",
+     "storage_report/below_year_ago_bcf",
+     "storage_report/publisher",
+     "storage_hist/row",
+     "storage_hist/week_label",
+     "storage_hist/year",
+     "storage_hist/injection_bcf",
+     "storage_hist/level_bcf",
+     "open_season/id",
+     "open_season/operator",
+     "open_season/service",
+     "open_season/service_start",
+     "open_season/offers_due",
+     "open_season/offers_good_until",
+     "open_season/sheet_good_until",
+     "open_season/closes",
+     "open_season/preferred_term_years",
+     "open_season/rack_inventory",
+     "open_season/rack_injection",
+     "open_season/rack_withdrawal",
+     "open_season/rack_inj_commodity",
+     "open_season/rack_wd_commodity",
+     "open_season/fuel_low_pct",
+     "open_season/fuel_high_pct",
+     "open_season/max_daily_injection",
+     "open_season/facility_inventory_bcf",
+     "open_season/facility_withdrawal_mmcfd",
+     "open_season/facility_injection_mmcfd",
+     "open_season/pipeline_mmcfd",
+     "open_season/in_service",
+     "open_season/pipeline_miles",
+     "location/id",
+     "location/on_pipeline",
+     "location/abbreviation",
+     "location/sort_code",
+     "nomination/id",
+     "nomination/producer",
+     "nomination/month",
+     "nomination/first_of_month_mcfd",
+     "nomination/production_mcfd",
+     "nomination/requested_mmcfd",
+     "nom_well/row",
+     "nom_well/well_name",
+     "nom_well/meter_number",
+     "nom_well/mcfd",
+     "supply_issue/id",
+     "supply_issue/place",
+     "supply_issue/reported_by",
+     "supply_issue/gas_day",
+     "supply_issue/sold",
+     "supply_issue/unscheduled",
+     "event/id",
+     "event/held_on",
+     "event/organizer",
+     "proceeding/id",
+     "proceeding/concerns",
+     "proceeding/conference_on",
+     "proceeding/protester",
+     "legislation/id",
+     "legislation/signed_on",
+     "legislation/repeals_deregulation",
+     "legislation/plant_sale_moratorium",
+     "earnings/id",
+     "earnings/company",
+     "earnings/period_end",
+     "earnings/revenues_musd",
+     "earnings/net_income_musd",
+     "earnings/eps_diluted"
+    ],
+    "ontology agent": [],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "ids": {},
+  "bare": {
+   "btu/row": {
+    "entities": 15,
+    "bare": 0
+   },
+   "capacity_offer/id": {
+    "entities": 58,
+    "bare": 0
+   },
+   "deal/number": {
+    "entities": 3,
+    "bare": 0
+   },
+   "deal_report/id": {
+    "entities": 3,
+    "bare": 3
+   },
+   "earnings/id": {
+    "entities": 1,
+    "bare": 0
+   },
+   "event/id": {
+    "entities": 3,
+    "bare": 0
+   },
+   "kern_fuel/row": {
+    "entities": 7,
+    "bare": 0
+   },
+   "legislation/id": {
+    "entities": 1,
+    "bare": 0
+   },
+   "location/id": {
+    "entities": 2,
+    "bare": 0
+   },
+   "maintenance/id": {
+    "entities": 6,
+    "bare": 0
+   },
+   "nomination/id": {
+    "entities": 2,
+    "bare": 0
+   },
+   "nom_well/row": {
+    "entities": 36,
+    "bare": 0
+   },
+   "notice/id": {
+    "entities": 9,
+    "bare": 1
+   },
+   "open_season/id": {
+    "entities": 3,
+    "bare": 0
+   },
+   "org/name": {
+    "entities": 359,
+    "bare": 62
+   },
+   "physical_deal/row": {
+    "entities": 411,
+    "bare": 0
+   },
+   "physical_wacog/row": {
+    "entities": 26,
+    "bare": 0
+   },
+   "proceeding/id": {
+    "entities": 1,
+    "bare": 0
+   },
+   "restriction/id": {
+    "entities": 6,
+    "bare": 0
+   },
+   "shape/name": {
+    "entities": 0,
+    "bare": 0
+   },
+   "storage_hist/row": {
+    "entities": 24,
+    "bare": 0
+   },
+   "storage_report/id": {
+    "entities": 2,
+    "bare": 0
+   },
+   "supply_issue/id": {
+    "entities": 1,
+    "bare": 0
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 0,
+   "allowed": []
+  },
+  "documents": {
+   "documents": 103,
+   "url": 103,
+   "issued_at": 96
+  },
+  "size": {
+   "facts": 9213,
+   "entities": 1089,
+   "transactions": 145
+  },
+  "evidence": {
+   "transactions": 136,
+   "with_evidence": 136,
+   "with_confidence": 136
+  },
+  "shapes": 24,
+  "truth": {
+   "messages": {
+    "files": 249,
+    "distinct": 103,
+    "recorded": 103,
+    "recorded_more_than_once": 0,
+    "documents": 103
+   },
+   "people": {
+    "names_in_mailbox": 829,
+    "addresses_in_mailbox": 1084,
+    "phones_in_mailbox": 49,
+    "values_naming_a_person": 0,
+    "values_holding_an_address": 0,
+    "values_holding_a_phone": 0
+   },
+   "recorded": {
+    "physical_deal": 4110,
+    "core": 1260,
+    "org": 950,
+    "capacity_offer": 421,
+    "document": 302,
+    "nom_well": 144,
+    "physical_wacog": 122,
+    "storage_hist": 106,
+    "btu": 75,
+    "notice": 70,
+    "kern_fuel": 41,
+    "restriction": 41,
+    "maintenance": 37,
+    "open_season": 28,
+    "storage_report": 20,
+    "deal": 14,
+    "event": 9,
+    "nomination": 9,
+    "location": 8,
+    "supply_issue": 6,
+    "earnings": 6,
+    "proceeding": 5,
+    "legislation": 4,
+    "deal_report": 3
+   }
+  },
+  "cost_usd": 2.93,
+  "wall_minutes": 13,
+  "questions": {
+   "right": 6,
+   "asked": 8,
+   "wrong": [
+    4,
+    7
+   ]
+  }
+ }
+}

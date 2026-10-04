@@ -131,8 +131,9 @@ def judge(given: list, expected: list) -> bool:
         if isinstance(e, date):  # a message's "Gas Day 4/26" gives no year
             return e in days(g) or (e.month, e.day) in {(int(m), int(d)) for m, d in
                                                         re.findall(r"^\s*(\d{1,2})/(\d{1,2})\s*$", str(g))}
-        if re.fullmatch(r"-?\d+(\.\d+)?", str(e)):  # an ID may be printed with separators: 2001-042
-            return Decimal(str(e)) in numbers(g) or re.sub(r"[\s-]", "", str(g)) == str(e)
+        if re.fullmatch(r"-?\d+(\.\d+)?", str(e)):  # an ID may be printed with separators, or end a key:
+            return (Decimal(str(e)) in numbers(g)                # 2001-042, kern-river/2001-042
+                    or re.sub(r"[\s-]", "", str(g).rsplit("/", 1)[-1]) == str(e))
         return words(e) in words(g)
 
     if len(given) != len(expected):

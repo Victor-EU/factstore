@@ -1,0 +1,299 @@
+{
+ "round": 5,
+ "use_case": "One mailbox in another industry, with no vocabulary package",
+ "model": "sonnet",
+ "sample": null,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 126,
+   "by_agent": {
+    "ingestion agent": [
+     "org/name",
+     "org/credit_status",
+     "org/credit_status_as_of",
+     "deal/sitara_number",
+     "deal/counterparty",
+     "deal/possible_counterparty",
+     "deal/delivery_month",
+     "deal/price_basis",
+     "deal/price_period_start",
+     "deal/price_period_end",
+     "deal/price_status",
+     "deal/outstanding_balance_usd",
+     "nom/key",
+     "nom/counterparty",
+     "nom/month",
+     "nom/original_mcf_d",
+     "nom/production_mcf_d",
+     "nom/requested_mmcf_d",
+     "sale/key",
+     "sale/counterparty",
+     "sale/delivery_point",
+     "sale/volume_sold",
+     "sale/volume_unscheduled",
+     "notice/key",
+     "notice/pipeline",
+     "notice/type",
+     "notice/issued_on",
+     "notice/effective_from",
+     "notice/effective_to",
+     "notice/capacity_min_mcf_d",
+     "notice/capacity_max_mcf_d",
+     "notice/request_deadline",
+     "kern_fuel/key",
+     "kern_fuel/point",
+     "kern_fuel/lu_pct",
+     "kern_fuel/fuel_pct",
+     "kern_fuel/total_salt_lake_pct",
+     "kern_fuel/total_las_vegas_pct",
+     "kern_fuel/total_california_pct",
+     "kern_btu/key",
+     "kern_btu/receipt_point",
+     "kern_btu/drn",
+     "kern_btu/value",
+     "restriction/key",
+     "restriction/pipeline",
+     "restriction/point",
+     "restriction/capacity",
+     "restriction/capacity_unit",
+     "restriction/from",
+     "restriction/to",
+     "restriction/firm_impact_pct",
+     "maintenance/key",
+     "maintenance/pipeline",
+     "maintenance/location",
+     "maintenance/start",
+     "maintenance/end",
+     "maintenance/original_start",
+     "maintenance/original_end",
+     "maintenance/status",
+     "offer/key",
+     "offer/pipeline",
+     "offer/notice",
+     "offer/package",
+     "offer/receipt_point",
+     "offer/delivery_point",
+     "offer/quantity_dth_d",
+     "offer/term_start",
+     "offer/term_end",
+     "offer/min_bid_usd_per_dth",
+     "offer/bid_open",
+     "offer/bid_close",
+     "offer/award_deadline",
+     "storage_report/key",
+     "storage_report/week_ending",
+     "storage_report/net_injection_bcf",
+     "storage_report/total_storage_bcf",
+     "storage_report/pct_full",
+     "storage_report/vs_last_year_bcf",
+     "openseason/key",
+     "openseason/operator",
+     "openseason/service_start",
+     "openseason/offers_due",
+     "openseason/offers_open_until",
+     "openseason/closes",
+     "openseason/max_daily_injection_dth",
+     "openseason/rack_inventory_usd_per_dth",
+     "openseason/rack_injection_usd_per_dth_d",
+     "openseason/rack_withdrawal_usd_per_dth_d",
+     "openseason/rack_injection_commodity_usd_per_dth",
+     "openseason/rack_withdrawal_commodity_usd_per_dth",
+     "project/key",
+     "project/sponsor",
+     "project/capacity_mmcf_d",
+     "project/service_start",
+     "project/open_season_close",
+     "solicitation/key",
+     "solicitation/buyer",
+     "solicitation/month",
+     "solicitation/bid_due",
+     "solicitation/max_volume_mmbtu_d",
+     "solicitation/pipeline",
+     "location/key",
+     "location/sort_code",
+     "event/key",
+     "event/org",
+     "event/date",
+     "docket/key",
+     "docket/pipeline",
+     "docket/conference_date",
+     "earnings/key",
+     "earnings/org",
+     "earnings/net_income_usd_m",
+     "earnings/eps_usd",
+     "earnings/prior_year_net_income_usd_m",
+     "earnings/prior_year_eps_usd",
+     "capacity_package/key",
+     "capacity_package/package",
+     "capacity_package/receipt_point",
+     "capacity_package/delivery_point",
+     "capacity_package/quantity_dth_d",
+     "capacity_package/available_from",
+     "capacity_package/available_to",
+     "capacity_package/available_now",
+     "capacity_package/period",
+     "capacity_package/footnotes",
+     "capacity_package/section"
+    ],
+    "ontology agent": [],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 69,
+   "transactions": 3,
+   "facts": 685
+  },
+  "ids": {},
+  "bare": {
+   "capacity_package/key": {
+    "entities": 69,
+    "bare": 0
+   },
+   "deal/sitara_number": {
+    "entities": 3,
+    "bare": 0
+   },
+   "docket/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "earnings/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "event/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "kern_btu/key": {
+    "entities": 15,
+    "bare": 0
+   },
+   "kern_fuel/key": {
+    "entities": 7,
+    "bare": 0
+   },
+   "location/key": {
+    "entities": 2,
+    "bare": 0
+   },
+   "maintenance/key": {
+    "entities": 6,
+    "bare": 0
+   },
+   "nom/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "notice/key": {
+    "entities": 8,
+    "bare": 0
+   },
+   "offer/key": {
+    "entities": 5,
+    "bare": 0
+   },
+   "openseason/key": {
+    "entities": 2,
+    "bare": 0
+   },
+   "org/name": {
+    "entities": 13,
+    "bare": 12
+   },
+   "project/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "restriction/key": {
+    "entities": 6,
+    "bare": 0
+   },
+   "sale/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "shape/name": {
+    "entities": 20,
+    "bare": 0
+   },
+   "solicitation/key": {
+    "entities": 1,
+    "bare": 0
+   },
+   "storage_report/key": {
+    "entities": 2,
+    "bare": 0
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 0,
+   "allowed": []
+  },
+  "documents": {
+   "documents": 103,
+   "url": 103,
+   "issued_at": 96
+  },
+  "size": {
+   "facts": 15837,
+   "entities": 274,
+   "transactions": 128
+  },
+  "evidence": {
+   "transactions": 117,
+   "with_evidence": 117,
+   "with_confidence": 117
+  },
+  "shapes": 20,
+  "truth": {
+   "messages": {
+    "files": 249,
+    "distinct": 103,
+    "recorded": 103,
+    "recorded_more_than_once": 0,
+    "documents": 103
+   },
+   "people": {
+    "names_in_mailbox": 829,
+    "addresses_in_mailbox": 1084,
+    "phones_in_mailbox": 49,
+    "values_naming_a_person": 0,
+    "values_holding_an_address": 0,
+    "values_holding_a_phone": 0
+   },
+   "recorded": {
+    "capacity_package": 536,
+    "core": 325,
+    "document": 302,
+    "offer": 65,
+    "kern_btu": 60,
+    "notice": 45,
+    "restriction": 42,
+    "kern_fuel": 41,
+    "maintenance": 32,
+    "org": 15,
+    "deal": 14,
+    "openseason": 14,
+    "storage_report": 12,
+    "nom": 6,
+    "earnings": 6,
+    "solicitation": 6,
+    "project": 5,
+    "sale": 4,
+    "location": 4,
+    "event": 3,
+    "docket": 3
+   }
+  },
+  "cost_usd": 3.27,
+  "wall_minutes": 10,
+  "questions": {
+   "right": 8,
+   "asked": 8,
+   "wrong": []
+  }
+ }
+}
