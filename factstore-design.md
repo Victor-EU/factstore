@@ -10,7 +10,7 @@
 - MCP server `factstore`, tools `transact`, `query`, `stats`, `search_attributes`, `register_attribute`, `excise`. Tool names are bare: the server name is already the namespace, and some clients reject dots in tool names.
 - SDK `import factstore`, then `factstore.transact(...)`. Not `assert`, which is a Python keyword.
 
-**Changes in v0.7:** what M6's five rounds found. Each ran one use case on public data from a real company ([evals/m6](evals/m6/README.md)). Round 4 read TV stations' orders and invoices, standing in for DocILE's supplier documents, and stopped short of its mark.
+**Changes in v0.7:** what M6's five rounds found. Each ran one use case on public data from a real company ([evals/m6](evals/m6/README.md)). Round 4 read TV stations' orders and invoices, standing in for DocILE's supplier documents, and passed its mark on its last run.
 - **The kernel's code didn't change.** Stores reached 3.2 million facts. What broke was skill text, a package's model, and what the MCP server tells an agent (§19).
 - **The store's rules are in its MCP server's instructions** (§2, Part II): values, not copies of text; no personal data; each document once; every fact cites its document. They are the only guidance an agent with no skill reads. Without them, agents put people in the store.
 - **A general ingestion skill,** `factstore-ingest`, for documents no package covers (§8).
@@ -183,7 +183,7 @@ Patterns expressed entirely with registered attributes, in the `core/` namespace
 - **State the principle, and give cases only as examples.** A rule that listed the defects it covered left out a dropped zero, and the fixture's slice then kept one (round 1).
 - **A fix can overreach, so the next run tests it.** The rule that an identifier holds only its own system's IDs took the shop's stock code off the product hub (round 2).
 - **Rules say what stays out; a procedure says what goes in.** Under the store's rules alone, what an agent recorded from a mailbox swung from 8 of 8 questions to 2. A skill that listed what to look for made it 8 of 8 in three runs (round 5).
-- **What holds at 20 documents may not at 100.** At 20 forms the agent read each one; at 100 it wrote parsers for the layouts it knew and left most forms' lines out (round 4). Told then to keep both a row's ordered and delivered dates, the next run still kept only when each spot aired.
+- **What holds at 20 documents may not at 100.** At 20 forms the agent read each one; at 100 it wrote parsers for the layouts it knew and left most forms' lines out (round 4). Told then to keep both a row's ordered and delivered dates, the next run still kept only when each spot aired. Told to list a table's columns and give each an attribute, the run after reached 99% of the lines, at twice the cost.
 - **Each run is a sample.** One slice compared duplicates on first addresses only, under a rule unchanged since M5 (round 2). So each round runs three times, and the fixture's slice runs again after every change.
 
 ## 6. Catalogue skill (aim 2)
@@ -333,7 +333,7 @@ Each per-source SKU ID is an identity attribute, on the record it identifies. Am
 4. *Resolved after v0.4, below.*
 5. Is the e-commerce supply-side pain sharp enough for a brand to adopt factstore before agents read WeChat reliably? Only a partner can answer the first half. On the fixture's chats, the ingestion skill put 66 of 70 ETD changes and all 15 container numbers on the right records (§18). But the fixture was written alongside the skill, and its voice notes are unreadable by construction.
 
-   Round 5 read a real company's mail (v0.7, §19). With the ingestion skill, three runs answered every question, and the 100 facts checked by hand were all right. That is a gas trader's email, though, not a factory's WeChat. No public WeChat export exists. Round 4 read real orders and invoices, though a TV station's rather than a factory's. In three runs on 100 forms, every field the mark scores reached 92% or more, and the line items didn't (§19).
+   Round 5 read a real company's mail (v0.7, §19). With the ingestion skill, three runs answered every question, and the 100 facts checked by hand were all right. That is a gas trader's email, though, not a factory's WeChat. No public WeChat export exists. Round 4 read real orders and invoices, though a TV station's rather than a factory's. On 100 forms, every field the mark scores reached 92% or more in each run, and line items reached 96% in the last, which passed (§19).
 6. *Resolved after v0.5, below.*
 7. **Personal data where the store is the source** (v0.7). The server's rules keep people's names, addresses and phones out of every store, because they "stay in the source". That holds for an index, and for a mailbox read in. It fails where the store is the source:
    - a supplier's contact: factstore-ecom-ops has `supplier/contact_name`, which no agent has filled;
@@ -450,8 +450,8 @@ Build plan M6 ([evals/m6](evals/m6/README.md)). A partner may put part of its da
 | 1 | One product list across a brand's marketplaces | An Indian clothing seller's Amazon, stock and sales reports; 0.5 million facts | 6 of 6 questions. All 9,817 products. Every ASIN on its own product, and both listings under each ASIN Amazon lists twice. |
 | 2 | One shop's orders, customers and products, with junk in its ID columns | Online Retail II, a UK gift retailer: 1,067,371 order lines; 3.2 million facts | 6 of 6. Every customer, invoice and product. One line per invoice and product. No postage or fee code taken for a product. |
 | 3 | A marketplace and its sales funnel, with duplicate customers | Olist: 99,441 orders; 1.2 million facts | 7 of 7. All 2,997 people's customer IDs joined, and no two people. No review comment in the store. |
-| 4 | Supplier invoices and orders, in layouts the skill hasn't seen | VRDU: 100 TV stations' orders and invoices for political airtime, from the FCC's public files, since DocILE had nothing under its token | Short of its mark. Contract number, station, advertiser and gross at 95% or more. Line items at 78%, most misses an invoice line's ordered dates. 4 of 6 questions, after it withdrew five scans it had read right. |
-| 5 | One mailbox, in an industry with no package | Enron: one gas trader's 103 messages, as 249 files | 8 of 8. Each message once. 50 of 50 facts right by hand. No personal data. On the skill text round 4 left, 6 of 8, in a run held to $2 that stopped short. |
+| 4 | Supplier invoices and orders, in layouts the skill hasn't seen | VRDU: 100 TV stations' orders and invoices for political airtime, from the FCC's public files, since DocILE had nothing under its token | 6 of 6. Contract number, station, advertiser and gross at 92% or more; line items at 96%. Each form once, scans included, every fact citing it, no person's details. |
+| 5 | One mailbox, in an industry with no package | Enron: one gas trader's 103 messages, as 249 files | 8 of 8. Each message once. 50 of 50 facts right by hand. No personal data. On the skill text round 4 left, 7 of 8; the eighth's answer is in the store. |
 
 Every last run wrote nothing on its re-run. On each round's final skill text, the fixture's slice kept product matching at 1.0, all 18 kinds and 10 of 10 questions. Two slices on intermediate text fell short, and the next fix restored them.
 
@@ -465,7 +465,7 @@ Ten questions can pass while a status is nearly a third short. Most of the fixtu
   - With a one-line instruction, it recorded people (124 values naming one in one run) and copied bodies.
   - Under the store's rules, it wrote no personal data, but answered 6 of 8 questions in one run and 2 in another.
   - The server's rules (§2) and `factstore-ingest` (§8) fixed both.
-- **The general skill on forms at scale** (round 4). Written from a mailbox, it said nothing of tables, garbled text layers or a folder too big to read by hand. Each run found the next gap: lines, page images, batches, withdrawing a value, a row's dates. One run read five scans right, then doubted the reads and withdrew them.
+- **The general skill on forms at scale** (round 4). Written from a mailbox, it said nothing of tables, garbled text layers or a folder too big to read by hand. Each run found the next gap: lines, page images, batches, withdrawing a value, a row's columns. One run read five scans right, then doubted the reads and withdrew them. Another left four scans unopened, having extracted their images instead of opening the PDFs. Told to open the file itself, the last read all five and passed.
 - **Judgement calls differ between first runs, and each re-run keeps its own.** Examples are gift vouchers as products, a seller's own-channel orders, and payments as records. They are a person's to settle. Round 3's report raised payments as one.
 
-**Cost.** A catalogue run cost $0.47 to $0.82 and took 3 to 21 minutes, a million lines included, since the agent samples a file and then writes a script. A mailbox run cost $2.14 to $3.99, and 100 forms $7 to $12, since the agent reads each document. All five rounds cost $75 in runs, and $49 in fixture slices.
+**Cost.** A catalogue run cost $0.47 to $0.82 and took 3 to 21 minutes, a million lines included, since the agent samples a file and then writes a script. A mailbox run cost $2.14 to $4.29, and 100 forms $7 to $25, since the agent reads each document; the last forms run mapped every column. All five rounds cost about $139 in runs, and $49 in fixture slices.

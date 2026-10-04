@@ -1,0 +1,208 @@
+{
+ "round": 4,
+ "use_case": "Read a supplier's orders and invoices, in layouts the skill hasn't seen",
+ "model": "sonnet",
+ "sample": 100,
+ "measures": {
+  "registered_beyond_packages": {
+   "total": 54,
+   "by_agent": {
+    "ingestion agent": [
+     "org/name",
+     "station/call_sign",
+     "station/market",
+     "buy/key",
+     "buy/kind",
+     "buy/number",
+     "buy/alt_number",
+     "buy/revision",
+     "buy/station",
+     "buy/agency",
+     "buy/advertiser",
+     "buy/order",
+     "buy/estimate",
+     "buy/product",
+     "buy/flight_start",
+     "buy/flight_end",
+     "buy/entered_date",
+     "buy/revised_date",
+     "buy/total_spots",
+     "buy/gross_amount",
+     "buy/commission_pct",
+     "buy/commission_amount",
+     "buy/net_amount",
+     "buy/billing_type",
+     "buy/account_type",
+     "buy/sales_office",
+     "buy/market",
+     "buy/invoice_date",
+     "buy/invoice_month",
+     "buy/period_start",
+     "buy/period_end",
+     "buy/terms",
+     "buy/balance",
+     "buy_line/key",
+     "buy_line/line_no",
+     "buy_line/start_date",
+     "buy_line/end_date",
+     "buy_line/air_date",
+     "buy_line/air_time",
+     "buy_line/time",
+     "buy_line/days",
+     "buy_line/description",
+     "buy_line/length_sec",
+     "buy_line/spots",
+     "buy_line/rate",
+     "buy_line/amount",
+     "buy_line/line_type",
+     "buy_line/ad_id",
+     "buy_line/daily_spots",
+     "buy_line/weekly_schedule",
+     "buy_line/other",
+     "buy/disposition",
+     "buy/payment_applied",
+     "buy/payment_date"
+    ],
+    "question agent": []
+   }
+  },
+  "rerun": {
+   "new_entities": 0,
+   "transactions": 0,
+   "facts": 0
+  },
+  "ids": {},
+  "bare": {
+   "buy/key": {
+    "entities": 138,
+    "bare": 0
+   },
+   "buy_line/key": {
+    "entities": 2029,
+    "bare": 0
+   },
+   "org/name": {
+    "entities": 129,
+    "bare": 116
+   },
+   "shape/name": {
+    "entities": 0,
+    "bare": 0
+   },
+   "station/call_sign": {
+    "entities": 85,
+    "bare": 85
+   }
+  },
+  "personal": {
+   "personal_values": 0,
+   "email_shaped": 0,
+   "allowed": []
+  },
+  "documents": {
+   "documents": 100,
+   "url": 100,
+   "issued_at": 100
+  },
+  "size": {
+   "facts": 27053,
+   "entities": 2487,
+   "transactions": 121
+  },
+  "evidence": {
+   "transactions": 111,
+   "with_evidence": 111,
+   "with_confidence": 111
+  },
+  "shapes": null,
+  "truth": {
+   "forms": {
+    "given": 100,
+    "recorded": 100,
+    "recorded_more_than_once": 0,
+    "dated": 100,
+    "scans": 5,
+    "scans_recorded": 5
+   },
+   "fields": {
+    "contract_num": {
+     "labelled": 97,
+     "found": 96,
+     "found_by_ref": 0
+    },
+    "advertiser": {
+     "labelled": 98,
+     "found": 72,
+     "found_by_ref": 15,
+     "names_a_candidate": 20,
+     "names_a_candidate_recorded": 18
+    },
+    "gross_amount": {
+     "labelled": 98,
+     "found": 97,
+     "found_by_ref": 0
+    },
+    "agency": {
+     "labelled": 52,
+     "found": 52,
+     "found_by_ref": 26
+    },
+    "product": {
+     "labelled": 95,
+     "found": 59,
+     "found_by_ref": 0,
+     "unusable": 1
+    },
+    "flight_from": {
+     "labelled": 78,
+     "found": 66,
+     "found_by_ref": 0,
+     "unusable": 12
+    },
+    "flight_to": {
+     "labelled": 78,
+     "found": 61,
+     "found_by_ref": 0,
+     "unusable": 17
+    },
+    "tv_address": {
+     "labelled": 82,
+     "found": 2,
+     "found_by_ref": 0
+    },
+    "property": {
+     "labelled": 96,
+     "found": 93,
+     "found_by_ref": 2
+    }
+   },
+   "lines": {
+    "labelled": 1552,
+    "found": 1465,
+    "found_with_description": 985,
+    "unusable": 33
+   },
+   "people": {
+    "emails_on_forms": 5,
+    "phones_on_forms": 58,
+    "values_holding_an_email": 0,
+    "values_holding_a_phone": 0,
+    "attributes_naming_a_role": 0
+   },
+   "marked": {
+    "contract_num": 0.99,
+    "property": 0.969,
+    "advertiser": 0.923,
+    "gross_amount": 0.99,
+    "lines": 0.964
+   }
+  },
+  "cost_usd": 21.85,
+  "wall_minutes": 44,
+  "questions": {
+   "right": 6,
+   "asked": 6,
+   "wrong": []
+  }
+ }
+}

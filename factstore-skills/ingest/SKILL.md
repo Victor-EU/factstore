@@ -42,7 +42,7 @@ Each document is an entity with `document/hash`, `document/url` and `document/is
 ## Working through a mailbox or a folder
 
 1. **List the documents.** Extract each one's text, issue date, hash and url into your working directory, and group the copies. Read the attachments you can open: text, PDF, RTF, Word and spreadsheet files. List the ones you can't.
-   - A scan, or a PDF whose extracted text comes out garbled, is read from its page images: open the PDF itself, as you would an image. If asking for some of its pages fails, open the whole file. Don't settle for the parts of a garbled text layer that read cleanly.
+   - A scan, or a PDF whose extracted text comes out garbled, is read from its page images: open the PDF file itself with your reader, as you would an image. Don't extract its images first; your reader may not open the format they come out in. If asking for some of its pages fails, open the whole file. Don't settle for the parts of a garbled text layer that read cleanly. What you read on a page is a reading like any other: if one disagrees with its document's total, read that page again. It doesn't mean your other readings failed.
 2. **Read every document, and keep what states something about the business.**
    - Mail sent to many is still read. A notice, a bulletin or a solicitation from another company carries numbers, dates and deadlines.
    - Skip a document only when it states nothing a person running the business would look up, such as social mail and company-wide announcements.
@@ -51,7 +51,7 @@ Each document is an entity with `document/hash`, `document/url` and `document/is
    - dates: effective, start and end, due, closing, delivery and payment dates;
    - quantities and prices, with their units and currency;
    - statuses and decisions: approved, cancelled, placed on hold, lowered to, moved to;
-   - a table's rows: the lines of an order, an invoice or a schedule. Each row is a record of its own, with every value it prints: what it is, each of its dates, its quantity, its rate and its amount. A row that prints both the dates ordered and the date delivered keeps both. A document's totals don't replace its lines.
+   - a table's rows: the lines of an order, an invoice or a schedule. Each row is a record of its own. List the table's columns and give each one an attribute, so the row keeps every value it prints: what it is, each of its dates, its quantity, its rate and its amount. A row that prints both the dates ordered and the date delivered keeps both. A document's totals don't replace its lines.
 
    A value belongs in the store when the document states it, whether or not an attribute exists for it yet.
 4. **Group the values into kinds of record,** such as a deal, a notice or a claim, and give each record a key:
@@ -78,6 +78,7 @@ Each document is an entity with `document/hash`, `document/url` and `document/is
 - **Documents.** The store holds one document for each distinct message or file, and each has an issue date unless you reported why not.
 - **Evidence.** Every transaction you wrote carries `core/evidence`, retractions and links between duplicates included.
 - **Nothing skimmed.** A document you could open, attachments included, has every value it states in the store. Only one you can't open is reported as unread.
+- **Columns.** In each layout, every column a table prints has an attribute holding it, or your report says why not.
 - **Lines against totals.** Every document that prints lines has them in the store, and where it prints a total, their amounts add up to it.
 - **No personal data.** List the string values you wrote, and look for names, email addresses and phone numbers outside the attributes the business allowed.
 - **Ten facts against their documents.** Draw ten facts, read each one's document, and check that it states them. If any doesn't, find what wrote it and fix the rule.

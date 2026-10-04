@@ -271,11 +271,14 @@ A partner may use factstore for part of their data, not all of it: one channel's
   - The store's MCP instructions state its rules: values, not copies of text; no personal data; each document once; every fact cites its document. With one line of instructions, agents had put people in the store.
   - A general ingestion skill, `factstore-ingest` (factstore-skills 0.3.0). Under the rules alone, what an agent recorded swung from 8 of 8 questions to 2.
   - The fixture's slice stayed as it was under the new instructions (slice o).
-- **Round 4 ran on VRDU's ad-buy forms** (Victor, 2026-10-03). DocILE's download had nothing under its token, so TV stations' orders, contracts and invoices for political airtime, from the FCC's public files, stood in. It stopped short of its mark:
-  - In three runs on 100 forms, contract number, station, advertiser and gross were at 92% or more. Each form was recorded once, with no person's email, phone or role, and each re-run wrote nothing.
-  - Line items reached 36%, 86% and 78%. Most misses in the last two are an invoice line's ordered dates, kept beside when the spot aired in neither.
-  - Its fixes to `factstore-ingest` (0.3.2 to 0.3.5) cover tables' rows, page images, batches, withdrawing a value and variant spellings.
-  - The evals stopped at the $35 Victor set (2026-10-04), at $33.10. Round 5 hasn't passed again on the final skill text: its last run, held to $2, answered 6 of 8.
+- **Round 4 ran on VRDU's ad-buy forms** (Victor, 2026-10-03). DocILE's download had nothing under its token, so TV stations' orders, contracts and invoices for political airtime, from the FCC's public files, stood in. Run f passed every part of its mark:
+  - all six questions; all 100 forms once, each dated, scans included, every fact citing its form;
+  - contract number, station, advertiser and gross at 92% or more, and line items at 96%;
+  - no person's details, and a re-run that wrote nothing.
+  - Line items had stalled at 36% to 86% until the skill gave each of a table's columns an attribute (`factstore-ingest` 0.3.6), which doubled a run's cost to $25 for 100 forms.
+  - Its other fixes cover tables' rows, page images and opening a PDF itself, batches, withdrawing a value and variant spellings (to 0.3.7).
+  - Round 5 re-ran on the final skill: run k met every part of its mark but one question, whose answer the store holds.
+  - The evals spent $33.10 of the $35 Victor first set (2026-10-04), then about $64 on the runs he approved after it.
 - **Design v0.7 is drafted** from rounds 1, 2, 3 and 5. It adds two open questions. One is personal data where the store is the source, which the business that owns the store decides; the default is none. The other is a vocabulary with no package. Round 4's findings are in it too.
 - **Question 7 is built** (core 0.3.0, ecom-ops 0.4.1, factstore-skills 0.3.1). The business's owner or a manager allows an attribute with `core/personal`, using their own credential, and the server's rule names the exception. It needed no kernel code.
   - With nothing allowed, round 5 (run g) passed every part of its mark, and the fixture's slice (p) wrote no personal data.
