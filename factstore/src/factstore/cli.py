@@ -1,8 +1,12 @@
-"""factstore admin commands. The admin DSN is a superuser connection string."""
+"""factstore admin commands. The admin DSN is a superuser connection string. `mcp` and `skills`
+need none."""
 
 import argparse
 import os
+import re
+import shutil
 import sys
+from pathlib import Path
 
 from . import admin, packages
 from .errors import FactstoreError
@@ -19,7 +23,8 @@ def main(argv: list[str] | None = None) -> int:
 
     install = commands.add_parser("install", help="install vocabulary packages, each after those it depends on")
     install.add_argument("store")
-    install.add_argument("package", nargs="+", help="a package's directory")
+    install.add_argument("package", nargs="+",
+                         help="a package's directory, or the name of one this release carries, such as ecom-ops")
 
     actor = commands.add_parser("actor", help="create an actor and print its credential")
     actor.add_argument("store")
@@ -38,7 +43,17 @@ def main(argv: list[str] | None = None) -> int:
     drop.add_argument("store")
     drop.add_argument("--yes", action="store_true", help="confirm")
 
+    commands.add_parser("mcp", help="serve the store $FACTSTORE_DSN names over MCP, on stdio")
+
+    skills = commands.add_parser("skills", help="list the skills this release carries, or copy them into a directory")
+    skills.add_argument("dest", nargs="?", help="a skills directory, such as .claude/skills")
+
     args = parser.parse_args(argv)
+    if args.command == "mcp":
+        from .server import main as serve
+        return serve()
+    if args.command == "skills":
+        return _skills(args.dest)
     if not args.admin_dsn:
         parser.error("give --admin-dsn or set FACTSTORE_ADMIN_DSN")
 
@@ -47,7 +62,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"created store {args.store}\n{_installed(core)}")
     elif args.command == "install":
         try:
-            results = admin.install(args.admin_dsn, args.store, [packages.load(p) for p in args.package])
+            wanted = packages.with_dependencies([packages.find(p) for p in args.package])
+            results = admin.install(args.admin_dsn, args.store, wanted)
         except FactstoreError as e:
             print(e, file=sys.stderr)
             return 1
@@ -67,6 +83,20 @@ def main(argv: list[str] | None = None) -> int:
             parser.error(f"dropping {args.store} deletes it permanently; add --yes to confirm")
         admin.drop_store(args.admin_dsn, args.store)
         print(f"dropped store {args.store}")
+    return 0
+
+
+def _skills(dest: str | None) -> int:
+    """Each skill is copied into a directory named after it, as Agent Skills expects."""
+    for package, directory in packages.bundled().items():
+        for path in packages.load(directory).skills:
+            skill = (directory / path).parent
+            name = re.search(r"^name:\s*(\S+)", (directory / path).read_text(), re.M).group(1)
+            if dest is None:
+                print(f"{name}  ({package})  {skill}")
+            else:
+                shutil.copytree(skill, Path(dest) / name, dirs_exist_ok=True)
+                print(f"copied {name} to {Path(dest) / name}")
     return 0
 
 

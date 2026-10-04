@@ -286,6 +286,15 @@ A partner may use factstore for part of their data, not all of it: one channel's
   - Slice p answered 9 of 10 questions. It skipped a WeChat reply ingestion has skipped before (slice l), and the change didn't touch that.
 - **Chat replies are read with the message they answer** (ecom-ops 0.4.2). A new measure found p's miss was wider: slices l to q recorded 30 to 43 of the 43 production starts the chats state, and the questions caught it in two. Slices r, s and t, on the new skill text, each recorded 43 and answered 10 of 10, against 3 of the 6 before it.
 
+## Release
+
+Added after M6 (Victor, 2026-10-04), so that someone outside can install factstore and run it on their own data. Version 0.1.0 is published in three places from one tag:
+- **PyPI:** `factstore`, with the kernel, the MCP server (`factstore mcp`), the SDK and the CLI. It carries core, ecom-ops, ecom-index and factstore-skills. `factstore install STORE ecom-index` installs one by name, with the packages it depends on, and `factstore skills DIR` copies the skills for any agent.
+- **The MCP registry:** `io.github.Victor-EU/factstore` ([server.json](server.json)), run with `uvx factstore mcp`.
+- **A Claude Code plugin** in this repository ([.claude-plugin](.claude-plugin/plugin.json)): the MCP server and the four skills. It asks for the store's credential at install.
+
+A tag `v<version>` runs [the release workflow](.github/workflows/release.yml). It runs the tests and checks that the tag, the package, the registry entry and the plugin give one version. Then it publishes to PyPI and the registry. PyPI trusts the workflow (trusted publishing) and the registry trusts GitHub's OIDC token, so no token is stored.
+
 ## Partner track
 
 Runs from M0, alongside everything else.
@@ -311,7 +320,7 @@ M0 → M1 → M2 → M4 → M5, with M3 alongside M2. The partner track gates on
 
 ## Not in this plan
 
-All of Part IV: the `once` write mode, write tiers, policies, definitions, scopes, compiled tools, agent-scoped servers, tool search, published shapes, vector search, the DuckDB batch tier, generated UI. Also: the CRM package, live connectors, sync, multi-tenant hosting, publishing to PyPI or an MCP registry.
+All of Part IV: the `once` write mode, write tiers, policies, definitions, scopes, compiled tools, agent-scoped servers, tool search, published shapes, vector search, the DuckDB batch tier, generated UI. Also: the CRM package, live connectors, sync, multi-tenant hosting. Publishing to PyPI, the MCP registry and a Claude Code plugin was added after M6 ([release](#release)).
 
 ## After the slice
 

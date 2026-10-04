@@ -186,3 +186,37 @@ def test_the_cli_installs_and_reports(tmp_path, store_name, capsys):
     lines = str(manifest(tmp_path, "test-lines", LINES, depends_on=["test-missing"]))
     assert cli.main(["--admin-dsn", ADMIN_DSN, "install", store_name, lines]) == 1
     assert "test-missing, which is neither installed" in capsys.readouterr().err
+
+
+def test_the_release_carries_its_packages():
+    carried = packages.bundled()
+    assert sorted(carried) == ["factstore-core", "factstore-ecom-index", "factstore-ecom-ops", "factstore-skills"]
+    assert all(packages.load(directory).name == name for name, directory in carried.items())
+    assert packages.find("ecom-ops") == packages.find("factstore-ecom-ops") == packages.load(carried["factstore-ecom-ops"])
+    with pytest.raises(PackageError, match="neither a package's directory nor a package this release carries"):
+        packages.find("ecom-crm")
+
+
+def test_the_cli_installs_a_carried_package_by_name_with_its_dependencies(store_name, capsys):
+    assert cli.main(["--admin-dsn", ADMIN_DSN, "install", store_name, "ecom-index"]) == 0
+    out = capsys.readouterr().out
+    installed = [line.split()[0] for line in out.splitlines()]
+    assert installed == ["factstore-core", "factstore-ecom-ops", "factstore-ecom-index"]
+    assert "already installed" not in out
+    assert cli.main(["--admin-dsn", ADMIN_DSN, "install", store_name, "factstore-ecom-index"]) == 0
+    assert capsys.readouterr().out.count("already installed") == 3
+
+
+def test_the_cli_copies_the_skills_under_their_names(tmp_path, monkeypatch):
+    monkeypatch.delenv("FACTSTORE_ADMIN_DSN", raising=False)  # copying skills needs no store
+    assert cli.main(["skills", str(tmp_path)]) == 0
+    assert sorted(p.name for p in tmp_path.iterdir()) == [
+        "ecom-ops-ingest-documents", "factstore-catalogue", "factstore-ingest", "factstore-ontology"]
+    assert all((p / "SKILL.md").is_file() for p in tmp_path.iterdir())
+
+
+def test_the_cli_serves_mcp_only_with_a_credential(monkeypatch):
+    monkeypatch.delenv("FACTSTORE_ADMIN_DSN", raising=False)
+    monkeypatch.delenv("FACTSTORE_DSN", raising=False)
+    with pytest.raises(SystemExit, match="set FACTSTORE_DSN"):
+        cli.main(["mcp"])

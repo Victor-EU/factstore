@@ -11,6 +11,7 @@ import json
 import os
 from datetime import date, datetime, timedelta
 from decimal import Decimal
+from importlib.metadata import PackageNotFoundError, version
 
 import mcp_types as types
 from mcp.server.lowlevel import Server
@@ -51,7 +52,8 @@ def build(store: Store, exciser: Store | None = None) -> Server:
         text = json.dumps(result, default=str, ensure_ascii=False)
         return types.CallToolResult(content=[types.TextContent(type="text", text=text)])
 
-    return Server("factstore", instructions=INSTRUCTIONS, on_list_tools=list_tools, on_call_tool=call_tool)
+    return Server("factstore", version=_version(), instructions=INSTRUCTIONS,
+                  on_list_tools=list_tools, on_call_tool=call_tool)
 
 
 REFUSAL_NEXT = (
@@ -116,6 +118,13 @@ def plain(x):
 def _error(payload: dict) -> types.CallToolResult:
     return types.CallToolResult(content=[types.TextContent(type="text", text=json.dumps(payload, default=str))],
                                 is_error=True)
+
+
+def _version() -> str:
+    try:
+        return version("factstore")
+    except PackageNotFoundError:
+        return ""
 
 
 async def serve(dsn: str, excise_dsn: str | None = None) -> None:

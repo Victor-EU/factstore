@@ -13,8 +13,8 @@ The ingestion skill for supplier documents belongs to its vocabulary: [`ecom-ops
 ## Format
 
 Each skill is an [Agent Skill](https://agentskills.io): a directory holding `SKILL.md`, with a `name` and a `description` in its frontmatter. Agents load it by that description.
-- **Claude Code:** copy or link the directory into `.claude/skills/`.
-- **Other agents:** read `SKILL.md` as instructions.
+- **Claude Code:** install the plugin, which brings the skills and the MCP server: `/plugin marketplace add Victor-EU/factstore`, then `/plugin install factstore@factstore`.
+- **Other agents:** `factstore skills DIR` copies them into an agent's skills directory, each under its name. Or read `SKILL.md` as instructions.
 
 Either way, the agent also needs the factstore MCP server. The catalogue and ingestion skills also need a shell with Python and the SDK for bulk writes.
 

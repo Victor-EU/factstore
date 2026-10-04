@@ -128,12 +128,50 @@ def load(path) -> Package:
                    raw.get("license"))
 
 
+# The packages a release carries, by name, and where the repository keeps each. The wheel carries
+# them under factstore/vocab/, each in a directory named after its directory here.
+BUNDLED = {"factstore-core": "packages/core", "factstore-ecom-ops": "packages/ecom-ops",
+           "factstore-ecom-index": "packages/ecom-index", "factstore-skills": "factstore-skills"}
+
+
+def bundled() -> dict[str, Path]:
+    """The directory of each package this release carries: in the wheel, or in a source checkout."""
+    wheel = resources.files("factstore") / "vocab"
+    repo = Path(__file__).resolve().parents[3]
+    out = {}
+    for name, source in BUNDLED.items():
+        inside = wheel / Path(source).name
+        out[name] = Path(str(inside)) if inside.joinpath(MANIFEST).is_file() else repo / source
+    return out
+
+
+def find(ref: str) -> Package:
+    """A package by its directory, or by the name of one this release carries: factstore-ecom-ops,
+    or ecom-ops."""
+    if Path(ref).exists():
+        return load(ref)
+    named = bundled()
+    name = ref if ref in named else f"factstore-{ref}"
+    if name not in named:
+        raise PackageError([f"{ref} is neither a package's directory nor a package this release carries "
+                            f"({', '.join(sorted(named))})"])
+    return load(named[name])
+
+
+def with_dependencies(pkgs: list[Package]) -> list[Package]:
+    """The packages, with each package they depend on that this release carries."""
+    out, named, todo = {p.name: p for p in pkgs}, bundled(), list(pkgs)
+    while todo:
+        for dep in todo.pop().depends_on:
+            if dep not in out and dep in named:
+                out[dep] = load(named[dep])
+                todo.append(out[dep])
+    return list(out.values())
+
+
 def core() -> Package:
-    """factstore-core, which init installs: bundled in the wheel, or packages/core in a source checkout."""
-    bundled = resources.files("factstore") / "core"
-    if bundled.joinpath(MANIFEST).is_file():
-        return load(Path(str(bundled)))
-    return load(Path(__file__).resolve().parents[3] / "packages" / "core")
+    """factstore-core, which init installs."""
+    return load(bundled()["factstore-core"])
 
 
 def installed(conn) -> set[str]:

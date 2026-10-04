@@ -1,10 +1,27 @@
 [project]
 name = "factstore"
-version = "0.1.0.dev0"
-description = "The facts component: entities, registered attributes, values and transactions, on Postgres."
+version = "0.1.0"
+description = "A fact store for agents, on Postgres: registered attributes and values, every write a transaction with its actor and evidence."
+readme = "README.md"
 license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Victor Zhang" }]
 requires-python = ">=3.12"
+keywords = ["mcp", "mcp-server", "agents", "postgres", "facts", "provenance", "data-catalogue"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Database",
+]
 dependencies = ["psycopg[binary]>=3.2", "mcp>=2.2"]
+
+[project.urls]
+Homepage = "https://github.com/Victor-EU/factstore"
+Documentation = "https://github.com/Victor-EU/factstore/blob/main/factstore-design.md"
+Issues = "https://github.com/Victor-EU/factstore/issues"
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "hypothesis>=6"]
@@ -20,6 +37,8 @@ build-backend = "hatchling.build"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
-# init installs factstore-core, so the wheel carries it; a source checkout reads packages/core.
-[tool.hatch.build.targets.wheel.force-include]
-"../packages/core" = "factstore/core"
+# The vocabulary packages and their skills, from ../packages and ../factstore-skills: hatch_build.py.
+[tool.hatch.build.hooks.custom]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "hatch_build.py", "README.md", "LICENSE"]

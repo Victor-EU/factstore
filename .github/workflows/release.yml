@@ -1,0 +1,98 @@
+# Publishes a release when a tag v<version> is pushed: tests, then PyPI, then the MCP registry.
+# PyPI trusts this workflow (trusted publishing), and the registry trusts GitHub's OIDC token,
+# so no token is stored anywhere.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --shm-size=1g
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      FACTSTORE_TEST_ADMIN_DSN: postgresql://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e "./factstore[dev]"
+      - run: pytest -q
+        working-directory: factstore
+      - run: pytest -q packages/tests
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: The tag, the package, the registry entry and the plugin give one version
+        run: |
+          python - <<'PY'
+          import json, os, tomllib
+          tag = os.environ["GITHUB_REF_NAME"].removeprefix("v")
+          versions = {
+              "pyproject": tomllib.load(open("factstore/pyproject.toml", "rb"))["project"]["version"],
+              "server.json": json.load(open("server.json"))["version"],
+              "server.json package": json.load(open("server.json"))["packages"][0]["version"],
+              "plugin": json.load(open(".claude-plugin/plugin.json"))["version"],
+              "plugin's server": json.load(open(".claude-plugin/plugin.json"))["mcpServers"]["factstore"]["args"][0].split("@")[1],
+          }
+          wrong = {k: v for k, v in versions.items() if v != tag}
+          if wrong:
+              raise SystemExit(f"tag {tag} disagrees with {wrong}")
+          PY
+      - run: pip install build twine
+      - run: python -m build factstore -o dist   # the wheel is built from the sdist
+      - run: twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  pypi:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  mcp-registry:
+    needs: pypi
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for PyPI to serve the release
+        run: |
+          for i in $(seq 30); do
+            curl -sf "https://pypi.org/pypi/factstore/${GITHUB_REF_NAME#v}/json" > /dev/null && exit 0
+            sleep 10
+          done
+          exit 1
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+      - run: ./mcp-publisher login github-oidc
+      - run: ./mcp-publisher publish

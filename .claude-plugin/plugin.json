@@ -1,0 +1,43 @@
+{
+  "name": "factstore",
+  "version": "0.1.0",
+  "description": "A fact store for AI agents, on Postgres: the MCP server, and skills that index a company's systems and read its documents into facts.",
+  "author": {
+    "name": "Victor Zhang"
+  },
+  "homepage": "https://github.com/Victor-EU/factstore",
+  "repository": "https://github.com/Victor-EU/factstore",
+  "license": "MIT",
+  "keywords": [
+    "facts",
+    "postgres",
+    "mcp",
+    "ingestion",
+    "data-catalogue"
+  ],
+  "skills": [
+    "./factstore-skills/",
+    "./packages/ecom-ops/"
+  ],
+  "mcpServers": {
+    "factstore": {
+      "command": "uvx",
+      "args": [
+        "factstore@0.1.0",
+        "mcp"
+      ],
+      "env": {
+        "FACTSTORE_DSN": "${user_config.dsn}"
+      }
+    }
+  },
+  "userConfig": {
+    "dsn": {
+      "type": "string",
+      "title": "Store credential",
+      "description": "The connection string `factstore actor STORE NAME` prints for this agent.",
+      "sensitive": true,
+      "required": true
+    }
+  }
+}

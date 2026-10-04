@@ -1,0 +1,14 @@
+{
+  "name": "factstore",
+  "description": "factstore's plugin for Claude Code.",
+  "owner": {
+    "name": "Victor Zhang"
+  },
+  "plugins": [
+    {
+      "name": "factstore",
+      "source": "./",
+      "description": "The factstore MCP server, and skills that index a company's systems and read its documents into facts."
+    }
+  ]
+}
