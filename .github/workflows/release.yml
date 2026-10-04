@@ -10,22 +10,15 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_PASSWORD: postgres
-        ports: ["5432:5432"]
-        options: >-
-          --shm-size=1g
-          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
-    env:
-      FACTSTORE_TEST_ADMIN_DSN: postgresql://postgres:postgres@localhost:5432/postgres
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+      - name: Postgres as compose.yaml runs it, with commit timestamps for the invariant tests
+        run: |
+          docker compose up -d
+          until docker compose exec -T postgres pg_isready -h localhost -U postgres; do sleep 1; done  # TCP: up after init
       - run: pip install -e "./factstore[dev]"
       - run: pytest -q
         working-directory: factstore
@@ -35,8 +28,8 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: The tag, the package, the registry entry and the plugin give one version
@@ -58,7 +51,7 @@ jobs:
       - run: pip install build twine
       - run: python -m build factstore -o dist   # the wheel is built from the sdist
       - run: twine check dist/*
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: dist
           path: dist/
@@ -70,7 +63,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: dist
           path: dist/
@@ -83,7 +76,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Wait for PyPI to serve the release
         run: |
           for i in $(seq 30); do
